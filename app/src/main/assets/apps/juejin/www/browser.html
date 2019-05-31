@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+  <title>浏览器</title>
+</head>
+<script>
+  ! function (window) {
+    var docWidth = 750;
+    var doc = window.document,
+      docEl = doc.documentElement,
+      resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize';
+    var recalc = (function refreshRem() {
+      var clientWidth = docEl.getBoundingClientRect().width;
+      docEl.style.fontSize = Math.max(Math.min(20 * (clientWidth / docWidth), 11.2), 8.55) * 5 + 'px';
+      return refreshRem;
+    })();
+    docEl.setAttribute('data-dpr', window.navigator.appVersion.match(/iphone/gi) ? window.devicePixelRatio : 1);
+    if (/iP(hone|od|ad)/.test(window.navigator.userAgent)) {
+      doc.documentElement.classList.add('ios');
+      if (parseInt(window.navigator.appVersion.match(/OS (\d+)_(\d+)_?(\d+)?/)[1], 10) >= 8)
+        doc.documentElement.classList.add('hairline');
+    }
+    if (!doc.addEventListener) return;
+    window.addEventListener(resizeEvt, recalc, false);
+    doc.addEventListener('DOMContentLoaded', recalc, false);
+  }(window);
+
+</script>
+<style>
+	body,html {
+		height: 100%;
+		width: 100%;
+    overflow-x: hidden;
+		padding: 0;
+		margin: 0;
+	}
+	body {
+		overflow-y: hidden;
+		-webkit-overflow-scrolling: touch;
+	}
+  .header {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		height: .88rem;
+		display: flex;
+		position: relative;
+		justify-content: center;
+		text-align: center;
+		box-sizing: border-box;
+		padding-top: .28rem;
+		border-bottom: 1px solid #f2f2f2;
+  }
+  .title {
+	  font-size: .32rem;
+  }
+  .backIcon {
+    position: absolute;
+    top: 0;
+    width: .8rem;
+	  left: 0;
+    height: 44px;
+    background: url("img/black-left.png") no-repeat .3rem center;
+	  background-size: .2rem .35rem;
+  }
+  .title {
+    max-width: 60%;
+  }
+	#iframe {
+		height: calc(100% - 44px);
+		overflow: auto;
+		-webkit-overflow-scrolling:touch;
+		width:100%;
+	}
+	#iframe iframe {
+		display: block;
+		width: 100%;
+		height: 100%;
+	}
+</style>
+
+<body>
+  <div class="header">
+    <div class="backIcon" onclick="backIndex()"></div>
+    <div class="title"></div>
+  </div>
+	<div id="iframe">
+		<iframe scrolling="0" sandbox="allow-scripts" scrolling="yes" frameborder="0" src=""></iframe>
+	</div>
+</body>
+<script src="js/mui.min.js"></script>
+<script type="text/javascript">
+  var iframe = document.querySelector('iframe')
+	mui.plusReady(function () {
+		current = plus.webview.currentWebview()
+		if (current.id && current.id.indexOf('url') > -1) {
+			params = JSON.parse(current.id)
+			console.log(params.extra.url)
+			document.querySelector('.title').innerText = params && params.extra && params.extra.title ? params.extra.title : '详情';
+			iframe.src = params.extra.url
+			var childView = plus.webview.create(params.extra.url, 'adview', {
+				top: "44px",
+				bottom: 0,
+				popGesture:'hide',
+				progress:{color:'#ff6633', width: '2px'}
+			})
+			current.append(childView)
+			console.log('end')
+		}
+	})
+	function backIndex () {
+		plus.webview.close(current)
+		mui.back()
+	}
+</script>
+</html>

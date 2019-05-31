@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="500dp"
+    android:background="@android:color/white"
+    android:orientation="vertical"
+    >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/ly_bottom"
+        android:layout_marginBottom="1dp"
+        android:layout_marginLeft="@dimen/listView_side_margin"
+        android:layout_marginRight="@dimen/listView_side_margin"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="回复详情" />
+
+            <Button
+                android:id="@+id/btn_close"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:background="@color/white"
+                android:textSize="30sp"
+                android:text="×" />
+        </LinearLayout>
+
+        <include
+            layout="@layout/item_reply_comment" />
+
+        <View
+            style="@style/line_style" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:gravity="center_vertical"
+            android:text="全部回复" />
+
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        </android.support.v7.widget.RecyclerView>
+
+    </LinearLayout>
+
+    <View
+        style="@style/line_style"
+        android:layout_above="@+id/ly_bottom"
+        />
+
+    <LinearLayout
+        android:id="@+id/ly_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="@dimen/listView_side_margin"
+        android:layout_marginRight="@dimen/listView_side_margin"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/edt_replyComment"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:background="@drawable/edit_shape_comment"
+            android:layout_weight="1"/>
+
+        <Button
+            android:id="@+id/btn_publish"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:layout_marginLeft="5dp"
+            android:textSize="15sp"
+            android:text="发布" />
+
+    </LinearLayout>
+
+</RelativeLayout>

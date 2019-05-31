@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/root"
+    android:gravity="center"
+    android:background="@android:color/transparent"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <!--<com.juejinchain.android.ui.view.UniversalLoadingView-->
+        <!--android:layout_width="50dp"-->
+        <!--android:layout_height="50dp"-->
+        <!--android:id="@+id/loadingView"-->
+        <!--app:bGradient="false"-->
+        <!--app:radius="50dp"-->
+        <!--app:bg_transparent="false"-->
+        <!--app:circleColor="@android:color/holo_green_dark"-->
+        <!--android:background="@android:color/white"-->
+        <!--&gt;-->
+    <!--</com.juejinchain.android.ui.view.UniversalLoadingView>-->
+
+    <com.juejinchain.android.ui.view.MaterialCircleView
+        android:layout_width="60dp"
+        android:layout_height="60dp" />
+
+</LinearLayout>

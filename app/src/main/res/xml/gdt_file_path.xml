@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+
+     <!-- GDT:这个下载路径不可以修改，必须是 GDTDOWNLOAD -->
+     <external-path name="gdt_sdk_download_path" path="GDTDOWNLOAD" />
+     <!--ICloud 对应外部内存卡根目录：Environment.getExternalStorageDirectory()-->
+     <external-path name="ext_root" path="/" />
+</paths>
+

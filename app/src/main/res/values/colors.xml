@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#F44336</color>
+    <color name="colorPrimaryDark">#D32F2F</color>
+    <color name="colorAccent">#536DFE</color>
+    <color name="bg_app">#F1F1F1</color>
+    <color name="video_tabText">#666666</color>
+
+    <color name="bg_yellow">#FFAA00</color>
+    <color name="colorDarker_gray">#aaa</color>
+    <color name="colorLighter_dark">#ddd</color>
+
+    <color name="white">#FFF</color>
+
+    <color name="text_red">#F44336</color>
+    <color name="text_darker">#666</color>
+    <color name="text_darker_lighter">#999</color>
+    <color name="text_yellow">#FFAA00</color>
+    <color name="tab_selected_color">#666666</color>
+
+    <color name="tab_unselect">#c9c9c9</color>
+    <color name="bg_btn">#dadada</color>
+
+    <color name="X_text_gray">#8a8a8a</color>
+    <color name="XFrame_loading_dialog_message">#595959</color>
+    <color name="XFrame_darker_gray">#aaaaaa</color>
+
+    <color name="tip">#9c9c9c</color>
+    <color name="bg_focus">#DDDDDD</color>
+    <color name="red_500">#ef4836</color>
+    <color name="toolbar_bg">#FFC125</color>
+
+    <color name="line_bg">#CDCDCD</color>
+
+</resources>

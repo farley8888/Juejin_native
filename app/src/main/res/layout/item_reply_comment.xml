@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingLeft="@dimen/listView_side_margin"
+    android:paddingRight="@dimen/listView_side_margin"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal">
+
+        <com.dcloud.android.widget.RoundAngleImageView
+            android:id="@+id/img_cmtHead"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            app:srcCompat="@drawable/default_img" />
+
+        <TextView
+            android:id="@+id/tv_cmtName"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="12sp"
+            android:layout_marginRight="10dp"
+            android:text="TextView" />
+
+        <com.juejinchain.android.ui.view.DrawableTextView
+            android:id="@+id/btn_cmtZan"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:drawableLeft="@drawable/selecter_zan"
+            android:paddingLeft="5dp"
+            android:paddingRight="3dp"
+            android:drawablePadding="2dp"
+            android:minWidth="40dp"
+            android:text="000"
+            android:textColor="@color/selecter_zan_color" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tv_cmtContent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLines="4"
+        android:layout_marginLeft="40dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="10dp"
+        android:text="TextView" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tv_cmtDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="40dp"
+            android:textSize="12sp"
+            android:text="000小时前" />
+
+        <Button
+            android:id="@+id/btn_cmtReply"
+            android:layout_width="wrap_content"
+            android:layout_height="24dp"
+            android:layout_marginLeft="5dp"
+            android:paddingRight="3dp"
+            android:paddingLeft="3dp"
+            android:background="@drawable/button_shape_reply"
+            android:minWidth="50dp"
+            android:text="00回复"
+            android:textSize="12sp" />
+
+    </LinearLayout>
+</LinearLayout>

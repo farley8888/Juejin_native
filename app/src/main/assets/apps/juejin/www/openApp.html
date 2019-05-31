@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>打开app</title>
+</head>
+<body>
+</body>
+<script src="js/mui.min.js"></script>
+<script>
+	var qq_group_url = 'https://jq.qq.com/?_wv=1027&k=55J8Dfe'
+	// var qq_group_url = ''
+	mui.ajax({
+		url: 'http://api.juejinchain.com/v1/about?source_style=7',
+		type: "GET",
+		data: {
+			vsn: '1.7.5',
+			source_style: 7
+		},
+		success: function (res) {
+			console.log(res.data.about.site_qqqun_url.value)
+			if (res.code === 0) {
+				qq_group_url = res.data.about.site_qqqun_url.value
+			}
+			if (window.plus) {
+				openInApp()
+			} else {
+				document.addEventListener('plusready', function () {
+					openInApp()
+				})
+			}
+		}
+  })
+	function openInApp() {
+		var ws = plus.webview.open(qq_group_url)
+		if (plus.device.vendor.toLocaleLowerCase() === 'xiaomi') {
+			setTimeout(function () {
+				mui.back()
+			}, 3000)
+		} else {
+			setTimeout(function () {
+				mui.back()
+			}, 5000)
+		}
+		
+	}
+	mui.init()
+	
+</script>
+</html>

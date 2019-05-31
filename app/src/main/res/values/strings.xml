@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">掘金宝</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="press_again_exit">再按一次退出</string>
+
+    <string name="msg">消息</string>
+    <string name="more">全部</string>
+
+    <string name="tip_drag">长按编辑,拖拽排序</string>
+    <string name="my_cahnnel">我的频道</string>
+    <string name="other_channel">其他频道</string>
+    <string name="edit">编辑</string>
+    <string name="finish">完成</string>
+    <string name="manage_channel">频道管理</string>
+    <string name="other_channel_click_add">点击添加频道</string>
+
+    <string name="xloading_dialog_message">正在加载中</string>
+    <string name="xloading_no_network_text">无网络连接，请检查你的网络</string>
+    <string name="xloading_error_text">加载失败，请稍后再试</string>
+    <string name="xloading_empty_text">数据空空的哎~</string>
+    <string name="xloading_retry_text">点击重试</string>
+
+</resources>

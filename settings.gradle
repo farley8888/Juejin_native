@@ -1,0 +1,7 @@
+include ':app',
+        ':fragmentation_core',
+        ':fragmentation_swipeback',
+        ':fragmentation',
+        ':component_pull_refresh',
+        ':jiaozivideoplayer',
+        ':popup_lib'

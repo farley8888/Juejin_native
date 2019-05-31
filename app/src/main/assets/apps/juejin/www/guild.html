@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title>mui引导页</title>
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<link rel="stylesheet" href="css/swiper.min.css">
+		<script>
+			! function(window) {
+				/* 设计图文档宽度 */
+				var docWidth = 750;
+				var doc = window.document,
+					docEl = doc.documentElement,
+					resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize';
+				var recalc = (function refreshRem() {
+					var clientWidth = docEl.getBoundingClientRect().width;
+					/* 8.55：小于320px不再缩小，11.2：大于420px不再放大 */
+					docEl.style.fontSize = Math.max(Math.min(20 * (clientWidth / docWidth), 11.2), 8.55) * 5 + 'px';
+					return refreshRem;
+				})();
+				/* 添加倍屏标识，安卓为1 */
+				docEl.setAttribute('data-dpr', window.navigator.appVersion.match(/iphone/gi) ? window.devicePixelRatio : 1);
+
+				if (/iP(hone|od|ad)/.test(window.navigator.userAgent)) {
+					/* 添加IOS标识 */
+					doc.documentElement.classList.add('ios');
+					/* IOS8以上给html添加hairline样式，以便特殊处理 */
+					if (parseInt(window.navigator.appVersion.match(/OS (\d+)_(\d+)_?(\d+)?/)[1], 10) >= 8)
+						doc.documentElement.classList.add('hairline');
+				}
+				if (!doc.addEventListener) return;
+				window.addEventListener(resizeEvt, recalc, false);
+				doc.addEventListener('DOMContentLoaded', recalc, false);
+			}(window);
+		</script>
+		<style>
+			html, 
+      body { 
+        height: 100%; 
+      } 
+      body { 
+        margin: 0; 
+      } 
+      .mui-content { 
+        height: 100%; 
+        padding: 0; 
+      }
+      #muiSlider{
+        position: relative;
+      }
+		.swiper-slide{
+			position: relative;
+		}
+		.swiper-slide img{
+			width: 100%;
+			height: 100%;
+		}
+		.swiper-pagination-bullet-active{
+			background: #fa0;	
+		}
+		.closePage{
+			position: absolute;
+			left: 50%;
+			transform: translateX(-50%);
+			font-size: 16px;
+			bottom: 50px;
+			color: #fff;
+			background: orange;
+			padding: 8px 16px;
+			border-radius: 32px;
+			z-index: 2;
+      }
+      .jump {
+        position: absolute;
+        background: url('https://jjlmobile.oss-cn-shenzhen.aliyuncs.com/vsn1_1/jump.png') no-repeat center;
+        width: .72rem;
+        background-size: 100% 100%;
+        overflow: hidden;
+        border-radius: .72rem;
+        height: .72rem; 
+        right: .4rem;
+        top: .8rem;
+        z-index: 7;
+      }
+  </style>
+	</head>
+
+	<body>
+		<div class="mui-content" id="muiSlider" style="height: 100%;overflow: hidden;padding: 0px;margin: 0px;">
+			<div class="jump" onclick="closePage()"></div>
+			<div class="swiper-wrapper">
+				<div class="swiper-slide">
+					<!-- <img src="https://jjlmobile.oss-cn-shenzhen.aliyuncs.com/vsn1_1/guild1_0_0_no01.png" alt="图片1"> -->
+					<!-- <img src="https://jjlmobile.oss-cn-shenzhen.aliyuncs.com/vsn1_1/guild1_1_0_no01.jpg" alt="图片1"> -->
+					<img width="100%" src="https://jjlmobile.oss-cn-shenzhen.aliyuncs.com/vsn1_1/newPage0.jpg" alt="">
+				</div>
+				<div class="swiper-slide">
+					<!-- <img src="https://jjlmobile.oss-cn-shenzhen.aliyuncs.com/vsn1_1/guild1_0_0_no02.png" alt="图片2"> -->
+					<!-- <img src="https://jjlmobile.oss-cn-shenzhen.aliyuncs.com/vsn1_1/guild1_1_0_no02.jpg" alt="图片2"> -->
+					<img width="100%" src="https://jjlmobile.oss-cn-shenzhen.aliyuncs.com/vsn1_1/newPage1.jpg" alt="">
+
+				</div>
+				<div class="swiper-slide">
+					<!-- <img src="https://jjlmobile.oss-cn-shenzhen.aliyuncs.com/vsn1_1/guild1_0_0_no03.png" alt="图片3"> -->
+					<!-- <img src="https://jjlmobile.oss-cn-shenzhen.aliyuncs.com/vsn1_1/guild1_1_0_no03.jpg" alt="图片3"> -->
+					<img width="100%" src="https://jjlmobile.oss-cn-shenzhen.aliyuncs.com/vsn1_1/newPage2.png" alt="">
+				</div>
+				<div class="swiper-slide" id="lastPage">
+					<img width="100%" src="https://jjlmobile.oss-cn-shenzhen.aliyuncs.com/vsn1_1/newPage3.png" alt="">
+				</div>
+			</div>
+			<!-- Add Pagination -->
+			<div class="swiper-pagination"></div>
+		</div>
+	</body>
+	<script src="js/swiper.min.js"></script>
+	<script src="js/mui.min.js" type="text/javascript" charset="utf-8"></script>
+	<script type="text/javascript" charset="utf-8">
+		var d = new Date().getTime()
+		if (localStorage.getItem('menu')) {
+			console.log(JSON.parse(localStorage.getItem('menu')).arr.length)
+			if (JSON.parse(localStorage.getItem('menu')).arr.length === 4) {
+				localStorage.removeItem('menu')
+				console.log('remove')
+			}
+		}
+		if (!localStorage.getItem('menu') || d > JSON.parse(localStorage.getItem('menu')).time) {
+			mui.ajax({
+				url: 'http://api.juejinchain.com/v1/system/menu',
+				data: {
+					vsn: '1.7.4',
+					source_style: 7
+				},
+				success: function(res) {
+					localStorage.setItem('menu', JSON.stringify({
+						time: new Date().getTime() + 3 * 24 * 3600 * 1000,
+						arr: res.data
+					}))
+				}
+			})
+		}
+		var muiSlider = document.getElementById('muiSlider')
+		var mSwiper = new Swiper('#muiSlider', {
+			pagination: {
+				el: '.swiper-pagination',
+			},
+			on: {
+				touchStart: function() {
+					if (this.realIndex === 3) {
+						closePage()
+					}
+				}
+			}
+		})
+		var IndexPage
+		var currentPage
+		mui.init();
+		// 清除置顶
+		localStorage.removeItem('isTop')
+		localStorage.removeItem('messageShow')
+		localStorage.removeItem('domain')
+		localStorage.removeItem('isShowUpdate')
+		function closePage() {
+			localStorage.setItem("isFirst", 1)
+			plus.webview.show(IndexPage)
+			plus.webview.hide(currentPage)
+		}
+		mui.plusReady(function() {
+			// plus.navigator.setStatusBarStyle('light')
+			IndexPage = plus.webview.create('./index.html');
+			currentPage = plus.webview.currentWebview()
+			if (!localStorage.getItem('isFirst')) {
+				muiSlider.style.display = 'block'
+			} else {
+				muiSlider.style.display = 'none'
+				closePage()
+			}
+		})
+	</script>
+
+</html>

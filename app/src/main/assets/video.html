@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>视频播放</title>
+</head>
+<style>
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+  }
+  #content {
+    text-align: center;
+    font-size: 14px;
+    color: #666;
+    line-height: 100px;
+    overflow: hidden;
+  }
+  #content div{
+    margin: 0;
+    line-height: 0;
+  }
+  #content video{
+    display: block;
+    margin: 0;
+   /* height: 280px; */
+    background: #000;
+    line-height: 0;
+  }
+</style>
+
+<body>
+<div id="content">
+
+</div>
+</body>
+<script>
+  var videoEl = null
+  // 获取视频元素
+  function getVideoEl() {
+    var timer = setInterval(function () {
+      videoEl = document.querySelector('video')
+      if (videoEl) {
+        clearInterval(timer)
+        videoReady()
+      }
+    }, 100)
+  }
+  // 视频元素已存在
+  function videoReady() {
+    videoEl.setAttribute("autoplay", "autoplay")
+    videoEl.setAttribute("controlslist", "nodownload")
+    videoEl.setAttribute("playsinline", "playsinline")
+    videoEl.setAttribute("webkit-playsinline", "webkit-playsinline")
+  //  videoEl.removeAttribute("controls");
+    videoEl.load()
+  //  videoEl.play()
+    setTimeout(function () {
+      sendMsg(videoEl.getBoundingClientRect())
+      setPause();
+    }, 500)
+    //sendMsg(videoEl.getBoundingClientRect())
+    videoEl.addEventListener('webkitbeginfullscreen', function () {
+       // videoEl.play()
+     })
+     videoEl.addEventListener('webkitendfullscreen', function () {
+                              setTimeout(function(){
+                                    //   videoEl.play()
+                                         }, 600)
+     //   endFullscreen() 加个延时就行了
+     })
+  }
+  var content = document.querySelector('#content')
+  // 设置视频id
+  function setVideoContent(videoid, poster) {
+    //alert(videoid);
+    content.innerHTML = ''
+    var div = document.createElement('div')
+    div.setAttribute('tt-videoid', videoid)
+    div.setAttribute('tt-poster', poster)
+    div.className = 'tt-video-box'
+    div.innerText = '视频加载中...'
+    var oScript = document.createElement('script')
+    oScript.type = 'text/javascript'
+    oScript.src = 'https://s0.pstatp.com/tt_player/tt.player.js?v=20160723'
+    content.appendChild(div)
+    content.appendChild(oScript)
+    getVideoEl()
+  }
+  function setPause(){
+    videoEl.pause()
+  }
+  // 发送消息给app
+  function sendMsg (obj) {
+    obj.src = videoEl.src
+   // alert(videoEl.src)
+    var temp = {
+        height: obj.height,
+        src: obj.src
+    }
+    console.log(JSON.stringify(obj))
+    //obj 不能传document对象，temp为null, Android类型要对应，否则Android收到为null
+    app.parseData(videoEl.src, obj.height);
+  }
+// setVideoContent('v03004c30000bisk0750157irg0lokb0', 'http://p1-tt.bytecdn.cn/video1609/1f56d0001fead08a2aeef')
+</script>
+</html>

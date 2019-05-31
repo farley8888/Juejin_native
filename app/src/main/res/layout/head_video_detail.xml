@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/tv_vdoTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/listView_side_margin"
+            android:maxLines="2"
+            android:text="TextView"
+            android:layout_marginTop="5dp"
+            android:layout_marginRight="@dimen/listView_side_margin"
+            android:textColor="@color/text_darker"
+            android:textSize="17sp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            tools:ignore="MissingConstraints" />
+
+        <TextView
+            android:id="@+id/tv_vdoPlayTimes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:maxLines="1"
+            android:text="TextView"
+            android:textColor="@color/text_darker_lighter"
+            android:textSize="12sp"
+            app:layout_constraintLeft_toLeftOf="@+id/tv_vdoTitle"
+            app:layout_constraintTop_toBottomOf="@+id/tv_vdoTitle" />
+
+
+        <com.juejinchain.android.ui.view.DrawableTextView
+            android:id="@+id/button1"
+            android:layout_width="100dp"
+            android:layout_marginTop="10dp"
+            android:layout_height="30dp"
+            android:background="@drawable/button_shape_video"
+            android:drawableLeft="@drawable/video_msg_icon"
+            android:drawablePadding="3dp"
+            android:gravity="center_vertical"
+            android:text="11"
+            android:textSize="15sp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@+id/buttonZan"
+            app:layout_constraintTop_toBottomOf="@+id/tv_vdoPlayTimes"
+            tools:ignore="MissingConstraints" />
+
+        <com.juejinchain.android.ui.view.DrawableTextView
+            android:id="@+id/buttonZan"
+            android:layout_width="100dp"
+            android:layout_height="30dp"
+            android:background="@drawable/button_shape_video"
+            android:drawableLeft="@drawable/selecter_zan"
+            android:drawablePadding="3dp"
+            android:enabled="true"
+            android:textColor="@color/selecter_zan_color"
+            android:gravity="center_vertical"
+            android:text="11"
+            android:textSize="15sp"
+            app:layout_constraintLeft_toRightOf="@+id/button1"
+            app:layout_constraintRight_toLeftOf="@+id/buttonShare"
+            app:layout_constraintTop_toTopOf="@+id/button1"
+            tools:ignore="MissingConstraints" />
+
+        <com.juejinchain.android.ui.view.DrawableTextView
+            android:id="@+id/buttonShare"
+            android:layout_width="100dp"
+            android:layout_height="30dp"
+            android:background="@drawable/button_shape_video"
+            android:drawableLeft="@drawable/nav_share_icon"
+            android:drawablePadding="5dp"
+            android:gravity="center_vertical"
+            android:text="分享"
+            android:textSize="15sp"
+            app:layout_constraintLeft_toRightOf="@+id/buttonZan"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/buttonZan"
+            tools:ignore="MissingConstraints" />
+
+        <TextView
+            android:id="@+id/tv_vdoAbstract"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:maxLines="2"
+            android:text="TextView"
+            android:textColor="@color/text_darker_lighter"
+            android:textSize="12sp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginRight="@dimen/listView_side_margin"
+            app:layout_constraintLeft_toLeftOf="@+id/tv_vdoTitle"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/button1" />
+
+    </android.support.constraint.ConstraintLayout>
+
+
+</LinearLayout>

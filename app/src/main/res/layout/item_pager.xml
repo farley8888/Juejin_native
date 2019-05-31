@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@null"
+    android:paddingLeft="@dimen/listView_side_margin"
+    android:paddingRight="@dimen/listView_side_margin">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginTop="5dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="sdf"
+            android:maxLines="2"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:textColor="@android:color/black"
+            android:textSize="17sp" />
+
+        <com.juejinchain.android.ui.view.RoundImageView
+            android:id="@+id/imageView0"
+            android:layout_width="100dp"
+            android:layout_marginLeft="5dp"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            app:srcCompat="@drawable/dcloud_gallery_default_image" />
+    </LinearLayout>
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/ly_middle"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginLeft="-10dp"
+        android:layout_marginRight="-10dp"
+        tools:ignore="MissingConstraints"
+        >
+
+        <com.juejinchain.android.ui.view.RoundImageView
+            android:id="@+id/imageView1"
+            app:srcCompat="@drawable/dcloud_gallery_default_image"
+            android:layout_width="110dp"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@+id/imageView2"
+             />
+        <!-- android:scaleType="centerCrop" 这个会影响glide的圆角
+         所以使用RoundImageView 或circleImageView-->
+        <com.juejinchain.android.ui.view.RoundImageView
+            android:id="@+id/imageView2"
+            app:srcCompat="@drawable/dcloud_gallery_default_image"
+            android:layout_width="110dp"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            app:layout_constraintLeft_toRightOf="@+id/imageView1"
+            app:layout_constraintRight_toLeftOf="@+id/imageView3"
+             />
+
+        <com.juejinchain.android.ui.view.RoundImageView
+            android:id="@+id/imageView3"
+            app:srcCompat="@drawable/dcloud_gallery_default_image"
+            android:layout_width="110dp"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            app:layout_constraintLeft_toRightOf="@+id/imageView2"
+            app:layout_constraintRight_toRightOf="parent" />
+
+    </android.support.constraint.ConstraintLayout>
+
+    <!--<LinearLayout-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="60dp"-->
+        <!--android:layout_marginTop="5dp"-->
+        <!--android:orientation="horizontal"-->
+        <!--android:visibility="visible">-->
+
+        <!--<ImageView-->
+            <!--android:id="@+id/imageView1"-->
+            <!--app:srcCompat="@drawable/dcloud_gallery_default_image"-->
+            <!--android:layout_width="100dp"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:layout_weight="1"-->
+             <!--/>-->
+
+        <!--<ImageView-->
+            <!--android:id="@+id/imageView2"-->
+            <!--android:layout_width="100dp"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:layout_marginLeft="5dp"-->
+            <!--android:layout_weight="1"-->
+            <!--android:maxWidth="100dp"-->
+            <!--app:srcCompat="@drawable/dcloud_gallery_default_image" />-->
+
+        <!--<ImageView-->
+            <!--android:id="@+id/imageView3"-->
+            <!--android:layout_width="100dp"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:layout_marginLeft="5dp"-->
+            <!--android:layout_weight="1"-->
+            <!--app:srcCompat="@drawable/dcloud_gallery_default_image" />-->
+    <!--</LinearLayout>-->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:layout_marginTop="5dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tv_hot"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="置顶"
+            android:textColor="@android:color/holo_red_light"
+            android:textSize="12sp"
+            android:visibility="visible" />
+
+        <TextView
+            android:id="@+id/tv_from"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:text="来源"
+            android:textColor="@android:color/secondary_text_dark"
+            android:textSize="12sp" />
+        <TextView
+            android:id="@+id/tv_readTimes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:text="阅读 10W"
+            android:textColor="@android:color/secondary_text_dark"
+            android:textSize="12sp" />
+        <TextView
+            android:id="@+id/tv_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:layout_weight="1"
+            android:text="04:25 12:00"
+            android:textColor="@android:color/secondary_text_dark"
+            android:textSize="12sp" />
+
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.2dp"
+        android:background="#c9c9c9"/>
+
+</LinearLayout>

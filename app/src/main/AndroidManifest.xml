@@ -1,0 +1,462 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.juejinchain.android">
+
+    <supports-screens
+        android:anyDensity="true"
+        android:largeScreens="true"
+        android:normalScreens="true"
+        android:resizeable="true"
+        android:smallScreens="true" />
+
+    <!-- Barcode(二维码)  begin -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-feature android:name="android.hardware.camera.autofocus" />
+
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.FLASHLIGHT" />
+    <!-- Barcode(二维码)  end -->
+
+
+    <!-- Push(推送)-个推  begin -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CALL_PHONE" />
+    <uses-permission android:name="getui.permission.GetuiService.com.HBuilder.integrate" />
+
+    <permission
+        android:name="getui.permission.GetuiService.com.HBuilder.integrate"
+        android:protectionLevel="normal" />
+    <!-- Push(推送)-个推    end -->
+
+
+    <!-- Share(分享)  begin -->
+    <!-- Share - 新浪微博分享 -->
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Share - 腾讯微博分享 -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_MOCK_LOCATION" />
+    <!-- Share - 微信分享 -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <!-- Push(推送)   end -->
+
+
+    <!-- Speech(语音识别)  begin -->
+    <!-- Speech - 讯飞语音云 -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <!-- Speech(语音识别)  end -->
+
+
+    <!-- Statistic(统计)  begin -->
+    <!-- Statistic - 友盟统计 -->
+    <uses-permission android:name="android.permission.READ_LOGS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.RECEIVE_USER_PRESENT" />
+    <!-- Statistic(统计)  end -->
+
+
+    <!-- 移动基地无感 -->
+    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+    <!-- 小米分享 -->
+    <!-- <uses-permission android:name="com.xiaomi.permission.AUTH_SERVICE" /> -->
+    <!--
+ io.dcloud.application.DCloudApplication
+    .MyApplication
+    -->
+    <application
+        android:name=".MyApplication"
+        android:allowBackup="false"
+        android:allowClearUserData="true"
+        android:debuggable="false"
+        android:icon="@drawable/icon"
+        android:label="@string/app_name"
+        android:largeHeap="true"
+        android:supportsRtl="true">
+
+        <!--
+        android:supportsRtl="true"
+        android:allowClearUserData="true"
+        -->
+
+
+        <!-- Statistic(统计)-友盟统计 begin -->
+        <!-- 官方网站：http://www.umeng.com/analytics -->
+        <!-- meta-data节点android:name="UMENG_APPKEY"项中android:value值为友盟网站申请的APPKEY -->
+        <!-- meta-data节点android:name="UMENG_CHANNEL"项中android:value值为发行渠道标识，可任意取值，用于各种发行渠道效果统计 -->
+        <meta-data
+            android:name="UMENG_APPKEY"
+            android:value="5c650ff4b465f5ce66000ca5" />
+        <meta-data
+            android:name="UMENG_CHANNEL"
+            android:value="selfplay" />
+        <!-- 友盟统计  配置  end -->
+
+
+        <!-- Maps(地图) begin -->
+        <!-- meta-data节点android:name="com.baidu.lbsapi.API_KEY"项中android:value值为百度地图应用的Appkey -->
+        <!-- <meta-data -->
+        <!-- android:name="com.baidu.lbsapi.API_KEY" -->
+        <!-- android:value="u1vrG5cDGQLioX9fezNAdGkR"/> -->
+        <!--  -->
+        <!-- <service -->
+        <!-- android:name="com.baidu.location.f" -->
+        <!-- android:enabled="true" -->
+        <!-- android:process=":remote"/> -->
+        <!-- Maps(地图) end -->
+
+
+        <!-- 腾讯GDT -->
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="com.juejinchain.android.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/gdt_file_path" />
+        </provider>
+
+        <!-- Oauth 授权登陆 start -->
+        <!-- Oauth QQ start -->
+        <!-- QQ 分享 配置和授权登陆相同 -->
+        <meta-data
+            android:name="QQ_APPID"
+            android:value="1107908760" />
+        <!-- <provider -->
+        <!-- android:name="android.support.v4.content.FileProvider" -->
+        <!-- android:authorities="com.HBuilder.integrate.fileprovider" -->
+        <!-- android:exported="false" -->
+        <!-- android:grantUriPermissions="true"> -->
+        <!-- <meta-data -->
+        <!-- android:name="android.support.FILE_PROVIDER_PATHS" -->
+        <!-- android:resource="@xml/file_provider" /> -->
+        <!-- </provider> -->
+        <activity
+            android:name="com.tencent.tauth.AuthActivity"
+            android:launchMode="singleTask"
+            android:noHistory="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="1107908760" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.tencent.connect.common.AssistActivity"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+        <!-- Oauth QQ end -->
+
+
+        <!-- Oauth Sina start -->
+
+
+        <!-- Oauth Sina end -->
+        <!-- Oauth 授权登陆 end -->
+
+
+        <!-- Speech(语音识别)-讯飞语音 begin -->
+        <!-- 官方网站：http://open.voicecloud.cn/ -->
+        <!-- meta-data节点android:name="IFLY_APPKEY"项中android:value值为讯飞语音云网站申请的APPKEY，由于它是和libs目录下的jar包是绑定的，不要修改此值 -->
+        <meta-data
+            android:name="IFLY_APPKEY"
+            android:value="53feacdd" />
+        <!-- Speech(语音识别)-讯飞语音 end -->
+
+
+        <!-- 腾讯广点通 -->
+        <service
+            android:name="com.qq.e.comm.DownloadService"
+            android:exported="false" />
+
+        <activity
+            android:name="com.qq.e.ads.ADActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name="com.qq.e.ads.PortraitADActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name="com.qq.e.ads.LandscapeADActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+            android:screenOrientation="landscape" />
+
+        <!-- Push(推送)-个推 begin -->
+        <!-- 官方网站：http://www.igetui.com/ -->
+        <!-- meta-data节点android:name="appid"项中android:value值为个推服务器上申请的APPID -->
+        <!-- meta-data节点android:name="appkey"项中android:value值为个推服务器上申请的APPKEY -->
+        <!-- meta-data节点android:name="appsecret"项中android:value值为个推服务器上申请的APPSECRET -->
+        <!-- 个推 aps配置  begin -->
+        <meta-data
+            android:name="PUSH_APPID"
+            android:value="hr1zALYmj5Avs1HviZ3Sa2" />
+        <meta-data
+            android:name="PUSH_APPKEY"
+            android:value="lmvSleXByu7HUXkToEUi5A" />
+        <meta-data
+            android:name="PUSH_APPSECRET"
+            android:value="fhwAJ6HSBj80rtCkpw3Bx" />
+
+        <service
+            android:name="com.igexin.sdk.PushService"
+            android:exported="true"
+            android:label="NotificationCenter"
+            android:process=":pushservice">
+            <intent-filter>
+                <action android:name="com.igexin.sdk.action.service.message" />
+            </intent-filter>
+        </service>
+
+        <receiver android:name="com.igexin.sdk.PushReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+                <action android:name="android.intent.action.USER_PRESENT" />
+                <action android:name="com.igexin.sdk.action.refreshls" />
+                <action android:name="android.intent.action.MEDIA_MOUNTED" />
+                <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
+                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />
+            </intent-filter>
+        </receiver>
+
+        <activity
+            android:name="com.igexin.sdk.PushActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:process=":pushservice"
+            android:taskAffinity="com.igexin.sdk.PushActivityTask"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+        <activity
+            android:name="com.igexin.sdk.GActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:process=":pushservice"
+            android:taskAffinity="com.igexin.sdk.PushActivityTask"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
+        <receiver android:name="io.dcloud.feature.apsGt.GTNotificationReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="com.HBuilder.integrate.__CREATE_NOTIFICATION" />
+                <action android:name="com.HBuilder.integrate.__REMOVE_NOTIFICATION" />
+                <action android:name="com.HBuilder.integrate.__CLEAR_NOTIFICATION" />
+                <action android:name="com.HBuilder.integrate.__CLILK_NOTIFICATION" />
+            </intent-filter>
+        </receiver>
+
+        <service android:name="io.dcloud.feature.apsGt.GTNormalIntentService" />
+        <service
+            android:name="io.dcloud.feature.apsGt.GTNormalPushService"
+            android:exported="true"
+            android:label="PushService"
+            android:process=":pushservice" />
+        <!-- Push(推送)-个推  end -->
+
+
+        <!-- 钉钉登录及分享 -->
+        <activity
+            android:name=".ddshare.DDShareActivity"
+            android:exported="true"
+            android:launchMode="singleInstance"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"></activity>
+
+        <!-- Share(分享) begin -->
+        <!-- Share - 新浪微博分享 -->
+        <!-- 官方网站：http://open.weibo.com/ -->
+        <meta-data
+            android:name="SINA_REDIRECT_URI"
+            android:value="http://open.weibo.com/apps/1748224285/privilege/oauth" />
+        <meta-data
+            android:name="SINA_SECRET"
+            android:value="dbf563ecd43c53b802e65c3eab677ef6" />
+        <meta-data
+            android:name="SINA_APPKEY"
+            android:value="_1748224285" />
+
+        <activity
+            android:name="com.sina.weibo.sdk.web.WeiboSdkWebActivity"
+            android:configChanges="keyboardHidden|orientation"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name="com.sina.weibo.sdk.share.WbShareTransActivity"
+            android:launchMode="singleTask"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen">
+            <intent-filter>
+                <action android:name="com.sina.weibo.sdk.action.ACTION_SDK_REQ_ACTIVITY" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <!-- 分享 -->
+
+
+        <!-- Share - 腾讯微博分享 -->
+        <!-- 官方网站：http://dev.t.qq.com/ -->
+        <!-- <meta-data -->
+        <!-- android:name="TENCENT_REDIRECT_URI" -->
+        <!-- android:value="%腾讯微博开放平台申请应用配置的回调地址%" /> -->
+        <!-- <meta-data -->
+        <!-- android:name="TENCENT_SECRET" -->
+        <!-- android:value="%腾讯微博开放平台申请应用的Secret%" /> -->
+        <!-- <meta-data -->
+        <!-- android:name="TENCENT_APPKEY" -->
+        <!-- android:value="_%腾讯微博开放平台申请应用的Appkey，注意前面要添加下划线%" /> -->
+
+        <activity
+            android:name="io.dcloud.share.tencent.WebAuthorize"
+            android:theme="@android:style/Theme.NoTitleBar" />
+        <!-- 微信分享 配置begin -->
+        <meta-data
+            android:name="WX_SECRET"
+            android:value="270be6c177911661af73e4e000bd0e9c" />
+        <meta-data
+            android:name="WX_APPID"
+            android:value="wx8526e046cde9ed1b" />
+
+        <activity
+            android:name=".wxapi.WXEntryActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:scheme="wx8526e046cde9ed1b" />
+            </intent-filter>
+        </activity>
+        <!-- 微信分享 配置 end -->
+
+        <activity
+            android:name=".hook.ADOpenActivity"
+            android:launchMode="singleTop"
+            android:screenOrientation="user"
+            android:theme="@android:style/Theme.NoTitleBar" />
+
+        <!-- 支付宝支付 配置begin -->
+        <!-- <activity -->
+        <!-- android:name="com.alipay.sdk.app.H5PayActivity" -->
+        <!-- android:configChanges="orientation|keyboardHidden|navigation" -->
+        <!-- android:exported="false" -->
+        <!-- android:screenOrientation="behind" -->
+        <!-- android:windowSoftInputMode="adjustResize|stateHidden"></activity> -->
+        <!-- <activity -->
+        <!-- android:name="com.alipay.sdk.auth.AuthActivity" -->
+        <!-- android:configChanges="orientation|keyboardHidden|navigation" -->
+        <!-- android:exported="false" -->
+        <!-- android:screenOrientation="behind"></activity> -->
+        <!-- 支付宝支付 配置end -->
+
+
+        <!-- ===========================================广告联盟配置相关 开始=================================== -->
+        <!--
+        io.dcloud.PandoraEntry
+        .IndexActivity
+        -->
+        <activity
+            android:name=".IndexActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|mcc|mnc|fontScale"
+            android:hardwareAccelerated="true"
+            android:screenOrientation="user"
+            android:theme="@style/TranslucentTheme"
+            android:windowSoftInputMode="adjustResize">
+
+            <!-- <intent-filter> -->
+            <!-- <action android:name="android.intent.action.MAIN" /> -->
+            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
+            <!-- </intent-filter> -->
+        </activity>
+
+        <!-- 开发者须自行配置该字段对应value值，替换appid和adid为自己应用的appid和广告联盟会员id，否则可能影响统计结算 -->
+        <!--
+            <meta-data
+            android:name="DCLOUD_STREAMAPP_CHANNEL"
+            android:value="io.dcloud.%APPID%|%APPID%|%adid" />
+        -->
+        <meta-data
+            android:name="DCLOUD_STREAMAPP_CHANNEL"
+            android:value="io.dcloud.HelloH5|juejinchain|adid" />
+
+        <!-- 百度语音识别 start -->
+        <meta-data
+            android:name="com.baidu.speech.APP_ID"
+            android:value="11770490" />
+        <meta-data
+            android:name="com.baidu.speech.API_KEY"
+            android:value="cDFRHjbhBklzS1ZKFBnz9cHg" />
+        <meta-data
+            android:name="com.baidu.speech.SECRET_KEY"
+            android:value="vZK4rC7ueQTMrhavm3qVlnGicPTeUCEr" />
+        <!-- <service android:name="com.baidu.speech.VoiceRecognitionService" android:exported="false" /> -->
+        <!-- 百度语音识别 end -->
+
+
+        <!-- ===========================================广告联盟配置相关 结束=================================== -->
+
+        <activity
+            android:name=".ActivityEntry"
+            android:configChanges="orientation|keyboardHidden"
+            android:label="@string/app_name"
+            android:launchMode="singleTask"
+            android:screenOrientation="user"
+            android:windowSoftInputMode="adjustResize"></activity>
+        <activity
+            android:name=".SDK_WebApp"
+            android:configChanges="orientation|keyboardHidden|screenSize|keyboard|navigation|mcc|mnc|fontScale"
+            android:screenOrientation="user"
+            android:theme="@style/DCloudTheme"> <!-- 离线配置沉浸式  SDK_WebApp  作为apk入口时  必须设置 SDK_WebApp   的主题为android:theme="@style/DCloudTheme" -->
+            <!-- <intent-filter> -->
+            <!-- <action android:name="android.intent.action.MAIN" /> -->
+            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
+            <!-- </intent-filter> -->
+        </activity>
+        <activity
+            android:name=".SDK_WebView"
+            android:configChanges="orientation|keyboardHidden|screenSize|keyboard|navigation|mcc|mnc|fontScale"
+            android:screenOrientation="sensor"
+            android:theme="@style/DCloudTheme" />
+        <activity
+            android:name=".MainActivity"
+            android:hardwareAccelerated="true"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme"> <!-- AppCompatActivity需要用Theme.AppCompat 不能用:DCloudTheme -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".ui.activity.CategoryExpandActivity"
+            android:theme="@style/AppTheme"></activity>
+    </application>
+
+</manifest>

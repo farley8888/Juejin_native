@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>分享到QQ</title>
+</head>
+<style>
+.share {
+  
+}
+#warpOut {
+	width: 100%;
+	height: 200px;
+	background: #f00;
+	position: fixed;
+	left: 0;
+	top: 0;
+}
+.warpper {
+	background: #ff0;
+	width: 100px;
+	height: 50px;
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	-webkit-transform: translate(-50%, -50%);
+}
+</style>
+<body>
+	<div id="warpOut">
+		<div class="warpper">
+			
+		</div>
+	</div>
+  <div class="share" onclick="shareQQ()">
+    分享到QQ
+  </div>
+</body>
+<script>
+  var shares = {}
+  if (window.plus) {
+    getSevices()
+  } else {
+    document.addEventListener('plusready', function () {
+      getSevices()
+    })
+  }
+  function getSevices () {
+    plus.share.getServices(s => {
+      for (var i = 0; i < s.length; i++) {
+        let temp = s[i]
+        shares[temp.id] = temp
+      }
+    })
+  }
+  function shareQQ () {
+    var msg = {
+      title: '我是掘金宝0000，即将免费赚得别克君威，赶紧看看！',
+      content: '看资讯看电影，180天就能赚豪车赚洋房！赶紧看看 >',
+      thumbs: ['http://jjlmobile.oss-cn-shenzhen.aliyuncs.com/goods_car/gid_31053/pic_list_h/eb6b767a2df77a8be60ea93563143bfe.jpg?x-oss-process=image/resize,h_50'],
+      href: 'http://dev.wechat.juejinchain.cn'
+    }
+    shares['qq'].send(msg, function (s) {
+      alert('分享成功：' + JSON.stringify(s))
+    })
+  }
+</script>
+</html>

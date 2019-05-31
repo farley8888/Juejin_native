@@ -7,13 +7,18 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -64,6 +69,7 @@ public class VideoDetailFragment extends BaseBackFragment {
     //评论总条数
     private int totalSize;
     ReplyCommentPopup mCommentPopup;
+    private EditText mEditView;
 
     public static VideoDetailFragment newInstance(VideoModel model) {
         VideoDetailFragment self = new VideoDetailFragment();
@@ -97,7 +103,7 @@ public class VideoDetailFragment extends BaseBackFragment {
         if (model.src == null){
             setPlayHtml(model, parseWebView);
         }
-        mJzvdPlayer.setUp(model.src, model.title, Jzvd.SCREEN_NORMAL);
+        mJzvdPlayer.setUp(model.src, model.title);
         Glide.with(getContext()).load(model.large_img_url).into(mJzvdPlayer.thumbImageView);
         mData.add(model);
         mAdapter.setDataList(mData);
@@ -110,7 +116,7 @@ public class VideoDetailFragment extends BaseBackFragment {
         NetUtil.getRequest(NetConfig.API_VideoRecommend, param, new NetUtil.OnResponse() {
             @Override
             public void onResponse(JSONObject response) {
-//                L.d(TAG, "onResponse: "+response.toJSONString());
+                L.d(TAG, "onResponse: "+response.toJSONString());
                 recommendList = JSON.parseArray(response.getString("data"), VideoModel.class);
                 mData.addAll(1, recommendList);
                 mAdapter.setDataList(mData); //此adapter这个方法才能刷新
@@ -165,9 +171,6 @@ public class VideoDetailFragment extends BaseBackFragment {
     }
 
     public void initView(View view){
-//        mSwipeLayout = view.findViewById(R.id.swipe);
-//        mSwipeLayout.setColorSchemeResources(R.color.bg_yellow);
-
         mRecyclerView = view.findViewById(R.id.recycler_view);
 
         mRecyclerView.addItemDecoration(new DividerDecoration(Color.parseColor("#C4C4C4"), 1));
@@ -175,11 +178,62 @@ public class VideoDetailFragment extends BaseBackFragment {
 
 //        mAdapter = new VideoDetailAdapter(getContext());
         mAdapter = new VideoDetailXAdapter(mRecyclerView);
-
         mRecyclerView.setAdapter(mAdapter);
 
+        mEditView = view.findViewById(R.id.edt_btmComment);
+        mEditView.setInputType(EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE);
+        mEditView.setSingleLine(false);
         setListener();
+        bindBottomListener(view);
 //        mAdapter.isLoadMore(true);
+    }
+
+    void bindBottomListener(View v){
+        View.OnClickListener listener = new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                switch (view.getId()){
+                    case R.id.btn_btmBack:
+                        _mActivity.onBackPressed();
+                        break;
+                    case R.id.btn_btmComment: //底部评论数按钮
+
+                        break;
+                    case R.id.btn_btmShare:  //分享
+
+                        break;
+                }
+            }
+        };
+        v.findViewById(R.id.btn_btmBack).setOnClickListener(listener);
+        v.findViewById(R.id.btn_btmShare).setOnClickListener(listener);
+        v.findViewById(R.id.btn_btmComment).setOnClickListener(listener);
+        mEditView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
+                boolean handled = false;
+                Log.d(TAG, "onEditorAction:actionId= "+actionId);
+                if (actionId == EditorInfo.IME_ACTION_SEND
+                    || actionId == EditorInfo.IME_ACTION_DONE) {
+                   String content = mEditView.getText().toString().trim();
+                    Log.d(TAG, "onEditorAction: "+content);
+                   if (content.length() < 2){
+                       Toast.makeText(getContext(), "请输入完整的评论", Toast.LENGTH_SHORT).show();
+                       return true;
+                   }else{
+                       publishComment(content);
+                   }
+                    handled = true;
+                    /*隐藏软键盘*/
+                    InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(getContext().INPUT_METHOD_SERVICE);
+                    if (inputMethodManager.isActive()) {
+                        inputMethodManager.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), 0);
+                    }
+                }
+                return handled;
+//                return false;
+            }
+        });
     }
 
     void setListener(){
@@ -267,7 +321,7 @@ public class VideoDetailFragment extends BaseBackFragment {
         NetUtil.postRequestShowLoading(NetConfig.API_VideoFabulous, param, new NetUtil.OnResponse() {
             @Override
             public void onResponse(JSONObject response) {
-                Log.d(TAG, "onResponse:点赞 " + response.toJSONString());
+//                Log.d(TAG, "onResponse:点赞 " + response.toJSONString());
                 if (aModel instanceof VideoModel){
                     model.video_like_count += 1;
                     model.is_fabulous = true;
@@ -277,6 +331,28 @@ public class VideoDetailFragment extends BaseBackFragment {
                     cmodel.fabulous += 1;
                 }
                 mAdapter.notifyDataSetChanged();
+            }
+        }, false);
+    }
+
+    //发表评论
+    public void publishComment(String content) {
+        mEditView.setText("");
+        Map<String, String> param = new HashMap<>();
+        param.put("vid", model.id);
+        param.put("content", content);
+        NetUtil.postRequestShowLoading(NetConfig.API_VideoComment, param, new NetUtil.OnResponse() {
+            @Override
+            public void onResponse(JSONObject response) {
+                Log.d(TAG, "onResponse:发评论 " + response.toJSONString());
+                Toast.makeText(getContext(),"发表成功", Toast.LENGTH_SHORT).show();
+
+                List<Object> removeComment = mData.subList(5, mData.size());
+                mData.removeAll(removeComment);
+                mAdapter.notifyDataSetChanged();
+                //清除评论后重新加载
+                currPage = 1;
+                loadComment();
             }
         }, false);
     }
@@ -333,9 +409,22 @@ public class VideoDetailFragment extends BaseBackFragment {
         // 不管是 父Fragment还是子Fragment 都有效！
     }
 
+
+    public boolean onBackPressedSupport() {
+        if (Jzvd.backPress()) {
+//            return;
+        }
+        return super.onBackPressedSupport();
+    }
+
+//    protected void onPause() {
+//        super.onPause();
+//        Jzvd.resetAllVideos();
+//    }
     @Override
     public void onSupportInvisible() {
         super.onSupportInvisible();
+        Jzvd.resetAllVideos();
         // 当对用户不可见时 回调
         // 不管是 父Fragment还是子Fragment 都有效！
     }

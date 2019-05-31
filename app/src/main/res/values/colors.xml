@@ -11,6 +11,8 @@
     <color name="colorLighter_dark">#ddd</color>
 
     <color name="white">#FFF</color>
+    <!-- 默认背景色 -->
+    <color name="default_bg">#FFF</color>
 
     <color name="text_red">#F44336</color>
     <color name="text_darker">#666</color>

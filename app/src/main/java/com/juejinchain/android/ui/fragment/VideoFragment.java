@@ -25,6 +25,7 @@ import com.juejinchain.android.ui.view.PagerSlidingTabStrip;
 import java.util.ArrayList;
 import java.util.List;
 
+import cn.jzvd.Jzvd;
 import me.yokeyword.fragmentation.SupportFragment;
 import okhttp3.Call;
 
@@ -120,6 +121,24 @@ public class VideoFragment extends SupportFragment {
         if (mListener != null) {
             mListener.onFragmentInteraction(uri);
         }
+    }
+    public boolean onBackPressedSupport() {
+        if (Jzvd.backPress()) {
+//            return;
+        }
+        return super.onBackPressedSupport();
+    }
+
+    //    protected void onPause() {
+//        super.onPause();
+//        Jzvd.resetAllVideos();
+//    }
+    @Override
+    public void onSupportInvisible() {
+        super.onSupportInvisible();
+        Jzvd.resetAllVideos();
+        // 当对用户不可见时 回调
+        // 不管是 父Fragment还是子Fragment 都有效！
     }
 
     @Override

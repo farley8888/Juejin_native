@@ -3,26 +3,50 @@
     android:layout_width="match_parent"
     android:layout_height="45dp"
     android:layout_alignParentBottom="true"
-    android:layout_marginLeft="@dimen/listView_side_margin"
-    android:layout_marginRight="@dimen/listView_side_margin"
+    android:background="@color/default_bg"
     android:gravity="center_vertical"
     android:orientation="horizontal">
 
-    <EditText
-        android:id="@+id/edt_replyComment"
-        android:layout_width="wrap_content"
+    <ImageButton
+        android:id="@+id/btn_btmBack"
+        android:layout_width="40dp"
         android:layout_height="40dp"
+        android:background="@color/default_bg"
+        android:src="@drawable/detai_back_icon" />
+
+    <EditText
+        android:id="@+id/edt_btmComment"
+        android:layout_width="wrap_content"
+        android:drawableLeft="@drawable/detail_edit_icon"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:drawablePadding="3dp"
+        android:imeOptions="actionSend"
+        android:singleLine="true"
+        android:maxLines="1"
+        android:textSize="15sp"
+        android:hint="写评论"
+        android:layout_height="35dp"
         android:background="@drawable/edit_shape_comment"
         android:layout_weight="1"/>
 
-    <Button
-        android:id="@+id/btn_publish"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@color/white"
+    <ImageButton
+        android:id="@+id/btn_btmComment"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@color/default_bg"
+        android:src="@drawable/nav_comment_icon"
+        android:text="Button" />
+
+    <ImageButton
+        android:id="@+id/btn_btmShare"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@color/default_bg"
+        android:src="@drawable/nav_share_icon"
         android:layout_marginLeft="5dp"
         android:textSize="15sp"
-        android:text="发布" />
+        />
 
 
 </LinearLayout>

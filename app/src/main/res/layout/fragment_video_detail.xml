@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -8,11 +8,17 @@
     android:orientation="vertical">
 
     <!--<include layout="@layout/toolbar"/>-->
-    <include layout="@layout/toolbar_layout"/>
+    <include
+        android:id="@+id/ly_top"
+        layout="@layout/toolbar_layout"/>
 
     <android.support.constraint.ConstraintLayout
+        android:id="@+id/constraint"
+        android:layout_below="@+id/ly_top"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="200dp"
+        tools:ignore="MissingConstraints">
+        <!-- ConstraintLayout, height要给固定值，否则全屏回来后，高度还是全屏 -->
 
         <cn.jzvd.JzvdStd
             android:id="@+id/jzvdStdPlayer"
@@ -26,99 +32,17 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.0" />
 
-        <!--<TextView-->
-            <!--android:id="@+id/tv_vdoTitle"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_marginLeft="10dp"-->
-            <!--android:layout_marginTop="5dp"-->
-            <!--android:layout_marginRight="10dp"-->
-            <!--android:maxLines="2"-->
-            <!--android:text="TextView"-->
-            <!--android:textColor="@color/text_darker"-->
-            <!--android:textSize="17sp"-->
-            <!--app:layout_constraintStart_toStartOf="parent"-->
-            <!--app:layout_constraintTop_toBottomOf="@+id/jzvdStdPlayer" />-->
-
-        <!--<TextView-->
-            <!--android:id="@+id/tv_vdoPlayTimes"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_marginTop="5dp"-->
-            <!--android:maxLines="1"-->
-            <!--android:text="TextView"-->
-            <!--android:textColor="@color/text_darker_lighter"-->
-            <!--android:textSize="12sp"-->
-            <!--app:layout_constraintLeft_toLeftOf="@+id/tv_vdoTitle"-->
-            <!--app:layout_constraintTop_toBottomOf="@+id/tv_vdoTitle" />-->
-
-
-        <!--<com.juejinchain.android.ui.view.DrawableTextView-->
-            <!--android:id="@+id/button1"-->
-            <!--android:layout_width="100dp"-->
-            <!--android:layout_marginTop="10dp"-->
-            <!--android:layout_height="30dp"-->
-            <!--android:background="@drawable/button_shape_video"-->
-            <!--android:drawableLeft="@drawable/share_icon"-->
-            <!--android:drawablePadding="5dp"-->
-            <!--android:gravity="center_vertical"-->
-            <!--android:text="11"-->
-            <!--android:textSize="15sp"-->
-            <!--app:layout_constraintLeft_toLeftOf="parent"-->
-            <!--app:layout_constraintRight_toLeftOf="@+id/button2"-->
-            <!--app:layout_constraintTop_toBottomOf="@+id/tv_vdoPlayTimes"-->
-            <!--tools:ignore="MissingConstraints" />-->
-
-        <!--<com.juejinchain.android.ui.view.DrawableTextView-->
-            <!--android:id="@+id/button2"-->
-            <!--android:layout_width="110dp"-->
-            <!--android:layout_height="30dp"-->
-            <!--android:background="@drawable/button_shape_video"-->
-            <!--android:drawableLeft="@drawable/share_icon"-->
-            <!--android:drawablePadding="5dp"-->
-            <!--android:gravity="center_vertical"-->
-            <!--android:text="11"-->
-            <!--android:textSize="15sp"-->
-            <!--app:layout_constraintLeft_toRightOf="@+id/button1"-->
-            <!--app:layout_constraintRight_toLeftOf="@+id/button3"-->
-            <!--app:layout_constraintTop_toTopOf="@+id/button1"-->
-            <!--tools:ignore="MissingConstraints" />-->
-
-        <!--<com.juejinchain.android.ui.view.DrawableTextView-->
-            <!--android:id="@+id/button3"-->
-            <!--android:layout_width="110dp"-->
-            <!--android:layout_height="30dp"-->
-            <!--android:background="@drawable/button_shape_video"-->
-            <!--android:drawableLeft="@drawable/share_icon"-->
-            <!--android:drawablePadding="5dp"-->
-            <!--android:gravity="center_vertical"-->
-            <!--android:text="11"-->
-            <!--android:textSize="15sp"-->
-            <!--app:layout_constraintLeft_toRightOf="@+id/button2"-->
-            <!--app:layout_constraintRight_toRightOf="parent"-->
-            <!--app:layout_constraintTop_toTopOf="@+id/button2"-->
-            <!--tools:ignore="MissingConstraints" />-->
-
-        <!--<TextView-->
-            <!--android:id="@+id/tv_vdoAbstract"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_marginTop="5dp"-->
-            <!--android:maxLines="1"-->
-            <!--android:text="TextView"-->
-            <!--android:textColor="@color/text_darker_lighter"-->
-            <!--android:textSize="12sp"-->
-            <!--app:layout_constraintLeft_toLeftOf="@+id/tv_vdoTitle"-->
-            <!--app:layout_constraintTop_toBottomOf="@+id/button2" />-->
-
     </android.support.constraint.ConstraintLayout>
 
 
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recycler_view"
+        android:layout_below="@+id/constraint"
+        android:layout_above="@+id/bottom"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/recycler_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
-
-
-</LinearLayout>
+    <include
+        android:id="@+id/bottom"
+        layout="@layout/bottom_comment_bar"/>
+</RelativeLayout>

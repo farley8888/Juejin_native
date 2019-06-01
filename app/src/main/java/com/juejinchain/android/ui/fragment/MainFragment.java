@@ -14,6 +14,7 @@ import com.juejinchain.android.R;
 import com.juejinchain.android.WebAppFragment;
 import com.juejinchain.android.event.TabSelectedEvent;
 import com.juejinchain.android.eventbus_activity.EventBusActivityScope;
+import com.juejinchain.android.ui.view.AdsHolderView;
 import com.juejinchain.android.ui.view.BottomBar;
 import com.juejinchain.android.ui.view.BottomBarTab;
 
@@ -34,6 +35,8 @@ public class MainFragment extends SupportFragment {
 
     private BottomBar mBottomBar;
     private FragmentManager fragmentManager;
+
+    private AdsHolderView mAdsHolderView;
 
     public static MainFragment newInstance() {
 
@@ -105,6 +108,7 @@ public class MainFragment extends SupportFragment {
     }
 
     private void initView(View view) {
+        mAdsHolderView = view.findViewById(R.id.adsView);
         mBottomBar = (BottomBar) view.findViewById(R.id.bottomBar);
 //.addItem(new BottomBarTab(_mActivity, R.drawable.ic_account_circle_white_24dp, getString(R.string.discover)))
         mBottomBar
@@ -141,7 +145,13 @@ public class MainFragment extends SupportFragment {
                     String[] vuePages = new String[]{"make_money", "login"};
                     WebAppFragment webFragmentVue = (WebAppFragment) mFragments[position];
                     webFragmentVue.showPage(vuePages[position-1]);
+
+                    mAdsHolderView.setVisibility(View.GONE);
+                }else{
+                    mAdsHolderView.setVisibility(View.VISIBLE);
                 }
+
+
                 showHideFragment(mFragments[position], mFragments[prePosition]);
 
                 if (mFragments[prePosition] == mFragments[position] ){
@@ -164,7 +174,6 @@ public class MainFragment extends SupportFragment {
 //                transaction.hide(mFragments[prePosition>0? 1:0]);
 //                transaction.show(mFragments[position > 0? 1:0]);
 //                transaction.commit();
-
             }
 
             @Override

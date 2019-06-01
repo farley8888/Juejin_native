@@ -1,4 +1,4 @@
-package com.juejinchain.android.ui.view;
+package com.juejinchain.android.ui.dialog;
 
 import android.app.Dialog;
 import android.content.Context;

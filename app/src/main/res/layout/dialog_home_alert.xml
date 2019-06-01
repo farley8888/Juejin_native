@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/JJ.WrapContent"
+    android:background="@drawable/bg_home_alert">
+
+    <LinearLayout
+        style="@style/JJ.WrapContent.Vertical"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="60dp"
+        android:gravity="center_horizontal">
+
+        <LinearLayout
+            style="@style/JJ.WrapContent.Horizontal"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:layout_width="13dp"
+                android:layout_height="13dp"
+                android:scaleType="fitXY"
+                android:src="@drawable/dcloud_amap_bus" />
+
+            <TextView
+                style="@style/JJ.Label.White.Small"
+                android:layout_marginLeft="5dp"
+                android:text="保时捷Cayenne" />
+        </LinearLayout>
+
+        <ImageView
+            android:layout_width="110dp"
+            android:layout_height="100dp"
+            android:layout_marginTop="10dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/dcloud_image_pick_no_media" />
+
+        <TextView
+            style="@style/JJ.Label.White.Small"
+            android:layout_marginTop="10dp"
+            android:text="2018款 Cayenne 3.0T" />
+
+        <TextView
+            style="@style/JJ.WrapContent"
+            android:layout_marginTop="18dp"
+            android:background="@drawable/shape_yellow_radius"
+            android:paddingHorizontal="35dp"
+            android:paddingVertical="8dp"
+            android:text="领"
+            android:textColor="@color/red_500"
+            android:textSize="16sp" />
+
+        <TextView
+            style="@style/JJ.Label.Minor.Small"
+            android:layout_marginTop="18dp"
+            android:text="限时领取"
+            android:textColor="@color/light_white" />
+    </LinearLayout>
+
+    <View
+        android:id="@+id/cancel"
+        android:layout_width="300dp"
+        android:layout_height="40dp"
+        android:layout_gravity="bottom" />
+</FrameLayout>

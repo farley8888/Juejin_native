@@ -1,29 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent"
-             android:orientation="vertical">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <FrameLayout
         android:id="@+id/fl_tab_container"
         android:layout_width="match_parent"
-        android:layout_marginBottom="@dimen/bottombar_wechat_height"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:layout_marginBottom="@dimen/bottombar_wechat_height" />
 
     <ImageView
         android:layout_width="match_parent"
-        android:background="@drawable/actionbar_shadow_up"
+        android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:layout_marginBottom="@dimen/bottombar_wechat_height"
-        android:layout_height="wrap_content"/>
+        android:background="@drawable/actionbar_shadow_up" />
 
     <com.juejinchain.android.ui.view.BottomBar
         android:id="@+id/bottomBar"
         android:layout_width="match_parent"
-        android:background="@android:color/transparent"
         android:layout_height="63dp"
-        android:layout_gravity="bottom"/>
-<!-- @dimen/bottombar_wechat_height
- android:background=设置透明后无点击波浪效果-->
+        android:layout_gravity="bottom"
+        android:background="@android:color/transparent" />
+    <!-- @dimen/bottombar_wechat_height
+     android:background=设置透明后无点击波浪效果-->
+
+    <com.juejinchain.android.ui.view.AdsHolderView
+        android:id="@+id/adsView"
+        style="@style/JJ.WrapContent"
+        android:layout_gravity="bottom|right"
+        android:layout_marginRight="12dp"
+        android:layout_marginBottom="65dp" />
 
 </FrameLayout>

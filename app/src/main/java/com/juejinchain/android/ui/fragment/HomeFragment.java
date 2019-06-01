@@ -5,15 +5,18 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.dmcbig.mediapicker.utils.ScreenUtils;
 import com.juejinchain.android.R;
 import com.juejinchain.android.adapter.HomePagerFragmentAdapter;
 import com.juejinchain.android.base.BaseMainFragment;
@@ -22,10 +25,11 @@ import com.juejinchain.android.network.NetConfig;
 import com.juejinchain.android.network.NetUtil;
 import com.juejinchain.android.network.OkHttpUtils;
 import com.juejinchain.android.network.callBack.JSONCallback;
+import com.juejinchain.android.ui.HomeTipsPopupWindow;
 import com.juejinchain.android.ui.activity.CategoryExpandActivity;
 import com.juejinchain.android.ui.activity.search.SearchActivity;
+import com.juejinchain.android.ui.dialog.ShareDialog;
 import com.juejinchain.android.ui.view.PagerSlidingTabStrip;
-import com.juejinchain.android.ui.view.ShareDialog;
 import com.juejinchain.android.util.SPUtils;
 
 import java.util.ArrayList;
@@ -40,7 +44,7 @@ import static com.juejinchain.android.util.Constant.CHANNEL_CHCHE;
  * 首页 主fragment
  */
 public class HomeFragment extends BaseMainFragment implements View.OnClickListener {
-//    private TabLayout mTab;
+    //    private TabLayout mTab;
 //    private Toolbar mToolbar;
     private ViewPager mViewPager;
     private Button mAddBtn;
@@ -76,7 +80,7 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
     private void initView(View view) {
 //        mToolbar = (Toolbar) view.findViewById(R.id.toolbar);
 //        mTab = (TabLayout) view.findViewById(R.id.tab);
-        mTabs = (PagerSlidingTabStrip)view.findViewById(R.id.tabs);
+        mTabs = (PagerSlidingTabStrip) view.findViewById(R.id.tabs);
         mAddBtn = view.findViewById(R.id.btn_add);
         mSearchView = view.findViewById(R.id.button2);
         mShareView = view.findViewById(R.id.button4);
@@ -104,14 +108,23 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
 //        mTab.addTab(mTab.newTab());
 //        mTab.addTab(mTab.newTab());
         setOnClickListener();
-        view.findViewById(R.id.ly_ling).setOnClickListener(this);
+
+        View lyLing = view.findViewById(R.id.ly_ling);
+        lyLing.setOnClickListener(this);
+
+        view.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                view.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                lyLing.performClick();
+            }
+        });
     }
 
     private void setOnClickListener() {
         mAddBtn.setOnClickListener(this);
         mSearchView.setOnClickListener(this);
         mShareView.setOnClickListener(this);
-
     }
 
     @Override
@@ -127,7 +140,7 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
         loadChannel();
     }
 
-    private void loadChannel(){
+    private void loadChannel() {
 
         String url = NetConfig.getUrlByAPI(NetConfig.API_ChannelGet);
         OkHttpUtils.getAsyn(url, new JSONCallback() {
@@ -138,7 +151,7 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
 
             @Override
             public void onResponse(JSONObject response) {
-                if (NetUtil.isSuccess(response)){
+                if (NetUtil.isSuccess(response)) {
                     mChannelList = JSON.parseArray(response.getString("data"), ChannelModel.class);
                     SPUtils.getInstance().put(CHANNEL_CHCHE, response.getString("data"));
                     setTabsPage();
@@ -147,7 +160,7 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
         });
     }
 
-    void setTabsPage(){
+    void setTabsPage() {
 //        String[] array = new String[mChannelList.size()];
 //        for (int i = 0 ; i < mChannelList.size(); i++)
 //            array[i] = mChannelList.get(i).getName();
@@ -214,17 +227,31 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
             case R.id.ly_ling:
                 mPromptPopup = new PromptGetPopup(getContext());
                 //外面可点,会影响显示位置
-//                mPromptPopup.setAllowInterceptTouchEvent(false);
+                mPromptPopup.setOutSideTouchable(true);
                 mPromptPopup.setBackground(null);  //背景透明
-                int[] location = new  int[2] ;
+                int[] location = new int[2];
                 tvCount.getLocationOnScreen(location);
-                Log.d(TAG, "onClick: "+location[0] + ", y ="+location[1]);
-//                mPromptPopup.showPopupWindow(location[0], location[1]);
-//                mPromptPopup.setOffsetX(-100);
-//                mPromptPopup.setOffsetY(location[1]);
-//                mPromptPopup.showPopupWindow(tvCount);
-                mPromptPopup.showPopupWindow(v);
+                Log.d(TAG, "onClick: " + location[0] + ", y =" + location[1]);
+//                mPromptPopup.showPopupWindow(v);
+
+                if(mPopupWindow == null || !mPopupWindow.isShowing()){
+                    mPopupWindow = new HomeTipsPopupWindow(getActivity());
+                    mPopupWindow.showAtLocation(tvCount, Gravity.NO_GRAVITY, location[0] - ScreenUtils.dp2px(getActivity(), 70), location[1] + ScreenUtils.dp2px(getActivity(), 25));
+                }else if(mPopupWindow != null){
+                    mPopupWindow.dismiss();
+                }
+
                 break;
         }
     }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if(mPopupWindow != null && !mPopupWindow.isShowing()){
+            mPopupWindow.dismiss();
+        }
+    }
+
+    private HomeTipsPopupWindow mPopupWindow;
 }

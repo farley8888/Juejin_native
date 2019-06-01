@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
@@ -61,11 +62,14 @@ public class HomeTipsAlertDialog extends Dialog {
         ImageView logo = findViewById(R.id.img_gftLogo);
         ImageView image = findViewById(R.id.img_gftLarge);
 
+
         Glide.with(getContext()).load(jo.getString("brand_logo")).into(logo);
         Glide.with(getContext()).load(jo.getString("images")).into(image);
     }
 
     private void initView(){
+        ImageView gifImage = findViewById(R.id.img_get);
+        Glide.with(getContext()).load(R.drawable.get_button).into(gifImage);
 
         findViewById(R.id.cancel).setOnClickListener(v -> dismiss());
     }

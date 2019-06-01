@@ -41,15 +41,23 @@
             android:layout_marginTop="10dp"
             android:text="2018款 Cayenne 3.0T" />
 
-        <TextView
-            style="@style/JJ.WrapContent"
-            android:layout_marginTop="18dp"
-            android:background="@drawable/shape_yellow_radius"
-            android:paddingHorizontal="35dp"
-            android:paddingVertical="8dp"
-            android:text="领"
-            android:textColor="@color/red_500"
-            android:textSize="16sp" />
+        <!--<TextView-->
+        <!--style="@style/JJ.WrapContent"-->
+        <!--android:layout_marginTop="18dp"-->
+        <!--android:background="@drawable/shape_yellow_radius"-->
+        <!--android:paddingHorizontal="35dp"-->
+        <!--android:paddingVertical="8dp"-->
+        <!--android:text="领"-->
+        <!--android:textColor="@color/red_500"-->
+        <!--android:textSize="16sp" />-->
+
+        <!-- pl.droidsonroids.gif.GifImageView 用不了bug-->
+        <ImageView
+            android:id="@+id/img_get"
+            android:layout_width="70dp"
+            android:layout_height="30dp"
+            android:layout_marginTop="15dp"
+            />
 
         <TextView
             android:id="@+id/tv_gftLimit_ling"

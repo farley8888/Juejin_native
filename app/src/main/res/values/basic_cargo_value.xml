@@ -1,0 +1,388 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ###################### styles #########################-->
+
+    <!-- cargo base -->
+    <style name="Cargo" />
+
+    <!-- match parent -->
+    <style name="JJ.MatchParent" parent="Cargo">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+    </style>
+
+    <!-- match vertical -->
+    <style name="JJ.MatchParent.Vertical" parent="JJ.MatchParent">
+        <item name="android:orientation">vertical</item>
+    </style>
+
+    <!-- match horizontal -->
+    <style name="JJ.MatchParent.Horizontal" parent="JJ.MatchParent">
+        <item name="android:orientation">horizontal</item>
+    </style>
+
+    <!-- wrap content -->
+    <style name="JJ.WrapContent" parent="Cargo">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <!-- wrap vertical -->
+    <style name="JJ.WrapContent.Vertical" parent="JJ.WrapContent">
+        <item name="android:orientation">vertical</item>
+    </style>
+
+    <!-- wrap horizontal -->
+    <style name="JJ.WrapContent.Horizontal" parent="JJ.WrapContent">
+        <item name="android:orientation">horizontal</item>
+    </style>
+
+    <!-- width match parent -->
+    <style name="JJ.WidthFill" parent="Cargo">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <!-- width match vertical -->
+    <style name="JJ.WidthFill.Vertical" parent="JJ.WidthFill">
+        <item name="android:orientation">vertical</item>
+    </style>
+
+    <!-- width match vertical background -->
+    <style name="JJ.WidthFill.Vertical.WhiteBackground" parent="JJ.WidthFill.Vertical">
+        <item name="android:background">@color/white</item>
+    </style>
+
+    <!-- width match horizontal -->
+    <style name="JJ.WidthFill.Horizontal" parent="JJ.WidthFill">
+        <item name="android:orientation">horizontal</item>
+    </style>
+
+    <!-- width match horizontal background -->
+    <style name="JJ.WidthFill.Horizontal.WhiteBackground" parent="JJ.WidthFill.Horizontal">
+        <item name="android:background">@color/white</item>
+    </style>
+
+    <!-- width match horizontal background i -->
+    <style name="JJ.WidthFill.Horizontal.WhiteBackground.Item" parent="JJ.WidthFill.Horizontal">
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minHeight">50dp</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+
+    <!-- height match parent -->
+    <style name="JJ.HeightFill" parent="Cargo">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">match_parent</item>
+    </style>
+
+    <!-- height match vertical -->
+    <style name="JJ.HeightFill.Vertical" parent="JJ.HeightFill">
+        <item name="android:orientation">vertical</item>
+    </style>
+
+    <!-- height match horizontal -->
+    <style name="JJ.HeightFill.Horizontal" parent="JJ.HeightFill">
+        <item name="android:orientation">horizontal</item>
+    </style>
+
+    <!-- match weight one -->
+    <style name="JJ.MatchParent.Weight" parent="JJ.MatchParent">
+        <item name="android:layout_weight">1</item>
+    </style>
+
+    <!-- width weight one -->
+    <style name="JJ.WidthFill.Weight" parent="JJ.WidthFill">
+        <item name="android:layout_weight">1</item>
+    </style>
+
+    <!-- height weight one -->
+    <style name="JJ.HeightFill.Weight" parent="JJ.HeightFill">
+        <item name="android:layout_weight">1</item>
+    </style>
+
+    <!-- line horizontal -->
+    <style name="JJ.Line.Horizontal" parent="JJ.WidthFill">
+        <item name="android:layout_height">1px</item>
+        <item name="android:background">@color/colorDivider</item>
+    </style>
+
+    <!-- line horizontal margin -->
+    <style name="JJ.Line.Horizontal.Margin" parent="JJ.Line.Horizontal">
+        <item name="android:layout_marginLeft">15dp</item>
+    </style>
+
+    <!-- line vertical -->
+    <style name="JJ.Line.Vertical" parent="JJ.HeightFill">
+        <item name="android:layout_width">1px</item>
+        <item name="android:background">@color/colorDivider</item>
+    </style>
+
+    <!-- label primary -->
+    <style name="JJ.Label.Primary" parent="JJ.WrapContent">
+        <item name="android:textColor">@color/colorPrimary</item>
+    </style>
+
+    <!-- label primary little -->
+    <style name="JJ.Label.Primary.Little" parent="JJ.Label.Primary">
+        <item name="android:textSize">10sp</item>
+    </style>
+
+    <!-- label primary small -->
+    <style name="JJ.Label.Primary.Small" parent="JJ.Label.Primary">
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <!-- label primary middle -->
+    <style name="JJ.Label.Primary.Middle" parent="JJ.Label.Primary">
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <!-- label primary large -->
+    <style name="JJ.Label.Primary.Large" parent="JJ.Label.Primary">
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <!-- label primary max -->
+    <style name="JJ.Label.Primary.Max" parent="JJ.Label.Primary">
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <!-- label white -->
+    <style name="JJ.Label.White" parent="JJ.WrapContent">
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <!-- label white little -->
+    <style name="JJ.Label.White.Little" parent="JJ.Label.White">
+        <item name="android:textSize">10sp</item>
+    </style>
+
+    <!-- label white small -->
+    <style name="JJ.Label.White.Small" parent="JJ.Label.White">
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <!-- label white middle -->
+    <style name="JJ.Label.White.Middle" parent="JJ.Label.White">
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <!-- label white large -->
+    <style name="JJ.Label.White.Large" parent="JJ.Label.White">
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <!-- label white max -->
+    <style name="JJ.Label.White.Max" parent="JJ.Label.White">
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <!-- label black -->
+    <style name="JJ.Label.Black" parent="JJ.WrapContent">
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <!-- label black little -->
+    <style name="JJ.Label.Black.Little" parent="JJ.Label.Black">
+        <item name="android:textSize">10sp</item>
+    </style>
+
+    <!-- label black small -->
+    <style name="JJ.Label.Black.Small" parent="JJ.Label.Black">
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <!-- label black middle -->
+    <style name="JJ.Label.Black.Middle" parent="JJ.Label.Black">
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <!-- label black large -->
+    <style name="JJ.Label.Black.Large" parent="JJ.Label.Black">
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <!-- label black max -->
+    <style name="JJ.Label.Black.Max" parent="JJ.Label.Black">
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <!-- label dark -->
+    <style name="JJ.Label.Dark" parent="JJ.WrapContent">
+        <item name="android:textColor">@color/text_333333</item>
+    </style>
+
+    <!-- label dark little -->
+    <style name="JJ.Label.Dark.Little" parent="JJ.Label.Dark">
+        <item name="android:textSize">10sp</item>
+    </style>
+
+    <!-- label dark small -->
+    <style name="JJ.Label.Dark.Small" parent="JJ.Label.Dark">
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <!-- label dark middle -->
+    <style name="JJ.Label.Dark.Middle" parent="JJ.Label.Dark">
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <!-- label dark large -->
+    <style name="JJ.Label.Dark.Large" parent="JJ.Label.Dark">
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <!-- label dark max -->
+    <style name="JJ.Label.Dark.Max" parent="JJ.Label.Dark">
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <!-- label minor -->
+    <style name="JJ.Label.Minor" parent="JJ.WrapContent">
+        <item name="android:textColor">@color/text_666666</item>
+    </style>
+
+    <!-- label minor little -->
+    <style name="JJ.Label.Minor.Little" parent="JJ.Label.Minor">
+        <item name="android:textSize">10sp</item>
+    </style>
+
+    <!-- label minor small -->
+    <style name="JJ.Label.Minor.Small" parent="JJ.Label.Minor">
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <!-- label minor middle -->
+    <style name="JJ.Label.Minor.Middle" parent="JJ.Label.Minor">
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <!-- label minor large -->
+    <style name="JJ.Label.Minor.Large" parent="JJ.Label.Minor">
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <!-- label minor max -->
+    <style name="JJ.Label.Minor.Max" parent="JJ.Label.Minor">
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <!-- label light -->
+    <style name="JJ.Label.Light" parent="JJ.WrapContent">
+        <item name="android:textColor">@color/text_999999</item>
+    </style>
+
+    <!-- label light little -->
+    <style name="JJ.Label.Light.Little" parent="JJ.Label.Light">
+        <item name="android:textSize">10sp</item>
+    </style>
+
+    <!-- label light small -->
+    <style name="JJ.Label.Light.Small" parent="JJ.Label.Light">
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <!-- label light middle -->
+    <style name="JJ.Label.Light.Middle" parent="JJ.Label.Light">
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <!-- label light large -->
+    <style name="JJ.Label.Light.Large" parent="JJ.Label.Light">
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <!-- label light max -->
+    <style name="JJ.Label.Light.Max" parent="JJ.Label.Light">
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <!-- button -->
+    <style name="JJ.MatchParent.Button" parent="JJ.MatchParent" />
+
+    <!-- button match parent primary -->
+    <style name="JJ.MatchParent.Button.Primary" parent="JJ.MatchParent.Button">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:gravity">center</item>
+        <item name="android:background">@color/primary_dark</item>
+    </style>
+
+    <!-- button match parent white -->
+    <style name="JJ.MatchParent.Button.White" parent="JJ.MatchParent.Button">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/text_333333</item>
+        <item name="android:gravity">center</item>
+        <item name="android:background">@color/white</item>
+    </style>
+
+    <!-- asterisk -->
+    <style name="JJ.WrapContent.Asterisk" parent="JJ.WrapContent">
+        <item name="android:textColor">@color/primary_dark</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:text">*</item>
+    </style>
+
+    <!-- ######################## dimen ######################## -->
+
+    <!-- ######################## color ######################## -->
+    <!-- 淡白色 -->
+    <color name="light_white">#FFE7CC</color>
+    <!-- 浅白色 -->
+    <color name="little_white">#FFFEFD</color>
+    <!-- 深白色 -->
+    <color name="much_white">#F8F4EC</color>
+    <!-- 淡黄色 -->
+    <color name="light_yellow">#E6AF6B</color>
+    <!-- 浅黄色 -->
+    <color name="little_yellow">#E2CAA0</color>
+    <!-- 淡褐色 -->
+    <color name="light_brown">#7F6641</color>
+    <!-- 浅棕色 -->
+    <color name="little_brown">#8E7755</color>
+    <!-- 淡黑色 -->
+    <color name="light_dark">#3D3D3D</color>
+    <!-- 橙黄色 深色 -->
+    <color name="primary_dark">#FF5B00</color>
+    <!-- 橙黄色 浅色 -->
+    <color name="primary_light">#F8861B</color>
+    <!-- 橙黄色 线条 -->
+    <color name="primary_line">#FF7800</color>
+    <!-- 橙黄色 淡色-->
+    <color name="primary_little">#FFFBEE</color>
+    <!-- 橙黄色按钮背景 -->
+    <color name="primary_little_bg">#FFF1E6</color>
+    <!-- 灰色 e9 -->
+    <color name="gray_e9">#E9E9E9</color>
+    <!-- 灰色 f6 -->
+    <color name="gray_f6">#F6F6F6</color>
+    <!-- 深褐色 -->
+    <color name="dark_brown">#5E3E3E</color>
+    <!-- 淡橙色 -->
+    <color name="yellow_more">#F97413</color>
+    <!-- 定义车蓝色 -->
+    <color name="define_car_blue">#335076</color>
+    <!-- 褐色 -->
+    <color name="great_brown">#7E6848</color>
+
+    <color name="colorDivider">#EFEFEF</color>
+    <color name="text_333333">#333</color>
+    <color name="text_666666">#666</color>
+    <color name="text_999999">#999</color>
+
+    <!-- ######################## theme ######################## -->
+
+    <!-- ######################## attr ######################## -->
+
+    <!-- ######################## ids ######################## -->
+    <item name="relt_id1" type="id" />
+    <item name="relt_id2" type="id" />
+    <item name="relt_id3" type="id" />
+    <item name="relt_id4" type="id" />
+    <item name="relt_id5" type="id" />
+    <item name="relt_id6" type="id" />
+    <item name="relt_id7" type="id" />
+    <item name="relt_id8" type="id" />
+    <item name="relt_id9" type="id" />
+</resources>

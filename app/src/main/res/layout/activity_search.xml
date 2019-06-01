@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@color/bg_yellow"
+        android:focusable="true"
+        android:focusableInTouchMode="true">
+
+        <ImageButton
+            android:id="@+id/btn_back"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@null"
+            android:src="@drawable/detai_back_icon" />
+
+        <EditText
+            android:id="@+id/edt_search"
+            style="@style/JJ.MatchParent.Weight"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/search_button_shape"
+            android:drawableLeft="@drawable/search_icon"
+            android:drawablePadding="5dp"
+            android:hint="搜索你感兴趣的内容"
+            android:paddingLeft="10dp"
+            android:textColor="@color/white"
+            android:textColorHint="@color/white"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/btn_search"
+            style="@style/JJ.Label.White.Large"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:gravity="center"
+            android:text="搜索" />
+
+    </LinearLayout>
+
+    <FrameLayout
+        style="@style/JJ.MatchParent"
+        android:background="@color/white">
+
+        <com.chanven.lib.cptr.PtrClassicFrameLayout
+            android:id="@+id/ptr_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#f0f0f0"
+            app:ptr_duration_to_close="200"
+            app:ptr_duration_to_close_header="700"
+            app:ptr_keep_header_when_refresh="true"
+            app:ptr_pull_to_fresh="false"
+            app:ptr_ratio_of_header_height_to_refresh="1.2"
+            app:ptr_resistance="1.8">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/recy"
+                style="@style/JJ.MatchParent"
+                android:clipChildren="false" />
+
+        </com.chanven.lib.cptr.PtrClassicFrameLayout>
+
+        <include
+            layout="@layout/no_data_view"
+            android:visibility="gone" />
+
+        <FrameLayout
+            android:id="@+id/history_layout"
+            style="@style/JJ.MatchParent.Vertical"
+            android:background="@color/white">
+
+            <FrameLayout
+                style="@style/JJ.WidthFill.Horizontal"
+                android:paddingLeft="15dp">
+
+                <TextView
+                    style="@style/JJ.Label.Minor.Large"
+                    android:layout_gravity="center_vertical"
+                    android:text="历史记录" />
+
+                <ImageButton
+                    android:id="@+id/btn_clear"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_gravity="right"
+                    android:background="@null"
+                    android:src="@drawable/delete_icon" />
+            </FrameLayout>
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/history_view"
+                style="@style/JJ.MatchParent"
+                android:layout_marginTop="50dp" />
+
+            <FrameLayout
+                android:id="@+id/search_empty"
+                style="@style/JJ.MatchParent"
+                android:background="@color/white"
+                android:gravity="center_horizontal">
+
+                <TextView
+                    style="@style/JJ.Label.Minor.Large"
+                    android:layout_gravity="center"
+                    android:drawableTop="@drawable/x_loading_empty"
+                    android:drawablePadding="10dp"
+                    android:text="暂无历史记录~" />
+            </FrameLayout>
+        </FrameLayout>
+    </FrameLayout>
+
+</LinearLayout>

@@ -4,11 +4,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -21,14 +21,12 @@ import com.juejinchain.android.network.NetUtil;
 import com.juejinchain.android.network.OkHttpUtils;
 import com.juejinchain.android.network.callBack.JSONCallback;
 import com.juejinchain.android.ui.activity.CategoryExpandActivity;
+import com.juejinchain.android.ui.activity.search.SearchActivity;
 import com.juejinchain.android.ui.view.PagerSlidingTabStrip;
-import com.juejinchain.android.util.SPStaticUtils;
 import com.juejinchain.android.util.SPUtils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import okhttp3.Call;
 
@@ -48,6 +46,8 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
     private String TAG = HomeFragment.class.getSimpleName();
 
     public List<ChannelModel> mChannelList = new ArrayList<>();
+
+    private TextView mSearchView;
 
     public static HomeFragment newInstance() {
 
@@ -71,6 +71,7 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
 //        mTab = (TabLayout) view.findViewById(R.id.tab);
         mTabs = (PagerSlidingTabStrip)view.findViewById(R.id.tabs);
         mAddBtn = view.findViewById(R.id.btn_add);
+        mSearchView = view.findViewById(R.id.button2);
 
         mViewPager = (ViewPager) view.findViewById(R.id.viewPager);
         mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -99,6 +100,7 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
 
     private void setOnClickListener() {
         mAddBtn.setOnClickListener(this);
+        mSearchView.setOnClickListener(this);
     }
 
     @Override
@@ -191,6 +193,9 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
         switch (v.getId()) {
             case R.id.btn_add:
                 startActivity(new Intent(getActivity(), CategoryExpandActivity.class));
+                break;
+            case R.id.button2:
+                startActivity(new Intent(getActivity(), SearchActivity.class));
                 break;
         }
     }

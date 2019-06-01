@@ -457,6 +457,10 @@
         <activity
             android:name=".ui.activity.CategoryExpandActivity"
             android:theme="@style/AppTheme"></activity>
+
+        <activity
+            android:name=".ui.activity.search.SearchActivity"
+            android:theme="@style/AppTheme"/>
     </application>
 
 </manifest>

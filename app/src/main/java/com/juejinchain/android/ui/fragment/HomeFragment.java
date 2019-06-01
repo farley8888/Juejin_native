@@ -100,7 +100,6 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
 //        mTab.addTab(mTab.newTab());
 //        mTab.addTab(mTab.newTab());
         setOnClickListener();
-
     }
 
     private void setOnClickListener() {

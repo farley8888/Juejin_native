@@ -26,18 +26,40 @@
             android:background="@drawable/search_button_shape"
             android:text="搜索你感兴趣的内容" />
 
-        <Button
-            android:id="@+id/button3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="领取" />
+        <LinearLayout
+            android:id="@+id/ly_ling"
+            android:layout_width="68dp"
+            android:layout_height="30dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="5dp"
+            android:background="@drawable/ling_anchor_bg"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tv_lingCount"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textColor="@color/red_500"
+                android:textSize="12sp"
+                android:gravity="center"
+                android:layout_weight="1"
+                android:text="100" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textColor="@color/red_500"
+                android:textSize="12sp"
+                android:gravity="center"
+                android:layout_weight="1.3"
+                android:text="领取" />
+        </LinearLayout>
 
         <ImageButton
             android:id="@+id/button4"
-            android:layout_width="wrap_content"
+            android:layout_width="40dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"
             android:src="@drawable/share_icon"
             android:background="@null" />
     </LinearLayout>

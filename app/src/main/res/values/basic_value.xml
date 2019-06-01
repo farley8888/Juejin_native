@@ -374,6 +374,10 @@
     <!-- ######################## theme ######################## -->
 
     <!-- ######################## attr ######################## -->
+    <style name="bottomSlideAnim" parent="android:Animation">
+        <item name="android:windowEnterAnimation">@anim/dialog_bottom_slide_in</item>
+        <item name="android:windowExitAnimation">@anim/dialog_bottom_slide_out</item>
+    </style>
 
     <!-- ######################## ids ######################## -->
     <item name="relt_id1" type="id" />

@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.alibaba.fastjson.JSON;
@@ -23,6 +24,7 @@ import com.juejinchain.android.network.callBack.JSONCallback;
 import com.juejinchain.android.ui.activity.CategoryExpandActivity;
 import com.juejinchain.android.ui.activity.search.SearchActivity;
 import com.juejinchain.android.ui.view.PagerSlidingTabStrip;
+import com.juejinchain.android.ui.view.ShareDialog;
 import com.juejinchain.android.util.SPUtils;
 
 import java.util.ArrayList;
@@ -49,6 +51,8 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
 
     private TextView mSearchView;
 
+    private ImageButton mShareView;
+
     public static HomeFragment newInstance() {
 
         Bundle args = new Bundle();
@@ -72,9 +76,10 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
         mTabs = (PagerSlidingTabStrip)view.findViewById(R.id.tabs);
         mAddBtn = view.findViewById(R.id.btn_add);
         mSearchView = view.findViewById(R.id.button2);
+        mShareView = view.findViewById(R.id.button4);
 
         mViewPager = (ViewPager) view.findViewById(R.id.viewPager);
-        mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int i, float v, int offset) {
 //                Log.d(TAG, "onPageScrolled: "+i+", offset="+offset);
@@ -101,6 +106,7 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
     private void setOnClickListener() {
         mAddBtn.setOnClickListener(this);
         mSearchView.setOnClickListener(this);
+        mShareView.setOnClickListener(this);
     }
 
     @Override
@@ -196,6 +202,9 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
                 break;
             case R.id.button2:
                 startActivity(new Intent(getActivity(), SearchActivity.class));
+                break;
+            case R.id.button4:
+                new ShareDialog(getActivity()).show();
                 break;
         }
     }

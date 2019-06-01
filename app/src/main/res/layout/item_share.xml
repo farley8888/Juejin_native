@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/JJ.WidthFill.Vertical"
+    android:padding="10dp">
+
+    <RelativeLayout
+        android:id="@id/relt_id1"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/shape_circle">
+
+        <ImageView
+            android:id="@+id/logo"
+            style="@style/JJ.WrapContent"
+            android:layout_centerInParent="true"
+            android:src="@drawable/dcloud_amap_car" />
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/recommend"
+        style="@style/JJ.Label.White.Little"
+        android:layout_alignRight="@id/relt_id1"
+        android:layout_marginTop="5dp"
+        android:layout_marginRight="-15dp"
+        android:background="@drawable/shape_red_radius"
+        android:paddingLeft="8dp"
+        android:paddingTop="2dp"
+        android:paddingRight="8dp"
+        android:paddingBottom="2dp"
+        android:text="推荐" />
+
+    <TextView
+        android:id="@+id/name"
+        style="@style/JJ.Label.Minor.Middle"
+        android:layout_below="@id/relt_id1"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:text="索粉神奇" />
+</RelativeLayout>

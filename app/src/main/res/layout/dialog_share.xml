@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/JJ.WidthFill.Vertical"
+    android:layout_marginBottom="10dp"
+    android:background="@drawable/shape_rect_radius">
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scaleType="fitXY"
+        android:src="@drawable/ic_car_and_money" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recycleView"
+        style="@style/JJ.WidthFill" />
+
+    <View style="@style/JJ.Line.Horizontal"/>
+
+    <TextView
+        android:id="@+id/cancel"
+        style="@style/JJ.Label.Minor.Large"
+        android:layout_width="match_parent"
+        android:background="@drawable/shape_bottom_btn_raidus"
+        android:gravity="center"
+        android:padding="12dp"
+        android:text="取消" />
+</LinearLayout>

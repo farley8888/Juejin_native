@@ -43,9 +43,11 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
 //    private Toolbar mToolbar;
     private ViewPager mViewPager;
     private Button mAddBtn;
+    private TextView tvCount;
     private PagerSlidingTabStrip mTabs;
     public ChannelModel currChannel;
     private String TAG = HomeFragment.class.getSimpleName();
+    PromptGetPopup mPromptPopup;
 
     public List<ChannelModel> mChannelList = new ArrayList<>();
 
@@ -77,6 +79,7 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
         mAddBtn = view.findViewById(R.id.btn_add);
         mSearchView = view.findViewById(R.id.button2);
         mShareView = view.findViewById(R.id.button4);
+        tvCount = view.findViewById(R.id.tv_lingCount);
 
         mViewPager = (ViewPager) view.findViewById(R.id.viewPager);
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -100,12 +103,14 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
 //        mTab.addTab(mTab.newTab());
 //        mTab.addTab(mTab.newTab());
         setOnClickListener();
+        view.findViewById(R.id.ly_ling).setOnClickListener(this);
     }
 
     private void setOnClickListener() {
         mAddBtn.setOnClickListener(this);
         mSearchView.setOnClickListener(this);
         mShareView.setOnClickListener(this);
+
     }
 
     @Override
@@ -204,6 +209,20 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
                 break;
             case R.id.button4:
                 new ShareDialog(getActivity()).show();
+                break;
+            case R.id.ly_ling:
+                mPromptPopup = new PromptGetPopup(getContext());
+                //外面可点,会影响显示位置
+//                mPromptPopup.setAllowInterceptTouchEvent(false);
+                mPromptPopup.setBackground(null);  //背景透明
+                int[] location = new  int[2] ;
+                tvCount.getLocationOnScreen(location);
+                Log.d(TAG, "onClick: "+location[0] + ", y ="+location[1]);
+//                mPromptPopup.showPopupWindow(location[0], location[1]);
+//                mPromptPopup.setOffsetX(-100);
+//                mPromptPopup.setOffsetY(location[1]);
+//                mPromptPopup.showPopupWindow(tvCount);
+                mPromptPopup.showPopupWindow(v);
                 break;
         }
     }

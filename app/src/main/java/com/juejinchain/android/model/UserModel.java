@@ -29,6 +29,7 @@ public class UserModel {
          * "{\"user_token\":\"da69985f35b6fe97435d7dc2116c77cd\",\"nickname\":\"掘金宝9141\",\"avatar\":\"https:\/\/jjlmobile.oss-cn-shenzhen.aliyuncs.com\/default\/avatar.png\",
          * \"city\":\"\",\"is_new\":1,\"invitation\":\"9916588\",\"follow\":0,\"collection\":0,
          * \"first_login\":0,\"unionid\":\"\",\"achieved_gift_bag\":0,\"mobile\":\"13682419141\"}",null]
+         * achieved_gift_bag 1已经领取，0 未领取奖励
          */
         String userToken = json.getString("user_token");
 //        Log.d("userMode", "setLoginUserInfo: "+userToken);

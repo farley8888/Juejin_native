@@ -54,24 +54,32 @@ public class NetConfig {
     public static final String API_OpenAd_Start = "user/ad_start_alert";
 
     //首页tab显示控制
-    public static final String API_SYSTEM_MENU = "system/menu";
+    public static final String API_SYSTEM_MENU  = "system/menu";
+
+    //获取大礼包随机车型数据
+    public static final String API_GiftImage    = "gift_image";
+    //领取大礼包
+    public static final String API_GiftBag      = "task/gift_bag";
+
 
     //获取频道，默认调用此接口，没登录返回8个，登录后重新获取
-    public static final String API_ChannelGet = "channel/user";
+    public static final String API_ChannelGet       = "channel/user";
     //频道调序 channel_id "1,2,3"
-    public static final String API_ChannelSet = "channel/set";
+    public static final String API_ChannelSet       = "channel/set";
+    //频道管理的，推荐频道
+    public static final String API_ChannelRecommend = "channel/recommend";
 
     //新闻推荐
-    public static final String API_NewsPull = "article/pull_up";
+    public static final String API_NewsPull     = "article/pull_up";
     //新闻非推荐,频道ID：channel_id
-    public static final String API_NewsOther = "article/pagelist";
+    public static final String API_NewsOther    = "article/pagelist";
     //搜索新闻 kw=王思聪&page=1&source_style=6
-    public static final String API_NewsSearch = "article/search";
+    public static final String API_NewsSearch   = "article/search";
     /**
      * 读文章，后30s请求
      * aid=132323, type: arc，成功提示一下
      */
-    public static final String API_NewsReading = "article/reading_article";
+    public static final String API_NewsReading  = "article/reading_article";
 
     //视频内容列表；category=video,subv_movie
     public static final String API_VideoList        = "video/lists";
@@ -110,11 +118,13 @@ public class NetConfig {
 
     public static String getUrlByParams(Map<String, String> param, String api) {
         String getUrl = BaseUrl + "/" + API_Prefix + api + "?";
-
-        for (String key : param.keySet()) {
-            getUrl += key + "=" + param.get(key);
-            getUrl += "&";
+        if (param != null){
+            for (String key : param.keySet()) {
+                getUrl += key + "=" + param.get(key);
+                getUrl += "&";
+            }
         }
+
         getUrl += getCommonParams();
         Log.d("NetConfig", "getUrlByParams: "+getUrl);
         return getUrl;

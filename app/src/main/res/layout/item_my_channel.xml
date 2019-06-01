@@ -16,9 +16,14 @@
 
     <ImageView
         android:id="@+id/img_edit"
+        android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
-        android:layout_width="16dp"
-        android:layout_height="16dp"
-        android:background="@mipmap/ic_channel_edit"/>
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginTop="3dp"
+        android:layout_marginRight="3dp"
+        android:background="@drawable/delete_icon"/>
+
+    <!-- android:background="@mipmap/ic_channel_edit" -->
 
 </RelativeLayout>

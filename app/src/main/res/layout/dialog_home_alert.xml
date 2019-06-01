@@ -14,18 +14,21 @@
             android:gravity="center_vertical">
 
             <ImageView
+                android:id="@+id/img_gftLogo"
                 android:layout_width="13dp"
                 android:layout_height="13dp"
                 android:scaleType="fitXY"
                 android:src="@drawable/dcloud_amap_bus" />
 
             <TextView
+                android:id="@+id/tv_gftCar_shortName"
                 style="@style/JJ.Label.White.Small"
                 android:layout_marginLeft="5dp"
                 android:text="保时捷Cayenne" />
         </LinearLayout>
 
         <ImageView
+            android:id="@+id/img_gftLarge"
             android:layout_width="110dp"
             android:layout_height="100dp"
             android:layout_marginTop="10dp"
@@ -33,6 +36,7 @@
             android:src="@drawable/dcloud_image_pick_no_media" />
 
         <TextView
+            android:id="@+id/tv_gftCar_fullName"
             style="@style/JJ.Label.White.Small"
             android:layout_marginTop="10dp"
             android:text="2018款 Cayenne 3.0T" />
@@ -48,6 +52,7 @@
             android:textSize="16sp" />
 
         <TextView
+            android:id="@+id/tv_gftLimit_ling"
             style="@style/JJ.Label.Minor.Small"
             android:layout_marginTop="18dp"
             android:text="限时领取"

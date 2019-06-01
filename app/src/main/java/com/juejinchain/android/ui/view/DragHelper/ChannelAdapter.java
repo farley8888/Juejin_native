@@ -16,6 +16,7 @@ import android.view.animation.TranslateAnimation;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.juejinchain.android.R;
 import com.juejinchain.android.model.ChannelModel;
@@ -57,6 +58,15 @@ public class ChannelAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private boolean isEditMode;
 
     private List<ChannelModel> mMyChannelItems, mOtherChannelItems;
+    private EndEditedListener editingListener;
+
+    public static interface EndEditedListener{
+        public void finishEdited(List<ChannelModel> lists);
+    }
+
+    public void setEditingListener(EndEditedListener listener) {
+        this.editingListener = listener;
+    }
 
     public ChannelAdapter(Context context, ItemTouchHelper helper, List<ChannelModel> mMyChannelItems, List<ChannelModel> mOtherChannelItems) {
         this.mInflater = LayoutInflater.from(context);
@@ -150,6 +160,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                         } else {
                             cancelEditMode((RecyclerView) parent);
                             holder.tvBtnEdit.setText(R.string.edit);
+                            if (editingListener != null) editingListener.finishEdited(mMyChannelItems);
                         }
                     }
                 });
@@ -164,6 +175,10 @@ public class ChannelAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     public void onClick(final View v) {
                         int position = myHolder.getAdapterPosition();
                         if (parent instanceof RecyclerView) {
+                            if (mMyChannelItems.size() <= 4){
+                                Toast.makeText(mInflater.getContext(), "我的频道至少有4个", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
                             remove((RecyclerView) parent, position, myHolder);
                         }
                     }
@@ -375,6 +390,10 @@ public class ChannelAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
      * @param otherHolder
      */
     private void moveOtherToMy(OtherViewHolder otherHolder) {
+        if(mMyChannelItems.size() > 11){
+            Toast.makeText(mInflater.getContext(), "我的频道最多12个", Toast.LENGTH_SHORT).show();
+            return;
+        }
         int position = processItemRemoveAdd(otherHolder);
         if (position == -1) {
             return;

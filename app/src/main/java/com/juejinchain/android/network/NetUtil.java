@@ -112,7 +112,7 @@ public class NetUtil {
 
     //请求显示loading
     public static void getRequestShowLoading( String api,Map<String, String> param, OnResponse response, boolean isProcessError){
-        showLoading(null);
+//        showLoading(null);
         getRequest(api, param, response,isProcessError);
     }
 

@@ -306,10 +306,14 @@ public class ChannelAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
             MyViewHolder myHolder = (MyViewHolder) holder;
             myHolder.textView.setText(mMyChannelItems.get(position - COUNT_PRE_MY_HEADER).getName());
-            if (isEditMode) {
+            myHolder.textView.setBackgroundResource(R.drawable.bg_channel_my);
+            if (isEditMode || position != 1) {
                 myHolder.imgEdit.setVisibility(View.VISIBLE);
             } else {
                 myHolder.imgEdit.setVisibility(View.INVISIBLE);
+                if(position == 1){
+                    myHolder.textView.setBackgroundResource(R.drawable.bg_channel_p);
+                }
             }
 
         } else if (holder instanceof OtherViewHolder) {
@@ -475,7 +479,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
      *
      * @param parent
      */
-    private void startEditMode(RecyclerView parent) {
+    public void startEditMode(RecyclerView parent) {
         isEditMode = true;
 
         int visibleChildCount = parent.getChildCount();
@@ -553,7 +557,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
          */
         @Override
         public void onItemFinish() {
-            textView.setBackgroundResource(R.drawable.bg_channel);
+            textView.setBackgroundResource(R.drawable.bg_channel_my);
         }
     }
 

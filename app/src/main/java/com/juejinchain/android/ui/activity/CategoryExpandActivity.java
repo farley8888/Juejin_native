@@ -79,6 +79,7 @@ public class CategoryExpandActivity extends AppCompatActivity implements View.On
             }
         });
         mRecy.setAdapter(adapter);
+//        adapter.startEditMode(mRecy);
 
         adapter.setEditingListener(new ChannelAdapter.EndEditedListener() {
             @Override

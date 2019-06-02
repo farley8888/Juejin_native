@@ -15,8 +15,8 @@
 
             <ImageView
                 android:id="@+id/img_gftLogo"
-                android:layout_width="13dp"
-                android:layout_height="13dp"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
                 android:scaleType="fitXY"
                 android:src="@drawable/dcloud_amap_bus" />
 
@@ -38,7 +38,7 @@
         <TextView
             android:id="@+id/tv_gftCar_fullName"
             style="@style/JJ.Label.White.Small"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="15dp"
             android:text="2018款 Cayenne 3.0T" />
 
         <!--<TextView-->
@@ -56,7 +56,7 @@
             android:id="@+id/img_get"
             android:layout_width="70dp"
             android:layout_height="30dp"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="25dp"
             />
 
         <TextView

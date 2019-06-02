@@ -20,17 +20,20 @@ import com.dmcbig.mediapicker.utils.ScreenUtils;
 import com.juejinchain.android.R;
 import com.juejinchain.android.adapter.HomePagerFragmentAdapter;
 import com.juejinchain.android.base.BaseMainFragment;
+import com.juejinchain.android.event.ShowTabPopupWindowEvent;
 import com.juejinchain.android.model.ChannelModel;
 import com.juejinchain.android.network.NetConfig;
 import com.juejinchain.android.network.NetUtil;
 import com.juejinchain.android.network.OkHttpUtils;
 import com.juejinchain.android.network.callBack.JSONCallback;
-import com.juejinchain.android.ui.HomeTipsPopupWindow;
+import com.juejinchain.android.ui.ppw.HomeTipsPopupWindow;
 import com.juejinchain.android.ui.activity.CategoryExpandActivity;
 import com.juejinchain.android.ui.activity.search.SearchActivity;
 import com.juejinchain.android.ui.dialog.ShareDialog;
 import com.juejinchain.android.ui.view.PagerSlidingTabStrip;
 import com.juejinchain.android.util.SPUtils;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -239,6 +242,7 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
                     mPopupWindow.showAtLocation(tvCount, Gravity.NO_GRAVITY, location[0] - ScreenUtils.dp2px(getActivity(), 70), location[1] + ScreenUtils.dp2px(getActivity(), 25));
                 }else if(mPopupWindow != null){
                     mPopupWindow.dismiss();
+                    EventBus.getDefault().post(new ShowTabPopupWindowEvent());
                 }
 
                 break;

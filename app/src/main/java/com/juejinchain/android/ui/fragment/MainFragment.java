@@ -6,17 +6,26 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.dmcbig.mediapicker.utils.ScreenUtils;
 import com.juejinchain.android.R;
 import com.juejinchain.android.WebAppFragment;
+import com.juejinchain.android.event.ShowTabPopupWindowEvent;
 import com.juejinchain.android.event.TabSelectedEvent;
 import com.juejinchain.android.eventbus_activity.EventBusActivityScope;
+import com.juejinchain.android.ui.ppw.HomeBottomTipsPopupWindow;
+import com.juejinchain.android.ui.ppw.HomeTipsPopupWindow;
 import com.juejinchain.android.ui.view.AdsHolderView;
 import com.juejinchain.android.ui.view.BottomBar;
 import com.juejinchain.android.ui.view.BottomBarTab;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import me.yokeyword.fragmentation.SupportFragment;
 
@@ -52,6 +61,8 @@ public class MainFragment extends SupportFragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_main, container, false);
         initView(view);
+
+        EventBus.getDefault().register(this);
         return view;
     }
 
@@ -225,4 +236,29 @@ public class MainFragment extends SupportFragment {
         start(targetFragment);
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        EventBus.getDefault().unregister(this);
+
+        if(mPopupWindow != null && mPopupWindow.isShowing()){
+            mPopupWindow.dismiss();
+        }
+    }
+
+    @Subscribe()
+    public void onBottomTabPopShowEvent(ShowTabPopupWindowEvent event){
+        int[] location = new int[2];
+        int position = 2;
+        int delta = position == 1 ? 35 : 25;
+
+        View anchor = mBottomBar.getItem(position);
+        anchor.getLocationOnScreen(location);
+        if(mPopupWindow == null || !mPopupWindow.isShowing()){
+            mPopupWindow = new HomeBottomTipsPopupWindow(getActivity());
+            mPopupWindow.showAtLocation(anchor, Gravity.NO_GRAVITY, location[0] - ScreenUtils.dp2px(getActivity(), 30), location[1] - ScreenUtils.dp2px(getActivity(), delta));
+        }
+    }
+
+    private HomeBottomTipsPopupWindow mPopupWindow;
 }

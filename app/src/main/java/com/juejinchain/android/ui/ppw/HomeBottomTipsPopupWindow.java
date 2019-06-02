@@ -1,4 +1,4 @@
-package com.juejinchain.android.ui;
+package com.juejinchain.android.ui.ppw;
 
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
@@ -7,13 +7,16 @@ import android.widget.PopupWindow;
 
 import com.juejinchain.android.R;
 
-public class HomeTipsPopupWindow extends PopupWindow {
+/**
+ * bottom tab ppw
+ */
+public class HomeBottomTipsPopupWindow extends PopupWindow {
     private Context mContext;
 
     private View mContentView;
 
 
-    public HomeTipsPopupWindow(Context context) {
+    public HomeBottomTipsPopupWindow(Context context) {
         super(context);
         mContext = context;
 
@@ -26,14 +29,9 @@ public class HomeTipsPopupWindow extends PopupWindow {
         setTouchable(true);
         setBackgroundDrawable(new ColorDrawable());
 
-        mContentView = View.inflate(mContext, R.layout.ling_prompt, null);
+        mContentView = View.inflate(mContext, R.layout.ling_prompt_bottom, null);
         setContentView(mContentView);
 
         mContentView.setOnClickListener(v -> dismiss());
-    }
-
-    public int getContentHeight() {
-        mContentView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
-        return mContentView.getMeasuredHeight();
     }
 }

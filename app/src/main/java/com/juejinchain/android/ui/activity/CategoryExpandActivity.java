@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.juejinchain.android.R;
+import com.juejinchain.android.event.UpdateChannelEvent;
 import com.juejinchain.android.model.ChannelModel;
 import com.juejinchain.android.network.NetConfig;
 import com.juejinchain.android.network.NetUtil;
@@ -19,10 +20,15 @@ import com.juejinchain.android.ui.view.DragHelper.ChannelAdapter;
 import com.juejinchain.android.ui.view.DragHelper.ItemDragHelperCallback;
 import com.juejinchain.android.util.SPUtils;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+
+import io.dcloud.common.util.JSONUtil;
 
 import static com.juejinchain.android.util.Constant.CHANNEL_CHCHE;
 //BaseBackFragment
@@ -32,7 +38,9 @@ public class CategoryExpandActivity extends AppCompatActivity implements View.On
 
     private RecyclerView mRecy;
     private ImageView mBackIv;
-    private List<ChannelModel> myChannels = new ArrayList<>();
+
+    private List<ChannelModel> originList = new ArrayList<>();
+    private List<ChannelModel> showList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,8 +67,19 @@ public class CategoryExpandActivity extends AppCompatActivity implements View.On
 
     private void setData(List<ChannelModel> otherChannels) {
         String channelCacheData = SPUtils.getInstance().getString(CHANNEL_CHCHE);
-        List<ChannelModel> temp = JSON.parseArray(channelCacheData, ChannelModel.class);
-        myChannels.addAll(temp);
+        showList = JSON.parseArray(channelCacheData, ChannelModel.class);
+
+        if(showList != null && !showList.isEmpty()){
+            originList.addAll(showList);
+
+            List<ChannelModel> duplications = new ArrayList<>();
+            for (ChannelModel channelModel : otherChannels){
+                if(showList.contains(channelModel)){
+                    duplications.add(channelModel);
+                }
+            }
+            otherChannels.removeAll(duplications);
+        }
 
         GridLayoutManager manager = new GridLayoutManager(this, 4);
         mRecy.setLayoutManager(manager);
@@ -69,7 +88,7 @@ public class CategoryExpandActivity extends AppCompatActivity implements View.On
         final ItemTouchHelper helper = new ItemTouchHelper(callback);
         helper.attachToRecyclerView(mRecy);
 
-        final ChannelAdapter adapter = new ChannelAdapter(this, helper, temp, otherChannels);
+        final ChannelAdapter adapter = new ChannelAdapter(this, helper, showList, otherChannels);
         manager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
             @Override
             public int getSpanSize(int position) {
@@ -79,18 +98,11 @@ public class CategoryExpandActivity extends AppCompatActivity implements View.On
             }
         });
         mRecy.setAdapter(adapter);
-//        adapter.startEditMode(mRecy);
 
-        adapter.setEditingListener(new ChannelAdapter.EndEditedListener() {
-            @Override
-            public void finishEdited(List<ChannelModel> lists) {
-                //换顺序了也一样
-//                if (lists.containsAll(myChannels) && myChannels.containsAll(lists)){
-//                    Log.d("baseCategory", "finishEdited: 没变");
-//                else
-                SPUtils.getInstance().put(CHANNEL_CHCHE, JSON.toJSONString(lists));
-                finish();
-            }
+        adapter.setEditingListener(list -> {
+            Log.i("yang", "拖动了view: " + list.toString());
+            SPUtils.getInstance().put(CHANNEL_CHCHE, JSON.toJSONString(list));
+            showList = list;
         });
     }
 
@@ -100,6 +112,25 @@ public class CategoryExpandActivity extends AppCompatActivity implements View.On
             case R.id.back_iv:
                 finish();
                 break;
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        boolean notifyUpdate = showList.size() != originList.size();
+        if(!notifyUpdate){
+            for (int i = 0 ; i < showList.size(); i++){
+                if(!showList.get(i).equals(originList.get(i))){
+                    notifyUpdate = true;
+                    break;
+                }
+            }
+        }
+
+        if(notifyUpdate){
+            EventBus.getDefault().post(new UpdateChannelEvent());
         }
     }
 }

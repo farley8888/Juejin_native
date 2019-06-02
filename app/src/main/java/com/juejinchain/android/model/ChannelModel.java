@@ -1,5 +1,7 @@
 package com.juejinchain.android.model;
 
+import java.util.Objects;
+
 public class ChannelModel {
 
     private String id;
@@ -20,5 +22,22 @@ public class ChannelModel {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return "ChannelModel{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof ChannelModel){
+            ChannelModel ob = (ChannelModel) obj;
+            return Objects.equals(this.id, ob.id) && Objects.equals(this.name, ob.name);
+        }
+        return false;
     }
 }

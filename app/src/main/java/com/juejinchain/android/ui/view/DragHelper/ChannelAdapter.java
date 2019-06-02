@@ -55,16 +55,20 @@ public class ChannelAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private ItemTouchHelper mItemTouchHelper;
 
     // 是否为 编辑 模式
-    private boolean isEditMode;
+    private boolean isEditMode = false;
 
     private List<ChannelModel> mMyChannelItems, mOtherChannelItems;
-    private EndEditedListener editingListener;
+    private EditedListener editingListener;
 
-    public static interface EndEditedListener{
-        public void finishEdited(List<ChannelModel> lists);
+    public interface EditedListener{
+        /**
+         * 更新本地保存的channel
+         * @param list
+         */
+        void updateChannel(List<ChannelModel> list);
     }
 
-    public void setEditingListener(EndEditedListener listener) {
+    public void setEditingListener(EditedListener listener) {
         this.editingListener = listener;
     }
 
@@ -160,7 +164,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                         } else {
                             cancelEditMode((RecyclerView) parent);
                             holder.tvBtnEdit.setText(R.string.edit);
-                            if (editingListener != null) editingListener.finishEdited(mMyChannelItems);
+//                            if (editingListener != null) editingListener.finishEdited(mMyChannelItems);
                         }
                     }
                 });
@@ -386,6 +390,8 @@ public class ChannelAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         mOtherChannelItems.add(0, item);
 
         notifyItemMoved(position, mMyChannelItems.size() + COUNT_PRE_OTHER_HEADER);
+
+        updateChannel();
     }
 
     /**
@@ -403,6 +409,8 @@ public class ChannelAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             return;
         }
         notifyItemMoved(position, mMyChannelItems.size() - 1 + COUNT_PRE_MY_HEADER);
+
+        updateChannel();
     }
 
     /**
@@ -419,8 +427,17 @@ public class ChannelAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             @Override
             public void run() {
                 notifyItemMoved(position, mMyChannelItems.size() - 1 + COUNT_PRE_MY_HEADER);
+
+                updateChannel();
+
             }
         }, ANIM_TIME);
+    }
+
+    private void updateChannel(){
+        if(editingListener != null){
+            editingListener.updateChannel(mMyChannelItems);
+        }
     }
 
     private Handler delayHandler = new Handler();
@@ -472,6 +489,8 @@ public class ChannelAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         mMyChannelItems.remove(fromPosition - COUNT_PRE_MY_HEADER);
         mMyChannelItems.add(toPosition - COUNT_PRE_MY_HEADER, item);
         notifyItemMoved(fromPosition, toPosition);
+
+        updateChannel();
     }
 
     /**

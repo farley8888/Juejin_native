@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewPager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -21,6 +22,7 @@ import com.juejinchain.android.R;
 import com.juejinchain.android.adapter.HomePagerFragmentAdapter;
 import com.juejinchain.android.base.BaseMainFragment;
 import com.juejinchain.android.event.ShowTabPopupWindowEvent;
+import com.juejinchain.android.event.UpdateChannelEvent;
 import com.juejinchain.android.model.ChannelModel;
 import com.juejinchain.android.network.NetConfig;
 import com.juejinchain.android.network.NetUtil;
@@ -34,6 +36,7 @@ import com.juejinchain.android.ui.view.PagerSlidingTabStrip;
 import com.juejinchain.android.util.SPUtils;
 
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,6 +80,7 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
         initView(view);
+        EventBus.getDefault().register(this);
         return view;
     }
 
@@ -140,7 +144,14 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
 
 //        mTabs.setViewPager(mViewPager);
 //        setTabsValue();
-        loadChannel();
+
+        String channelCacheData = SPUtils.getInstance().getString(CHANNEL_CHCHE);
+        if(TextUtils.isEmpty(channelCacheData)){
+            loadChannel();
+        }else{
+            mChannelList = JSON.parseArray(channelCacheData, ChannelModel.class);
+            setTabsPage();
+        }
     }
 
     private void loadChannel() {
@@ -252,8 +263,18 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        EventBus.getDefault().unregister(this);
         if(mPopupWindow != null && !mPopupWindow.isShowing()){
             mPopupWindow.dismiss();
+        }
+    }
+
+    @Subscribe
+    public void onChannelUpdate(UpdateChannelEvent event){
+        String channelCacheData = SPUtils.getInstance().getString(CHANNEL_CHCHE);
+        if(!TextUtils.isEmpty(channelCacheData)){
+            mChannelList = JSON.parseArray(channelCacheData, ChannelModel.class);
+            setTabsPage();
         }
     }
 

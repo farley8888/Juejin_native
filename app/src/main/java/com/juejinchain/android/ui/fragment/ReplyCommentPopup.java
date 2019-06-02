@@ -2,6 +2,7 @@ package com.juejinchain.android.ui.fragment;
 
 import android.app.Activity;
 import android.content.Context;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Gravity;
@@ -117,7 +118,7 @@ public class ReplyCommentPopup extends BasePopupWindow {
         param.put("page", currPage+"");
         param.put("pre_page", pageSize+"");
         if (currPage == 1){
-            AlertProDialog.showLoading(true);
+//            AlertProDialog.showLoading(true);
         }
         NetUtil.getRequest(NetConfig.API_VideoReplyList, param, new NetUtil.OnResponse() {
             @Override
@@ -148,6 +149,7 @@ public class ReplyCommentPopup extends BasePopupWindow {
 
     void initView(View v){
         mRecyclerVeiw = findViewById(R.id.recycler_view);
+        mRecyclerVeiw.setLayoutManager(new LinearLayoutManager(getContext()));
         editText = findViewById(R.id.edt_replyComment);
         editText.postDelayed(new Runnable() {
             @Override

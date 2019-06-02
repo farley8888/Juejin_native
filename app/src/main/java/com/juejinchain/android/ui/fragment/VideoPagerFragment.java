@@ -191,7 +191,7 @@ public class VideoPagerFragment extends SupportFragment  {
             @Override
             public void onChildViewDetachedFromWindow(View view) {
                 Jzvd jzvd = view.findViewById(R.id.jzvdPlayer);
-                if (jzvd != null && jzvd.jzDataSource != null &&
+                if (jzvd != null && jzvd.jzDataSource != null && Jzvd.CURRENT_JZVD != null && Jzvd.CURRENT_JZVD.jzDataSource != null &&
                         jzvd.jzDataSource.containsTheUrl(Jzvd.CURRENT_JZVD.jzDataSource.getCurrentUrl())) {
                     if (Jzvd.CURRENT_JZVD != null && Jzvd.CURRENT_JZVD.screen != Jzvd.SCREEN_FULLSCREEN) {
                         Jzvd.resetAllVideos();

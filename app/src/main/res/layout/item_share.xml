@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     style="@style/JJ.WidthFill.Vertical"
-    android:padding="10dp">
+    android:paddingVertical="10dp">
 
     <RelativeLayout
         android:id="@id/relt_id1"

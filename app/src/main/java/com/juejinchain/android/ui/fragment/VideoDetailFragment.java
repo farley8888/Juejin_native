@@ -33,6 +33,7 @@ import com.juejinchain.android.network.NetConfig;
 import com.juejinchain.android.network.NetUtil;
 import com.juejinchain.android.tools.L;
 import com.juejinchain.android.tools.WebViewUtil;
+import com.juejinchain.android.ui.dialog.ShareDialog;
 import com.juejinchain.android.ui.view.DividerDecoration;
 
 import java.util.ArrayList;
@@ -200,7 +201,7 @@ public class VideoDetailFragment extends BaseBackFragment {
 
                         break;
                     case R.id.btn_btmShare:  //分享
-
+                        new ShareDialog(getActivity()).show();
                         break;
                 }
             }
@@ -268,7 +269,7 @@ public class VideoDetailFragment extends BaseBackFragment {
                         doFabulous(tv, model);
                         break;
                     case R.id.buttonShare://分享
-
+                        new ShareDialog(getActivity()).show();
                         break;
                     case R.id.btn_cmtReply: //回复评论
                         CommentModel cmodel = commentList.get(position - recommendList.size() -1);

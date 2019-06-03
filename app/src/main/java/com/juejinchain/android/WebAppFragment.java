@@ -19,10 +19,10 @@ import io.dcloud.feature.internal.sdk.SDK;
 
 public class WebAppFragment extends BaseMainFragment {
 
-    Context context;
+    static Context context;
     boolean doHardAcc = true;
-    MyEntryProxy mEntryProxy = null;
-    ViewGroup webFrame;
+    static MyEntryProxy mEntryProxy = null;
+    static ViewGroup webFrame;
     private static String FNAME = "name";
     private String TAG = WebAppFragment.class.getSimpleName();
 

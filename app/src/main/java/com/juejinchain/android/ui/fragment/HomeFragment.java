@@ -24,6 +24,7 @@ import com.juejinchain.android.base.BaseMainFragment;
 import com.juejinchain.android.event.ShowTabPopupWindowEvent;
 import com.juejinchain.android.event.UpdateChannelEvent;
 import com.juejinchain.android.model.ChannelModel;
+import com.juejinchain.android.model.UserModel;
 import com.juejinchain.android.network.NetConfig;
 import com.juejinchain.android.network.NetUtil;
 import com.juejinchain.android.network.OkHttpUtils;
@@ -58,7 +59,7 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
     private PagerSlidingTabStrip mTabs;
     public ChannelModel currChannel;
     private String TAG = HomeFragment.class.getSimpleName();
-    PromptGetPopup mPromptPopup;
+//    PromptGetPopup mPromptPopup;
 
     public List<ChannelModel> mChannelList = new ArrayList<>();
 
@@ -232,25 +233,32 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
             case R.id.btn_add:
                 startActivity(new Intent(getActivity(), CategoryExpandActivity.class));
                 break;
-            case R.id.button2:
+            case R.id.button2:  //搜索
                 startActivity(new Intent(getActivity(), SearchActivity.class));
                 break;
-            case R.id.button4:
-                new ShareDialog(getActivity()).show();
+            case R.id.button4:  //分享
+                if (UserModel.isLogin()){
+                    new ShareDialog(getActivity()).show();
+                }
+                else{
+                    MainFragment mainFragment = (MainFragment) getParentFragment();
+                    mainFragment.showVue("login", "");
+                }
+
                 break;
             case R.id.ly_ling:
-                mPromptPopup = new PromptGetPopup(getContext());
-                //外面可点,会影响显示位置
-                mPromptPopup.setOutSideTouchable(true);
-                mPromptPopup.setBackground(null);  //背景透明
+//                mPromptPopup = new PromptGetPopup(getContext());
+//                //外面可点,会影响显示位置
+//                mPromptPopup.setOutSideTouchable(true);
+//                mPromptPopup.setBackground(null);  //背景透明
                 int[] location = new int[2];
                 tvCount.getLocationOnScreen(location);
-                Log.d(TAG, "onClick: " + location[0] + ", y =" + location[1]);
 //                mPromptPopup.showPopupWindow(v);
 
                 if(mPopupWindow == null || !mPopupWindow.isShowing()){
                     mPopupWindow = new HomeTipsPopupWindow(getActivity());
-                    mPopupWindow.showAtLocation(tvCount, Gravity.NO_GRAVITY, location[0] - ScreenUtils.dp2px(getActivity(), 70), location[1] + ScreenUtils.dp2px(getActivity(), 25));
+                    mPopupWindow.showAtLocation(tvCount, Gravity.NO_GRAVITY, location[0] - ScreenUtils.dp2px(getActivity(), 70),
+                            location[1] + ScreenUtils.dp2px(getActivity(), 25));
                 }else if(mPopupWindow != null){
                     mPopupWindow.dismiss();
                     EventBus.getDefault().post(new ShowTabPopupWindowEvent());

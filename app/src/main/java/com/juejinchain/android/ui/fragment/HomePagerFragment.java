@@ -1,5 +1,6 @@
 package com.juejinchain.android.ui.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -9,7 +10,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -20,7 +20,6 @@ import com.chanven.lib.cptr.PtrFrameLayout;
 import com.chanven.lib.cptr.loadmore.OnLoadMoreListener;
 import com.chanven.lib.cptr.recyclerview.RecyclerAdapterWithHF;
 import com.juejinchain.android.R;
-import com.juejinchain.android.WebAppFragment;
 import com.juejinchain.android.event.TabSelectedEvent;
 import com.juejinchain.android.eventbus_activity.EventBusActivityScope;
 import com.juejinchain.android.model.ChannelModel;
@@ -29,6 +28,7 @@ import com.juejinchain.android.network.NetConfig;
 import com.juejinchain.android.network.NetUtil;
 import com.juejinchain.android.network.OkHttpUtils;
 import com.juejinchain.android.network.callBack.JSONCallback;
+import com.juejinchain.android.ui.activity.ArticleDetailActivity;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -37,11 +37,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.dcloud.common.util.JSONUtil;
-import me.yokeyword.fragmentation.ISupportFragment;
 import me.yokeyword.fragmentation.SupportFragment;
 import okhttp3.Call;
-import uk.co.senab.photoview.log.LoggerDefault;
 
 
 /**
@@ -155,6 +152,9 @@ public class HomePagerFragment extends SupportFragment  {
                 // 通知MainFragment跳转至NewFeatureFragment
                 MainFragment mainFragment = (MainFragment) getParentFragment().getParentFragment();
 //                mainFragment.startBrotherFragment(NewFeatureFragment.newInstance());
+
+//                startActivity(new Intent(getContext(), ArticleDetailActivity.class));
+                mainFragment.showVue("ArticleDetails", mData.get(position).id);
                 /**
                  * 用切换隐藏tab的方式，这样重new等待时间太长
                  */
@@ -164,16 +164,6 @@ public class HomePagerFragment extends SupportFragment  {
             }
         });
 
-//        adapter.setOnItemClickListener(new OnItemClickListener() {
-//            @Override
-//            public void onItemClick(int position, View view, RecyclerView.ViewHolder holder) {
-//                // 通知MainFragment跳转至NewFeatureFragment
-//                ((MainFragment) getParentFragment().getParentFragment()).startBrotherFragment(NewFeatureFragment.newInstance());
-//                Intent it = new Intent(getActivity(), SDK_WebApp.class);
-////                Intent it = new Intent(getActivity(), LoginActivity.class);
-////                getActivity().startActivity(it);
-//            }
-//        });
 
         init();
     }

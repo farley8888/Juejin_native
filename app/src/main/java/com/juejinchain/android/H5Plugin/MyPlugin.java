@@ -16,6 +16,7 @@ import com.baidu.api.Baidu;
 import com.baidu.api.BaiduDialog;
 import com.baidu.api.BaiduDialogError;
 import com.baidu.api.BaiduException;
+import com.juejinchain.android.MainActivity;
 import com.juejinchain.android.ddshare.DDShareActivity;
 import com.juejinchain.android.ddshare.DDShareUtil;
 import com.juejinchain.android.model.UserModel;
@@ -32,7 +33,11 @@ import io.dcloud.common.util.JSUtil;
 public class MyPlugin extends StandardFeature {
 
     Context ctx;
-    final String BaiduClientId = "XIKkAdb4je1yQTb3A8iAh5io";  //掘金宝 API Key
+    /**
+     * 百度登录
+     * 掘金宝 API Key
+     */
+    final String BaiduClientId = "XIKkAdb4je1yQTb3A8iAh5io";
     private Baidu mBaidu;
     private String TAG = MyPlugin.class.getSimpleName();
 
@@ -215,6 +220,20 @@ public class MyPlugin extends StandardFeature {
         }
 
         pWebview.evalJS("callVue('from native args')");
+    }
+
+
+    public void vueGoNext(IWebview pWebview, JSONArray array){
+        L.d(TAG, "vueGoNext: "+array.toString());
+        L.d(TAG, "vueGoNext: from:"+array.opt(1));
+        L.d(TAG, "vueGoNext: to:"+array.opt(2));
+
+    }
+
+    public void vueGoBack(IWebview pWebview, JSONArray array){
+        L.d(TAG, "vueGoBack: "+array.toString());
+        MainActivity mainActivity = (MainActivity) pWebview.getActivity();
+        mainActivity.mainFragment.showHomeFragment();
     }
 
 }

@@ -12,6 +12,8 @@ import me.yokeyword.fragmentation.SupportActivity;
  */
 public class MainActivity extends SupportActivity {
 
+    public MainFragment mainFragment;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -19,7 +21,8 @@ public class MainActivity extends SupportActivity {
         setContentView(R.layout.activity_main);
 
         if (findFragment(MainFragment.class) == null) {
-            loadRootFragment(R.id.frameLayout, MainFragment.newInstance());
+            mainFragment =MainFragment.newInstance();
+            loadRootFragment(R.id.frameLayout, mainFragment);
         }
     }
 

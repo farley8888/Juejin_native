@@ -10,6 +10,8 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 
 import com.dmcbig.mediapicker.utils.ScreenUtils;
 import com.juejinchain.android.R;
@@ -18,14 +20,12 @@ import com.juejinchain.android.event.ShowTabPopupWindowEvent;
 import com.juejinchain.android.event.TabSelectedEvent;
 import com.juejinchain.android.eventbus_activity.EventBusActivityScope;
 import com.juejinchain.android.ui.ppw.HomeBottomTipsPopupWindow;
-import com.juejinchain.android.ui.ppw.HomeTipsPopupWindow;
 import com.juejinchain.android.ui.view.AdsHolderView;
 import com.juejinchain.android.ui.view.BottomBar;
 import com.juejinchain.android.ui.view.BottomBarTab;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
 
 import me.yokeyword.fragmentation.SupportFragment;
 
@@ -46,6 +46,9 @@ public class MainFragment extends SupportFragment {
     private FragmentManager fragmentManager;
 
     private AdsHolderView mAdsHolderView;
+    private BottomBarTab mBottomBarLogin;
+    private ImageView mBottomLineImg;
+    private FrameLayout mFrameLayout;
 
     public static MainFragment newInstance() {
 
@@ -80,7 +83,6 @@ public class MainFragment extends SupportFragment {
             /*
              * WebViewFragment 不能同时加两个，
              * 如同时加载WebAppFragment，webViewFragment要先加载
-             *
              */
             mFragments[SECOND] = WebAppFragment.instance("");
 //            mFragments[SECOND] = BlankFragment.newInstance("","");
@@ -106,7 +108,7 @@ public class MainFragment extends SupportFragment {
 
     //初始化所有
     void addFragments(){
-        //这样直接加载不行！！
+        //这里直接加载不能正常显示！
         fragmentManager = getActivity().getSupportFragmentManager();
 
         FragmentTransaction transaction = fragmentManager.beginTransaction();
@@ -120,12 +122,17 @@ public class MainFragment extends SupportFragment {
 
     private void initView(View view) {
         mAdsHolderView = view.findViewById(R.id.adsView);
+        mBottomLineImg = view.findViewById(R.id.img_bottomLine);
+        mFrameLayout = view.findViewById(R.id.fl_tab_container);
+
         mBottomBar = (BottomBar) view.findViewById(R.id.bottomBar);
 //.addItem(new BottomBarTab(_mActivity, R.drawable.ic_account_circle_white_24dp, getString(R.string.discover)))
+
+        mBottomBarLogin = new BottomBarTab(_mActivity, R.drawable.ic_discover_white_24dp, getString(R.string.login));
         mBottomBar
                 .addItem(new BottomBarTab(_mActivity, R.drawable.ic_message_white_24dp, getString(R.string.msg)))
                 .addItem(new BottomBarTab(_mActivity, R.drawable.ic_car_and_money, null))
-                .addItem(new BottomBarTab(_mActivity, R.drawable.ic_discover_white_24dp, getString(R.string.more)));
+                .addItem(mBottomBarLogin);
 
         // 模拟未读消息
         mBottomBar.getItem(FIRST).setUnreadCount(9);
@@ -151,6 +158,7 @@ public class MainFragment extends SupportFragment {
               * /make_money
               * /task
               * /personal_center
+              * ArticleDetails/5090577 文章详情
               */
                 if (position > 0){
                     String[] vuePages = new String[]{"make_money", "login"};
@@ -209,6 +217,34 @@ public class MainFragment extends SupportFragment {
                     .remove(child).commit();
 //                    .commitAllowingStateLoss();
         }
+    }
+
+    public void showVue(String page, String params){
+//        mBottomBarLogin.performClick();
+
+        WebAppFragment webVueFragment = (WebAppFragment) mFragments[1];
+        showHideFragment(webVueFragment, mFragments[0]);
+        webVueFragment.showPage(page+"/"+params);
+        changeBottomTabBar(false);
+    }
+
+    public void showHomeFragment(){
+        showHideFragment(mFragments[0], mFragments[1]);
+        changeBottomTabBar(true);
+    }
+
+    private void changeBottomTabBar(boolean isShow){
+        mBottomBar.setVisibility(isShow ? View.VISIBLE : View.GONE);
+        mBottomLineImg.setVisibility(isShow ? View.VISIBLE : View.GONE);
+        mAdsHolderView.setVisibility(isShow ? View.VISIBLE : View.GONE);
+
+        FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) mFrameLayout.getLayoutParams();
+        if (isShow){
+            params.setMargins(0,0, 0, ScreenUtils.dp2px(getContext(), 50));
+        }else{
+            params.setMargins(0,0, 0, 0);
+        }
+        mFrameLayout.setLayoutParams(params);
     }
 
     public void removeChildFragment(Fragment parentFragment) {

@@ -461,6 +461,10 @@
         <activity
             android:name=".ui.activity.search.SearchActivity"
             android:theme="@style/AppTheme"/>
+        <activity
+            android:name=".ui.activity.ArticleDetailActivity"
+            android:theme="@style/AppTheme"/>
+
     </application>
 
 </manifest>

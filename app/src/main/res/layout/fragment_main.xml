@@ -11,6 +11,7 @@
         android:layout_marginBottom="@dimen/bottombar_wechat_height" />
 
     <ImageView
+        android:id="@+id/img_bottomLine"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"

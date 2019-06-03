@@ -163,7 +163,9 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
-
+        if (hidden){
+            if (mPopupWindow != null && mPopupWindow.isShowing()) mPopupWindow.dismiss();
+        }
     }
 
     @Override
@@ -359,7 +361,7 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
                 }
                 else{
                     MainFragment mainFragment = (MainFragment) getParentFragment();
-                    mainFragment.showVue("login", "");
+                    mainFragment.showVue("/login", "");
                 }
 
                 break;

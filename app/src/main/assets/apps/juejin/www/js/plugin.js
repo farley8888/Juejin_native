@@ -55,7 +55,7 @@ document.addEventListener("plusready", function () {
       var success = null,
         fail = null;
       callbackID = B.callbackId(success, fail);
-      return B.exec(_BARCODE, "vueGoBack", [callbackID, [from, to, param]]);
+      return B.exec(_BARCODE, "vueGoBack", [callbackID, from, to, param]);
     }, //分享回调
     shareCallback: function (way, params, from) {
       var success = null,
@@ -74,7 +74,7 @@ document.addEventListener("plusready", function () {
         fail = null;
       callbackID = B.callbackId(success, fail);
       return B.exec(_BARCODE, "vueLoginOut", [callbackID, userName]);
-    }//清除缓存
+    }, //清除缓存
     cleanCache: function (userName) {
       var success = null,
         fail = null;

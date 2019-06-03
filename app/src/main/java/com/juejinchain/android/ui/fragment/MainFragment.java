@@ -46,7 +46,9 @@ public class MainFragment extends SupportFragment {
 
     private BottomBar mBottomBar;
     private FragmentManager fragmentManager;
-
+    /**
+     * 登录并没领取大礼包显示
+     */
     private AdsHolderView mAdsHolderView;
     private BottomBarTab mBottomBarMovie;
     private ImageView mBottomLineImg;
@@ -170,12 +172,7 @@ public class MainFragment extends SupportFragment {
                     }
                     WebAppFragment webFragmentVue = (WebAppFragment) mFragments[position];
                     webFragmentVue.showPage(vuePages[position-1]);
-
-                    mAdsHolderView.setVisibility(View.GONE);
-                }else{
-                    mAdsHolderView.setVisibility(View.VISIBLE);
                 }
-
 
                 showHideFragment(mFragments[position], mFragments[prePosition]);
 

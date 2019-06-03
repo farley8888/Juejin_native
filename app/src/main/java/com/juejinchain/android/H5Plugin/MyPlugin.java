@@ -22,10 +22,15 @@ import com.juejinchain.android.ddshare.DDShareActivity;
 import com.juejinchain.android.ddshare.DDShareUtil;
 import com.juejinchain.android.model.UserModel;
 import com.juejinchain.android.tools.L;
+import com.juejinchain.android.util.Constant;
+import com.juejinchain.android.util.SPUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import io.dcloud.common.DHInterface.IWebview;
 import io.dcloud.common.DHInterface.StandardFeature;
@@ -33,11 +38,13 @@ import io.dcloud.common.util.JSUtil;
 
 public class MyPlugin extends StandardFeature {
 
-    //vue tab页urlName
-    public static final String PK_MINE  = "personal_center";
-    public static final String PK_MOVIE = "movie";
-    public static final String PK_MakeMoney = "make_money";
-    public static final String PK_TASK  = "task";
+    //vue tab页 urlName
+    public static final String PK_MINE  = "/personal_center";
+    public static final String PK_MOVIE = "/movie";
+    public static final String PK_MakeMoney = "/make_money";
+    public static final String PK_TASK  = "/task";
+
+    static List<String> TAB_PAGES;
 
     Context ctx;
     /**
@@ -51,6 +58,14 @@ public class MyPlugin extends StandardFeature {
     private IDDShareApi iddShareApi ;
 
     int jumpVuePage; //记录跳转到vue的页数
+
+    static {
+        TAB_PAGES = new ArrayList<>();
+        TAB_PAGES.add(PK_MINE);
+        TAB_PAGES.add(PK_TASK);
+        TAB_PAGES.add(PK_MOVIE);
+        TAB_PAGES.add(PK_MakeMoney);
+    }
 
     public void PluginTestFunction(IWebview pWebview, JSONArray array)
     {
@@ -245,14 +260,36 @@ public class MyPlugin extends StandardFeature {
 
     public void vueGoNext(IWebview pWebview, JSONArray array){
         L.d(TAG, "vueGoNext: "+array.toString());
-        L.d(TAG, "vueGoNext: from:"+array.opt(1));
+        String from = (String) array.opt(1);
+        L.d(TAG, "vueGoNext: from:"+from); // \/movie
         L.d(TAG, "vueGoNext: to:"+array.opt(2));
-
+        if (TAB_PAGES.contains(from)){
+            ((MainActivity) pWebview.getActivity()).mainFragment.changeBottomTabBar(false);
+        }
     }
 
     public void vueGoBack(IWebview pWebview, JSONArray array){
         L.d(TAG, "vueGoBack: "+array.toString());
-        showNativeFragment(pWebview);
+        String to = (String) array.opt(2);
+        if (TAB_PAGES.contains(to)){
+            ((MainActivity) pWebview.getActivity()).mainFragment.changeBottomTabBar(true);
+        }else {
+            showNativeFragment(pWebview);
+        }
+    }
+
+    //登出
+    public void vueLoginOut(IWebview pWebview, JSONArray array){
+        L.d(TAG, "vueLoginOut: "+array.toString());
+        String from = (String) array.opt(1);
+        UserModel.cleanData();
+    }
+
+    //清缓存
+    public void cleanCache(IWebview pWebview, JSONArray array){
+        L.d(TAG, "cleanCache: "+array.toString());
+
+        SPUtils.getInstance().put(Constant.CHANNEL_CHCHE, "");
     }
 
 }

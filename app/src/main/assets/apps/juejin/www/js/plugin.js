@@ -68,6 +68,18 @@ document.addEventListener("plusready", function () {
         fail = null;
       callbackID = B.callbackId(success, fail);
       return B.exec(_BARCODE, "vueJumpto", [callbackID, [fromVue, toNative]]);
+    }, //登出
+    loginOut: function (userName) {
+      var success = null,
+        fail = null;
+      callbackID = B.callbackId(success, fail);
+      return B.exec(_BARCODE, "vueLoginOut", [callbackID, userName]);
+    }//清除缓存
+    cleanCache: function (userName) {
+      var success = null,
+        fail = null;
+      callbackID = B.callbackId(success, fail);
+      return B.exec(_BARCODE, "cleanCache", [callbackID, userName]);
     }
   };
   window.plus.myplugin = myPlugin;

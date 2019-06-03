@@ -3,6 +3,7 @@ package com.juejinchain.android.H5Plugin;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.telecom.Call;
 import android.util.Log;
 import android.widget.Toast;
@@ -32,6 +33,12 @@ import io.dcloud.common.util.JSUtil;
 
 public class MyPlugin extends StandardFeature {
 
+    //vue tab页urlName
+    public static final String PK_MINE  = "personal_center";
+    public static final String PK_MOVIE = "movie";
+    public static final String PK_MakeMoney = "make_money";
+    public static final String PK_TASK  = "task";
+
     Context ctx;
     /**
      * 百度登录
@@ -42,6 +49,8 @@ public class MyPlugin extends StandardFeature {
     private String TAG = MyPlugin.class.getSimpleName();
 
     private IDDShareApi iddShareApi ;
+
+    int jumpVuePage; //记录跳转到vue的页数
 
     public void PluginTestFunction(IWebview pWebview, JSONArray array)
     {
@@ -215,6 +224,13 @@ public class MyPlugin extends StandardFeature {
             if (jo != null){
                 UserModel.setLoginUserInfo(jo);
             }
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    showNativeFragment(pWebview);
+                }
+            }, 1500);
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -222,6 +238,10 @@ public class MyPlugin extends StandardFeature {
         pWebview.evalJS("callVue('from native args')");
     }
 
+    private void showNativeFragment(IWebview pWebview){
+        MainActivity mainActivity = (MainActivity) pWebview.getActivity();
+        mainActivity.mainFragment.showHomeFragment();
+    }
 
     public void vueGoNext(IWebview pWebview, JSONArray array){
         L.d(TAG, "vueGoNext: "+array.toString());
@@ -232,8 +252,7 @@ public class MyPlugin extends StandardFeature {
 
     public void vueGoBack(IWebview pWebview, JSONArray array){
         L.d(TAG, "vueGoBack: "+array.toString());
-        MainActivity mainActivity = (MainActivity) pWebview.getActivity();
-        mainActivity.mainFragment.showHomeFragment();
+        showNativeFragment(pWebview);
     }
 
 }

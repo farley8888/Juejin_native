@@ -129,7 +129,8 @@ public class BottomBarTab extends FrameLayout {
     public void setSelected(boolean selected) {
         super.setSelected(selected);
 //        Log.d(TAG, "setSelected: "+ mTabPosition);
-        if (mTabPosition == 1) return;  //
+//        if (mTabPosition == 1) return;  //赚车赚房选项
+        if (mTvTitle.getText().toString().length() == 0) return;
         if (selected) {
             mIcon.setColorFilter(ContextCompat.getColor(mContext, R.color.colorAccent));
             mTvTitle.setTextColor(ContextCompat.getColor(mContext, R.color.colorPrimary));

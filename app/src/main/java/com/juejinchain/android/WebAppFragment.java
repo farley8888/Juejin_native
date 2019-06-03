@@ -12,6 +12,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.juejinchain.android.base.BaseMainFragment;
+import com.juejinchain.android.tools.L;
+import com.juejinchain.android.ui.fragment.MainFragment;
 
 import io.dcloud.common.DHInterface.ISysEventListener;
 import io.dcloud.common.util.BaseInfo;
@@ -59,7 +61,7 @@ public class WebAppFragment extends BaseMainFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        System.out.println("baseWeb.onCreateView");
+//        System.out.println("baseWeb.onCreateView");
         View view = inflater.inflate(R.layout.fragment_blank, container, false);
         webFrame = (ViewGroup) view;  //container 不能用这个，切换后无法隐藏
         return view;
@@ -68,7 +70,7 @@ public class WebAppFragment extends BaseMainFragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        Log.d(TAG, "baseWeb.onActivityCreated: ");
+//        Log.d(TAG, "baseWeb.onActivityCreated: ");
         if (mEntryProxy == null) {
             // 创建5+内核运行事件监听
 //            WebappModeListener wm = new WebappModeListener((Activity) context, webFrame,  getArguments().getString(FNAME));
@@ -100,14 +102,14 @@ public class WebAppFragment extends BaseMainFragment {
     @Override
     public void onPause() {
         super.onPause();
-        Log.d(TAG, "onPause: ");
+//        Log.d(TAG, "onPause: ");
         mEntryProxy.onPause((Activity) context);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        Log.d(TAG, "onResume: ");
+//        Log.d(TAG, "onResume: ");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && BaseInfo.mDeStatusBarBackground == -111111) {
             BaseInfo.mDeStatusBarBackground =  ((Activity) context).getWindow().getStatusBarColor();
         }
@@ -118,7 +120,7 @@ public class WebAppFragment extends BaseMainFragment {
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
-        Log.d(TAG, "onHiddenChanged: "+hidden);
+//        Log.d(TAG, "onHiddenChanged: "+hidden);
         if (hidden){
 //            mEntryProxy.clearData(); //不能清
 //            mEntryProxy.onStop((Activity) context); //停止了
@@ -129,7 +131,7 @@ public class WebAppFragment extends BaseMainFragment {
     }
 
     public void createVue(Bundle savedInstanceState){
-        Log.d(TAG, "createVue: ");
+        L.d(TAG, "createVue: ");
         //            FrameLayout f = new FrameLayout(context);
         // 创建5+内核运行事件监听
         webModeListener = new WebappModeListener((Activity) context, webFrame,getArguments().getString(FNAME));
@@ -138,6 +140,17 @@ public class WebAppFragment extends BaseMainFragment {
         // 启动5+内核
         mEntryProxy.onCreate((Activity) context, savedInstanceState, SDK.IntegratedMode.WEBAPP, null);
         //            setContentView(f);
+    }
+
+    @Override
+    public boolean onBackPressedSupport() {
+        MainFragment mainFragment = (MainFragment) getParentFragment();
+        if (mainFragment.startVuePage){
+            mainFragment.showHomeFragment();
+
+            return true;
+        }
+        return super.onBackPressedSupport();
     }
 
     public void showPage(String page){

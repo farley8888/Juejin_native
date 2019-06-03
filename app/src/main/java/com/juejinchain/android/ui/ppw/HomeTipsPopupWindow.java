@@ -11,7 +11,11 @@ public class HomeTipsPopupWindow extends PopupWindow {
     private Context mContext;
 
     private View mContentView;
+    private View.OnClickListener onClickListener;
 
+    public void setOnClickListener(View.OnClickListener onClickListener) {
+        this.onClickListener = onClickListener;
+    }
 
     public HomeTipsPopupWindow(Context context) {
         super(context);
@@ -29,6 +33,15 @@ public class HomeTipsPopupWindow extends PopupWindow {
         mContentView = View.inflate(mContext, R.layout.ling_prompt, null);
         setContentView(mContentView);
 
-        mContentView.setOnClickListener(v -> dismiss());
+        mContentView.setOnClickListener(
+            new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    dismiss();
+                    if(onClickListener != null) onClickListener.onClick(mContentView);
+                }
+            }
+        );
+
     }
 }

@@ -13,7 +13,7 @@ import com.juejinchain.android.R;
 public class HomeBottomTipsPopupWindow extends PopupWindow {
     private Context mContext;
 
-    private View mContentView;
+    public View mContentView;
 
 
     public HomeBottomTipsPopupWindow(Context context) {

@@ -47,13 +47,15 @@
                 android:text="100" />
 
             <TextView
+                android:id="@+id/tv_countTime"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:textColor="@color/red_500"
                 android:textSize="12sp"
                 android:gravity="center"
                 android:layout_weight="1.3"
-                android:text="领取" />
+                android:paddingRight="3dp"
+                android:text="@string/lingqu" />
         </LinearLayout>
 
         <ImageButton

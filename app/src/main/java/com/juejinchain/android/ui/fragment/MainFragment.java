@@ -14,11 +14,13 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.dmcbig.mediapicker.utils.ScreenUtils;
+import com.juejinchain.android.H5Plugin.MyPlugin;
 import com.juejinchain.android.R;
 import com.juejinchain.android.WebAppFragment;
 import com.juejinchain.android.event.ShowTabPopupWindowEvent;
 import com.juejinchain.android.event.TabSelectedEvent;
 import com.juejinchain.android.eventbus_activity.EventBusActivityScope;
+import com.juejinchain.android.tools.L;
 import com.juejinchain.android.ui.ppw.HomeBottomTipsPopupWindow;
 import com.juejinchain.android.ui.view.AdsHolderView;
 import com.juejinchain.android.ui.view.BottomBar;
@@ -40,15 +42,20 @@ public class MainFragment extends SupportFragment {
     public static final int SECOND = 1;
     public static final int THIRD = 2;
 //SupportFragment
-    private SupportFragment[] mFragments = new SupportFragment[3];
+    private SupportFragment[] mFragments = new SupportFragment[5];
 
     private BottomBar mBottomBar;
     private FragmentManager fragmentManager;
 
     private AdsHolderView mAdsHolderView;
-    private BottomBarTab mBottomBarLogin;
+    private BottomBarTab mBottomBarMovie;
     private ImageView mBottomLineImg;
     private FrameLayout mFrameLayout;
+
+    String[] vuePages;
+    public boolean startVuePage; //
+    private BottomBarTab mBottomBarTask;
+    private BottomBarTab mBottomBarMine;
 
     public static MainFragment newInstance() {
 
@@ -87,8 +94,9 @@ public class MainFragment extends SupportFragment {
             mFragments[SECOND] = WebAppFragment.instance("");
 //            mFragments[SECOND] = BlankFragment.newInstance("","");
 
-//            mFragments[THIRD] = BlankFragment.newInstance("","");
             mFragments[THIRD] = WebAppFragment.instance("task");
+            mFragments[3]     = WebAppFragment.instance("");
+            mFragments[4]     = WebAppFragment.instance("");
 
             loadMultipleRootFragment(R.id.fl_tab_container, FIRST,
                     mFragments[FIRST],
@@ -102,13 +110,15 @@ public class MainFragment extends SupportFragment {
 
             mFragments[SECOND] = findChildFragment(WebAppFragment.class);
 
-            mFragments[THIRD] = findChildFragment(WebAppFragment.class);
+            mFragments[THIRD]  = findChildFragment(WebAppFragment.class);
+            mFragments[3]      = findChildFragment(WebAppFragment.class);
+            mFragments[4]      = findChildFragment(WebAppFragment.class);
         }
     }
 
     //初始化所有
     void addFragments(){
-        //这里直接加载不能正常显示！
+        //因使用了框架，直接加载不能正常显示！
         fragmentManager = getActivity().getSupportFragmentManager();
 
         FragmentTransaction transaction = fragmentManager.beginTransaction();
@@ -126,32 +136,25 @@ public class MainFragment extends SupportFragment {
         mFrameLayout = view.findViewById(R.id.fl_tab_container);
 
         mBottomBar = (BottomBar) view.findViewById(R.id.bottomBar);
-//.addItem(new BottomBarTab(_mActivity, R.drawable.ic_account_circle_white_24dp, getString(R.string.discover)))
+        //影视动态加载
+        mBottomBarMovie = new BottomBarTab(_mActivity, R.drawable.ic_discover_white_24dp, getString(R.string.movie));
+        mBottomBarTask = new BottomBarTab(_mActivity, R.drawable.ic_discover_white_24dp, getString(R.string.task));
+        mBottomBarMine = new BottomBarTab(_mActivity, R.drawable.ic_discover_white_24dp, getString(R.string.mine));
 
-        mBottomBarLogin = new BottomBarTab(_mActivity, R.drawable.ic_discover_white_24dp, getString(R.string.login));
         mBottomBar
-                .addItem(new BottomBarTab(_mActivity, R.drawable.ic_message_white_24dp, getString(R.string.msg)))
+                .addItem(new BottomBarTab(_mActivity, R.drawable.ic_message_white_24dp, getString(R.string.home)))
+                .addItem(mBottomBarMovie)
                 .addItem(new BottomBarTab(_mActivity, R.drawable.ic_car_and_money, null))
-                .addItem(mBottomBarLogin);
+                .addItem(mBottomBarTask)
+                .addItem(mBottomBarMine);
 
-        // 模拟未读消息
-        mBottomBar.getItem(FIRST).setUnreadCount(9);
-
+        // 模拟未读消息，提示点
+//        mBottomBarMine.setUnreadCount(3);
+//        mBottomBarTask.showUnreadDot(true);
         mBottomBar.setOnTabSelectedListener(new BottomBar.OnTabSelectedListener() {
-
 
             @Override
             public void onTabSelected(int position, int prePosition) {
-
-                BottomBarTab tab = mBottomBar.getItem(FIRST);
-                BottomBarTab tab3 = mBottomBar.getItem(THIRD);
-                if (position == FIRST) {
-                    tab.setUnreadCount(0);
-                    tab3.showUnreadDot(true);
-                } else {
-                    tab.setUnreadCount(tab.getUnreadCount() + 1);
-                    tab3.showUnreadDot(false);
-                }
 
              /* vue切换处理
               * /movie
@@ -159,9 +162,12 @@ public class MainFragment extends SupportFragment {
               * /task
               * /personal_center
               * ArticleDetails/5090577 文章详情
+              * task
               */
                 if (position > 0){
-                    String[] vuePages = new String[]{"make_money", "login"};
+                    if (vuePages == null){
+                        vuePages = new String[]{MyPlugin.PK_MOVIE, MyPlugin.PK_MakeMoney, MyPlugin.PK_TASK, MyPlugin.PK_MINE};
+                    }
                     WebAppFragment webFragmentVue = (WebAppFragment) mFragments[position];
                     webFragmentVue.showPage(vuePages[position-1]);
 
@@ -180,18 +186,16 @@ public class MainFragment extends SupportFragment {
                 fragmentManager = getActivity().getSupportFragmentManager();
                 FragmentTransaction transaction = fragmentManager.beginTransaction();
                 Fragment frg = fragmentManager.findFragmentByTag(String.valueOf(position));
-                Log.d("MainFragment", "onTabSelected: "+position + ", frag ="+frg);
+                L.d("MainFragment", "onTabSelected: "+position + ", frag ="+frg);
                 //只有两个fragment ,size 会不止2 时间长了frg会为空！
 //                if (frg == null && fragmentManager.getFragments().size() < 2)
 //                    transaction.add(R.id.fl_tab_container, mFragments[position], String.valueOf(position));
 //                else {
-                    if (mFragments[prePosition] != null){
+//                    if (mFragments[prePosition] != null){
 //                        transaction.hide(mFragments[prePosition]);
-                    }
+//                    }
 //                    transaction.show(frg);
 //                }
-//                transaction.hide(mFragments[prePosition>0? 1:0]);
-//                transaction.show(mFragments[position > 0? 1:0]);
 //                transaction.commit();
             }
 
@@ -220,8 +224,8 @@ public class MainFragment extends SupportFragment {
     }
 
     public void showVue(String page, String params){
-//        mBottomBarLogin.performClick();
-
+//        mBottomBarMovie.performClick();
+        startVuePage = true;
         WebAppFragment webVueFragment = (WebAppFragment) mFragments[1];
         showHideFragment(webVueFragment, mFragments[0]);
         webVueFragment.showPage(page+"/"+params);
@@ -229,11 +233,14 @@ public class MainFragment extends SupportFragment {
     }
 
     public void showHomeFragment(){
+        if(!startVuePage) return; //未开始不处理
+        startVuePage = false;
+//        jumpVuePage--;
         showHideFragment(mFragments[0], mFragments[1]);
         changeBottomTabBar(true);
     }
 
-    private void changeBottomTabBar(boolean isShow){
+    public void changeBottomTabBar(boolean isShow){
         mBottomBar.setVisibility(isShow ? View.VISIBLE : View.GONE);
         mBottomLineImg.setVisibility(isShow ? View.VISIBLE : View.GONE);
         mAdsHolderView.setVisibility(isShow ? View.VISIBLE : View.GONE);
@@ -288,11 +295,20 @@ public class MainFragment extends SupportFragment {
         int position = 2;
         int delta = position == 1 ? 35 : 25;
 
-        View anchor = mBottomBar.getItem(position);
+        View anchor = mBottomBarTask;
         anchor.getLocationOnScreen(location);
         if(mPopupWindow == null || !mPopupWindow.isShowing()){
             mPopupWindow = new HomeBottomTipsPopupWindow(getActivity());
-            mPopupWindow.showAtLocation(anchor, Gravity.NO_GRAVITY, location[0] - ScreenUtils.dp2px(getActivity(), 30), location[1] - ScreenUtils.dp2px(getActivity(), delta));
+            mPopupWindow.showAtLocation(anchor, Gravity.NO_GRAVITY, location[0] - anchor.getWidth()/2,
+                    location[1] - ScreenUtils.dp2px(getActivity(), delta));
+
+            mPopupWindow.mContentView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    mPopupWindow.dismiss();
+                    mBottomBarTask.performClick();
+                }
+            });
         }
     }
 

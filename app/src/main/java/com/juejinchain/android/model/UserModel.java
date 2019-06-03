@@ -18,6 +18,8 @@ public class UserModel {
     //当前登录用户邀请码
     private static final String Key_Invitation = "UKInvitation";
     private static final String Key_ISLogin = "UKLoginIs";
+    private static final String Key_ISNew = "UKLoginIsNew";
+    private static final String Key_HasGetReward = "UKGetReward";
 
     private String userName;
     private String token;
@@ -33,15 +35,30 @@ public class UserModel {
          */
         String userToken = json.getString("user_token");
 //        Log.d("userMode", "setLoginUserInfo: "+userToken);
-        if (userToken != null){
-            SPUtils.getInstance().put(Key_ISLogin, true);
-        }
+//        if (userToken != null)
+            SPUtils.getInstance().put(Key_ISLogin, userToken != null);
+
         SPUtils.getInstance().put(Key_UserToken, userToken);
         SPUtils.getInstance().put(Key_NickName, json.getString("nickname"));
         SPUtils.getInstance().put(Key_Invitation, json.getString("invitation"));
         SPUtils.getInstance().put(Key_PHone, json.getString("mobile"));
+        SPUtils.getInstance().put(Key_HasGetReward, json.getInt("achieved_gift_bag") == 1);
+        SPUtils.getInstance().put(Key_ISNew, json.getInt("is_new") == 1);
     }
 
+
+    public static void setGetGiftBag(boolean hasGet) {
+        SPUtils.getInstance().put(Key_HasGetReward, hasGet);
+    }
+
+    //是否领取大礼包
+    public static boolean hasGetGiftBag(){
+        return SPUtils.getInstance().getBoolean(Key_HasGetReward);
+    }
+    //是否为新用户
+    public static boolean isNew(){
+        return SPUtils.getInstance().getBoolean(Key_ISNew);
+    }
 
     public static boolean isLogin(){
         return SPUtils.getInstance().getBoolean(Key_ISLogin);

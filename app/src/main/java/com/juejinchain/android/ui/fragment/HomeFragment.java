@@ -2,10 +2,10 @@ package com.juejinchain.android.ui.fragment;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -51,21 +51,25 @@ import static com.juejinchain.android.util.Constant.CHANNEL_CHCHE;
  * 首页 主fragment
  */
 public class HomeFragment extends BaseMainFragment implements View.OnClickListener {
-    //    private TabLayout mTab;
+
 //    private Toolbar mToolbar;
     private ViewPager mViewPager;
     private Button mAddBtn;
-    private TextView tvCount;
+    //可领取金币
+    private TextView tvCoin;
     private PagerSlidingTabStrip mTabs;
     public ChannelModel currChannel;
     private String TAG = HomeFragment.class.getSimpleName();
 //    PromptGetPopup mPromptPopup;
+    private HomeTipsPopupWindow mPopupWindow;
 
     public List<ChannelModel> mChannelList = new ArrayList<>();
 
     private TextView mSearchView;
 
     private ImageButton mShareView;
+    private CountDownTimer mCountDownTimer;
+    private TextView tvCountTime;
 
     public static HomeFragment newInstance() {
 
@@ -92,7 +96,8 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
         mAddBtn = view.findViewById(R.id.btn_add);
         mSearchView = view.findViewById(R.id.button2);
         mShareView = view.findViewById(R.id.button4);
-        tvCount = view.findViewById(R.id.tv_lingCount);
+        tvCoin = view.findViewById(R.id.tv_lingCount);
+        tvCountTime = view.findViewById(R.id.tv_countTime);
 
         mViewPager = (ViewPager) view.findViewById(R.id.viewPager);
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -142,7 +147,6 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
 //        mViewPager.setAdapter(new HomePagerFragmentAdapter(getChildFragmentManager(), array));
 
 //        mTab.setupWithViewPager(mViewPager);
-
 //        mTabs.setViewPager(mViewPager);
 //        setTabsValue();
 
@@ -154,6 +158,119 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
             setTabsPage();
         }
     }
+
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    public void onSupportVisible() {
+        super.onSupportVisible();
+        if (UserModel.isLogin()){
+            if (!UserModel.hasGetGiftBag()){ //未领取
+                mAddBtn.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        showLingRewardPop();
+                    }
+                }, 1000); //等activity启动完才能加载pop
+            }
+
+        }
+    }
+
+    //加载是否可领取状态api
+    void loadLingStatusApi(){
+        //
+        NetUtil.getRequest(NetConfig.API_Times30, null, new NetUtil.OnResponse() {
+            @Override
+            public void onResponse(JSONObject response) {
+                response = response.getJSONObject("data");
+                long remainTime = response.getInteger("time_remaining");
+                tvCoin.setText(response.getString("coin"));
+
+                if (remainTime == 0){ //可领取
+                    doLingApi();
+                }else {               //倒计时
+                    if (mCountDownTimer != null) mCountDownTimer.cancel();
+                    mCountDownTimer = new CountDownTimer(remainTime*1000, 1000) {
+                        @Override
+                        public void onTick(long millisUntilFinished) {
+                            long min = millisUntilFinished/1000 / 60;
+                            long s = millisUntilFinished/1000 % 60;
+
+                            tvCountTime.setText(String.format("%02d:%02d",min ,s));
+                        }
+
+                        @Override
+                        public void onFinish() {
+                            tvCountTime.setText(getString(R.string.lingqu));
+                            showLingRewardPop();
+                        }
+                    };
+                    mCountDownTimer.start();
+                }
+            }
+        });
+    }
+
+    //调用领取接口后，才保存在服务器
+    void doLingApi(){
+        NetUtil.getRequest(NetConfig.API_Times30_Save, null, new NetUtil.OnResponse() {
+            @Override
+            public void onResponse(JSONObject response) {
+                if (NetUtil.isSuccess(response)){
+                    UserModel.setGetGiftBag(true);
+                }
+
+            }
+        });
+    }
+
+    //显示领取奖励popup
+    private void showLingRewardPop(){
+//                mPromptPopup = new PromptGetPopup(getContext());
+//                //外面可点,会影响显示位置
+//                mPromptPopup.setOutSideTouchable(true);
+//                mPromptPopup.setBackground(null);  //背景透明
+        int[] location = new int[2];
+        tvCoin.getLocationOnScreen(location);
+        if(mPopupWindow == null || !mPopupWindow.isShowing()){
+            mPopupWindow = new HomeTipsPopupWindow(getActivity());
+            mPopupWindow.showAtLocation(tvCoin, Gravity.NO_GRAVITY, location[0] - ScreenUtils.dp2px(getActivity(), 70),
+                    location[1] + ScreenUtils.dp2px(getActivity(), 25));
+        }else if(mPopupWindow != null){
+//                EventBus.getDefault().post(new ShowTabPopupWindowEvent());
+        }
+
+        mPopupWindow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                loadLingStatusApi();
+                if (UserModel.isNew())
+                    EventBus.getDefault().post(new ShowTabPopupWindowEvent());
+            }
+        });
+    }
+
+    //领取奖励后加载接口倒计时
+    void loadRewardTimeApi(){
+        NetUtil.getRequest(NetConfig.API_Times30, null, new NetUtil.OnResponse() {
+            @Override
+            public void onResponse(JSONObject response) {
+
+            }
+        });
+    }
+
 
     private void loadChannel() {
 
@@ -246,24 +363,9 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
                 }
 
                 break;
-            case R.id.ly_ling:
-//                mPromptPopup = new PromptGetPopup(getContext());
-//                //外面可点,会影响显示位置
-//                mPromptPopup.setOutSideTouchable(true);
-//                mPromptPopup.setBackground(null);  //背景透明
-                int[] location = new int[2];
-                tvCount.getLocationOnScreen(location);
-//                mPromptPopup.showPopupWindow(v);
-
-                if(mPopupWindow == null || !mPopupWindow.isShowing()){
-                    mPopupWindow = new HomeTipsPopupWindow(getActivity());
-                    mPopupWindow.showAtLocation(tvCount, Gravity.NO_GRAVITY, location[0] - ScreenUtils.dp2px(getActivity(), 70),
-                            location[1] + ScreenUtils.dp2px(getActivity(), 25));
-                }else if(mPopupWindow != null){
-                    mPopupWindow.dismiss();
-                    EventBus.getDefault().post(new ShowTabPopupWindowEvent());
-                }
-
+            case R.id.ly_ling:  //领奖励
+                if (mPopupWindow != null) mPopupWindow.dismiss();
+                loadLingStatusApi();
                 break;
         }
     }
@@ -286,5 +388,4 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
         }
     }
 
-    private HomeTipsPopupWindow mPopupWindow;
 }

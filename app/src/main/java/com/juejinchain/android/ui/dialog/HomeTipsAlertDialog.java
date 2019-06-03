@@ -67,10 +67,26 @@ public class HomeTipsAlertDialog extends Dialog {
         Glide.with(getContext()).load(jo.getString("images")).into(image);
     }
 
+
+    void loadGiftApi(){
+        //
+        NetUtil.getRequest(NetConfig.API_GiftBag, null, new NetUtil.OnResponse() {
+            @Override
+            public void onResponse(JSONObject response) {
+
+            }
+        });
+    }
+
     private void initView(){
         ImageView gifImage = findViewById(R.id.img_get);
         Glide.with(getContext()).load(R.drawable.get_button).into(gifImage);
-
+        gifImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                loadGiftApi();
+            }
+        });
         findViewById(R.id.cancel).setOnClickListener(v -> dismiss());
     }
 }

@@ -370,9 +370,9 @@ public final class SPUtils {
     }
 
     /**
-     * Return all values in sp.
+     * Return all values-zh in sp.
      *
-     * @return all values in sp
+     * @return all values-zh in sp
      */
     public Map<String, ?> getAll() {
         return sp.getAll();

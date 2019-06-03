@@ -292,9 +292,9 @@ public final class SPStaticUtils {
     }
 
     /**
-     * Return all values in sp.
+     * Return all values-zh in sp.
      *
-     * @return all values in sp
+     * @return all values-zh in sp
      */
     public static Map<String, ?> getAll() {
         return getAll(getDefaultSPUtils());
@@ -661,10 +661,10 @@ public final class SPStaticUtils {
     }
 
     /**
-     * Return all values in sp.
+     * Return all values-zh in sp.
      *
      * @param spUtils The instance of {@link SPUtils}.
-     * @return all values in sp
+     * @return all values-zh in sp
      */
     public static Map<String, ?> getAll(@NonNull final SPUtils spUtils) {
         return spUtils.getAll();

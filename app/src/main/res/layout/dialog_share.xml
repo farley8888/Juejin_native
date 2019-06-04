@@ -1,17 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     style="@style/JJ.WidthFill.Vertical"
     android:layout_marginBottom="10dp"
     android:background="@drawable/shape_rect_radius">
 
-    <ImageView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:scaleType="fitXY"
-        android:src="@drawable/ic_car_and_money" />
+        android:layout_height="match_parent"
+        android:gravity="center_vertical|right"
+        android:background="@drawable/share_top_bg"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/img_share_seeButton"
+            android:layout_width="70dp"
+            android:layout_height="40dp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginRight="10dp"
+            app:srcCompat="@drawable/share_see_button" />
+    </LinearLayout>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recycleView"
+        android:layout_marginTop="-10dp"
         style="@style/JJ.WidthFill" />
 
     <View style="@style/JJ.Line.Horizontal"/>

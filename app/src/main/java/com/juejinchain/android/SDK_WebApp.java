@@ -31,6 +31,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.FrameLayout;
 
+import com.alibaba.fastjson.JSONObject;
 import com.juejinchain.android.tools.L;
 
 import org.json.JSONArray;
@@ -177,7 +178,7 @@ class WebappModeListener implements ICoreStatusListener, IOnCreateSplashView {
 		iWebview.evalJS("nativeJump('"+page+"')", new ReceiveJSValue.ReceiveJSValueCallback() {
 			@Override
 			public String callback(JSONArray jsonArray) {
-				Log.d(TAG, "callback: ");
+				L.d(TAG, "SwitchPage.callback: ");
 				switchOK = true;
 				return "{}";
 			}
@@ -198,11 +199,31 @@ class WebappModeListener implements ICoreStatusListener, IOnCreateSplashView {
 	}
 
 	/**
+	 * 调用vue 的分享
+	 * @param way 		eg: qq, weibo, system, friend, wechat
+	 * @param jsonParam eg: {"title":"掘金宝0006即将把宝马X", "content":"赚豪车赚洋房，回家过年提车就靠它了,
+	 *                  	"thumbs":["http://jjlmobile.oss-cn-shenzhimage/resize,h_50"],
+	 *               		"href":"http://wechat.juejinbaonews.fun/?path=%2F&inviteCode=6812939" }
+	 * @param from 		eg: index, task etc.
+	 */
+	public void shareTo(String way, String jsonParam, String from){
+
+		iWebview.evalJS(String.format("shareFn('%s','%s','%s')", way, jsonParam, from), new ReceiveJSValue.ReceiveJSValueCallback() {
+			@Override
+			public String callback(JSONArray jsonArray) {
+				L.d(TAG, "shareTo.callback: ");
+				return "{}";
+			}
+		});
+
+	}
+
+	/**
 	 * 5+内核初始化完成时触发
 	 * */
 	@Override
 	public void onCoreInitEnd(ICore coreHandler) {
-		Log.d("webAppListener."+name, "onCoreInitEnd: ");
+		L.d("webAppListener."+name, "onCoreInitEnd: ");
 		// 表示Webapp的路径在 file:///android_asset/apps/HelloH5
 //		String appBasePath = "/apps/HelloH5";
 		String appBasePath = "/apps/juejin";
@@ -224,7 +245,7 @@ class WebappModeListener implements ICoreStatusListener, IOnCreateSplashView {
 						View view = iWebview.obtainApp().obtainWebAppRootView().obtainMainView();
 						view.setVisibility(View.INVISIBLE);
 
-						Log.d("webAppListener."+name, "ON_WEBVIEW_READY: ");
+						L.d("webAppListener."+name, "ON_WEBVIEW_READY: ");
 						if(view.getParent() != null){
 							((ViewGroup)view.getParent()).removeView(view);
 						}
@@ -243,7 +264,7 @@ class WebappModeListener implements ICoreStatusListener, IOnCreateSplashView {
 					case IWebviewStateListener.ON_PAGE_FINISHED:
 						// WebApp首页面加载完成事件
 //					iWebview.evalJS("nativeJump('"+name+"')");
-						Log.d("webAppListener."+name, "ON_PAGE_FINISHED: ");
+						L.d("webAppListener."+name, "ON_PAGE_FINISHED: ");
 						if (pd != null) {
 							pd.dismiss();
 							pd = null;

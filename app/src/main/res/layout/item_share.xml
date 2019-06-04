@@ -13,7 +13,8 @@
 
         <ImageView
             android:id="@+id/logo"
-            style="@style/JJ.WrapContent"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:layout_centerInParent="true"
             android:src="@drawable/dcloud_amap_car" />
     </RelativeLayout>

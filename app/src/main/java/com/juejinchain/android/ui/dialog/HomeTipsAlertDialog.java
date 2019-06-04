@@ -9,6 +9,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.alibaba.fastjson.JSONObject;
 import com.bumptech.glide.Glide;
@@ -73,7 +74,13 @@ public class HomeTipsAlertDialog extends Dialog {
         NetUtil.getRequest(NetConfig.API_GiftBag, null, new NetUtil.OnResponse() {
             @Override
             public void onResponse(JSONObject response) {
+                if (NetUtil.isSuccess(response)){
+                    response = response.getJSONObject("data");
 
+                }else{
+                    Toast.makeText(getContext(), response.getString("msg"), Toast.LENGTH_LONG).show();
+                }
+                dismiss();
             }
         });
     }

@@ -11,9 +11,21 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.alibaba.fastjson.JSONObject;
 import com.juejinchain.android.base.BaseMainFragment;
+import com.juejinchain.android.event.ShareEvent;
+import com.juejinchain.android.model.ShareModel;
+import com.juejinchain.android.model.UserModel;
+import com.juejinchain.android.network.NetConfig;
+import com.juejinchain.android.network.NetUtil;
 import com.juejinchain.android.tools.L;
 import com.juejinchain.android.ui.fragment.MainFragment;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import io.dcloud.common.DHInterface.ISysEventListener;
 import io.dcloud.common.util.BaseInfo;
@@ -51,10 +63,30 @@ public class WebAppFragment extends BaseMainFragment {
         this.context = context;
     }
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    @Subscribe()
+    public void onCallShareEvent(ShareEvent event){
+        ShareModel shareModel = event.shareModel;
+        Log.d(TAG, "onCallShareEvent: "+shareModel.name);
 
+        Map<String, String> param = new HashMap<>();
+        param.put("tag", shareModel.tag);
+        param.put("url", NetConfig.BaseUrl+"/"+shareModel.tag);
+        NetUtil.getRequest(NetConfig.API_ShareCopy, param, new NetUtil.OnResponse() {
+            @Override
+            public void onResponse(JSONObject response) {
+                JSONObject data = response.getJSONObject("data");
+
+                JSONObject shareJsonParam = new JSONObject();
+                shareJsonParam.put("content", data.getString("desc"));
+                shareJsonParam.put("title", data.getString("title"));
+                shareJsonParam.put("thumbs", data.getString("img_url"));
+                //%2F是‘/’的url转义
+                String href = String.format("%s/?path=/&inviteCode=%s", NetConfig.SHARE_BASE_HREF, UserModel.getInvitation());
+                shareJsonParam.put("href", href);
+
+                webModeListener.shareTo(shareModel.way, shareJsonParam.toJSONString(), shareModel.tag);
+            }
+        }, false);
     }
 
     @Override
@@ -64,6 +96,7 @@ public class WebAppFragment extends BaseMainFragment {
 //        System.out.println("baseWeb.onCreateView");
         View view = inflater.inflate(R.layout.fragment_blank, container, false);
         webFrame = (ViewGroup) view;  //container 不能用这个，切换后无法隐藏
+        EventBus.getDefault().register(this);
         return view;
     }
 
@@ -115,6 +148,21 @@ public class WebAppFragment extends BaseMainFragment {
         }
         mEntryProxy.onResume((Activity) context);
         showPage(currPage);
+        if (NetConfig.SHARE_BASE_HREF == null){
+            getShareHref();
+        }
+    }
+
+    private void getShareHref() {
+        NetUtil.getRequest(NetConfig.API_SYSTEM_HREF, null, new NetUtil.OnResponse() {
+            @Override
+            public void onResponse(JSONObject response) {
+                if (NetUtil.isSuccess(response)){
+                    response = response.getJSONObject("data");
+                    NetConfig.SHARE_BASE_HREF = response.getJSONArray("domain").getString(0);
+                }
+            }
+        });
     }
 
     @Override
@@ -164,5 +212,10 @@ public class WebAppFragment extends BaseMainFragment {
         mEntryProxy.onStop((Activity)context);
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
+    }
 }
 

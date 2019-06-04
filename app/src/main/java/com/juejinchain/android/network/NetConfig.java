@@ -14,10 +14,13 @@ public class NetConfig {
     /*
      * 正式环境
      *  发正式包要修改的地方有
-     *  1、ADOpenActivity.INTERVAL_TIME
+     *  1、L.ISDebug
      *  2、android:debuggable="false"
      */
 //    public static final String BaseUrl = "http://api.juejinchain.com";
+
+    //共享base href 通过接口获取
+    public static String SHARE_BASE_HREF ;
 
     //请求接口响应码
     public static final int NR_CODE_SUCCESS  = 0;             //请求成功
@@ -55,6 +58,8 @@ public class NetConfig {
 
     //首页tab显示控制
     public static final String API_SYSTEM_MENU  = "system/menu";
+    //获取分享href域名
+    public static final String API_SYSTEM_HREF  = "system/get_domain";
 
     //获取大礼包随机车型数据
     public static final String API_GiftImage    = "gift_image";
@@ -64,6 +69,22 @@ public class NetConfig {
     public static final String API_Times30      = "task/minute30";
     //首页半小时 已保存
     public static final String API_Times30_Save = "task/minute30_save";
+    /**
+     * 提示签到接口，非新用户登录后回到首页时调用
+     * 如未签到底部弹签到提示popup
+     * "data": {
+     *     "unsigned": 1,
+     */
+    public static final String API_MessageHint  = "message/hint";
+    /**
+     * 未读信息，登录后每20~30秒调用一次（全局的
+     * 如果有top弹下滚提示3s后消失，点击跳到消息页面
+     */
+    public static final String API_UnreadMsg    = "message/unread";
+    /**
+     * 获取随机分享内容
+     */
+    public static final String API_ShareCopy    = "share/copywriting";
 
 
     //获取频道，默认调用此接口，没登录返回8个，登录后重新获取

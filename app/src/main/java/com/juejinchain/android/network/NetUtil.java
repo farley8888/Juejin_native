@@ -161,7 +161,7 @@ public class NetUtil {
                 dismissLoading();
                 Log.e("NetUtil","getRequest.errorApi= "+api );
                 e.printStackTrace();
-                showErrToast("get异常："+ e.getMessage());
+                if (!isProcessError)showErrToast("get异常："+ e.getMessage());
             }
 
             @Override

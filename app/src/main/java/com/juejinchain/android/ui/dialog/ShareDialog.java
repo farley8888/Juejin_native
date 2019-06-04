@@ -1,11 +1,13 @@
 package com.juejinchain.android.ui.dialog;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,19 +18,39 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.alibaba.fastjson.JSONObject;
 import com.bumptech.glide.Glide;
 import com.dmcbig.mediapicker.utils.ScreenUtils;
+import com.juejinchain.android.MainActivity;
 import com.juejinchain.android.R;
+import com.juejinchain.android.event.ShareEvent;
+import com.juejinchain.android.model.ShareModel;
+import com.juejinchain.android.network.NetConfig;
+import com.juejinchain.android.network.NetUtil;
+import com.juejinchain.android.tools.L;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 分享对话框
  */
 public class ShareDialog extends Dialog {
+    Activity mActivity ;
+
     public ShareDialog(Context context) {
         this(context, 0);
+        mActivity = (Activity) context;
+    }
+
+    private View.OnClickListener clickListener;
+
+    public void setClickListener(View.OnClickListener clickListener) {
+        this.clickListener = clickListener;
     }
 
     public ShareDialog(Context context, int themeResId) {
@@ -51,7 +73,7 @@ public class ShareDialog extends Dialog {
     private void initView(){
         RecyclerView recyclerView = findViewById(R.id.recycleView);
 
-        List<ShareEntitiy> list = buildData();
+        List<ShareModel> list = buildData();
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 4, LinearLayoutManager.VERTICAL, false));
         recyclerView.setAdapter(new RecyclerView.Adapter<ShareHolder>() {
             @NonNull
@@ -62,8 +84,8 @@ public class ShareDialog extends Dialog {
 
             @Override
             public void onBindViewHolder(@NonNull ShareHolder viewHolder, int i) {
-                ShareEntitiy shareEntitiy = list.get(i);
-                viewHolder.bindView(shareEntitiy);
+                ShareModel ShareModel = list.get(i);
+                viewHolder.bindView(ShareModel);
             }
 
             @Override
@@ -71,17 +93,28 @@ public class ShareDialog extends Dialog {
                 return list.size();
             }
         });
+        ImageView img = findViewById(R.id.img_share_seeButton);
+        Glide.with(getContext()).load(R.drawable.share_see_button).into(img);
+        img.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
 
+                if (clickListener != null) clickListener.onClick(view);
+            }
+        });
         findViewById(R.id.cancel).setOnClickListener(v -> dismiss());
     }
 
-    private List<ShareEntitiy> buildData(){
-        List<ShareEntitiy> list = new ArrayList<>();
-        list.add(new ShareEntitiy("锁粉神器", 0, true));
-        list.add(new ShareEntitiy("微博", 0, false));
-        list.add(new ShareEntitiy("QQ好友", 0, false));
-        list.add(new ShareEntitiy("微信好友", 0, false));
-        list.add(new ShareEntitiy("朋友圈", 0, false));
+    private List<ShareModel> buildData(){
+        List<ShareModel> list = new ArrayList<>();
+        String tag = ShareModel.TAG_INDEX;
+        ShareModel suofen = new ShareModel("锁粉神器", ShareModel.WAY_SUOFEN,R.drawable.share_icon_suofen, tag);
+        suofen.withDot = true;
+        list.add(suofen);
+        list.add(new ShareModel("微博",ShareModel.WAY_WEIBO ,R.drawable.share_icon_weibo, tag));
+        list.add(new ShareModel("QQ好友",ShareModel.WAY_QQ, R.drawable.share_icon_qq, tag));
+        list.add(new ShareModel("微信好友",ShareModel.WAY_WECHAT, R.drawable.share_icon_wechat, tag));
+        list.add(new ShareModel("朋友圈",ShareModel.WAY_FRIEND, R.drawable.share_icon_friend, tag));
         return list;
     }
 
@@ -97,39 +130,55 @@ public class ShareDialog extends Dialog {
             name = itemView.findViewById(R.id.name);
         }
 
-        public void bindView(ShareEntitiy shareEntitiy){
-            name.setText(shareEntitiy.name);
-            recommend.setVisibility(shareEntitiy.withDot ? View.VISIBLE : View.GONE);
-            if(shareEntitiy.logo > 0){
+        public void bindView(ShareModel ShareModel){
+            name.setText(ShareModel.name);
+            recommend.setVisibility(ShareModel.withDot ? View.VISIBLE : View.GONE);
+            if(ShareModel.logo > 0){
                 Glide.with(getContext())
-                        .load(shareEntitiy.logo)
+                        .load(ShareModel.logo)
                         .into(logo);
             }
 
             itemView.setOnClickListener(v -> {
-                Toast.makeText(getContext(), "点击了" + shareEntitiy.name, Toast.LENGTH_SHORT).show();
+                shareTo (ShareModel);
+                if (clickListener != null) clickListener.onClick(v);
+//                Toast.makeText(getContext(), "点击了" + ShareModel.name, Toast.LENGTH_SHORT).show();
             });
         }
     }
 
-    private class ShareEntitiy{
-        /**
-         * 名称
-         */
-        public String name;
-        /**
-         * logo
-         */
-        public int logo;
-        /**
-         * 是否含有推荐
-         */
-        public boolean withDot;
+    void shareTo(ShareModel entitiy){
+//        L.d("baseDailog", "shareTo: "+entitiy.way);
 
-        public ShareEntitiy(String name, int logo, boolean withDot) {
-            this.name = name;
-            this.logo = logo;
-            this.withDot = withDot;
-        }
+        EventBus.getDefault().post(new ShareEvent(entitiy));
     }
+
+//    private class ShareModel{
+//
+//        /**
+//         * 名称
+//         */
+//        public String name;
+//        public String way;
+//        /**
+//         * logo
+//         */
+//        public int logo;
+//        /**
+//         * 是否含有推荐
+//         */
+//        public boolean withDot;
+//
+//        public ShareModel(String name, int logo, boolean withDot) {
+//            this.name = name;
+//            this.logo = logo;
+//            this.withDot = withDot;
+//        }
+//
+//
+//        public ShareModel(String name, String way, int logo, boolean withDot) {
+//            this(name, logo, withDot);
+//            this.way = way;
+//        }
+//    }
 }

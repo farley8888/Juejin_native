@@ -13,6 +13,8 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.dmcbig.mediapicker.utils.ScreenUtils;
 import com.juejinchain.android.H5Plugin.MyPlugin;
 import com.juejinchain.android.R;
@@ -20,7 +22,11 @@ import com.juejinchain.android.WebAppFragment;
 import com.juejinchain.android.event.ShowTabPopupWindowEvent;
 import com.juejinchain.android.event.TabSelectedEvent;
 import com.juejinchain.android.eventbus_activity.EventBusActivityScope;
+import com.juejinchain.android.model.UserModel;
+import com.juejinchain.android.network.NetConfig;
+import com.juejinchain.android.network.NetUtil;
 import com.juejinchain.android.tools.L;
+import com.juejinchain.android.ui.alerter.Alerter;
 import com.juejinchain.android.ui.ppw.HomeBottomTipsPopupWindow;
 import com.juejinchain.android.ui.view.AdsHolderView;
 import com.juejinchain.android.ui.view.BottomBar;
@@ -33,7 +39,7 @@ import me.yokeyword.fragmentation.SupportFragment;
 
 
 /**
- * Created by YoKeyword on 16/6/30.
+ * 所有fragment控制器
  */
 public class MainFragment extends SupportFragment {
     private static final int REQ_MSG = 10;
@@ -58,6 +64,8 @@ public class MainFragment extends SupportFragment {
     public boolean startVuePage; //
     private BottomBarTab mBottomBarTask;
     private BottomBarTab mBottomBarMine;
+
+    private HomeBottomTipsPopupWindow mPopupWindow;
 
     public static MainFragment newInstance() {
 
@@ -159,12 +167,6 @@ public class MainFragment extends SupportFragment {
             public void onTabSelected(int position, int prePosition) {
 
              /* vue切换处理
-              * /movie
-              * /make_money
-              * /task
-              * /personal_center
-              * ArticleDetails/5090577 文章详情
-              * task
               */
                 if (position > 0){
                     if (vuePages == null){
@@ -210,6 +212,30 @@ public class MainFragment extends SupportFragment {
         });
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (UserModel.isLogin()){
+            NetUtil.getRequest(NetConfig.API_UnreadMsg, null, new NetUtil.OnResponse() {
+                @Override
+                public void onResponse(JSONObject response) {
+                    if (NetUtil.isSuccess(response)){
+                        JSONArray array = response.getJSONArray("data");
+                        //content, id ,
+                    }
+                    Alerter.create(getActivity())
+                            .setTitle("title").setText("content")
+                            .setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+
+                                }
+                            }).setDuration(3000).show();
+                }
+            }, true);
+        }
+    }
+
     public void removeWebAppFragment() {
         fragmentManager = getFragmentManager();
         Fragment child = findChildFragment(WebAppFragment.class);
@@ -220,8 +246,13 @@ public class MainFragment extends SupportFragment {
         }
     }
 
+    /**
+     * 子页使用显示vue
+     * ArticleDetails/5090577 文章详情
+     * login 登录
+     *
+     */
     public void showVue(String page, String params){
-//        mBottomBarMovie.performClick();
         startVuePage = true;
         WebAppFragment webVueFragment = (WebAppFragment) mFragments[1];
         showHideFragment(webVueFragment, mFragments[0]);
@@ -299,6 +330,11 @@ public class MainFragment extends SupportFragment {
             mPopupWindow.showAtLocation(anchor, Gravity.NO_GRAVITY, location[0] - anchor.getWidth()/2,
                     location[1] - ScreenUtils.dp2px(getActivity(), delta));
 
+            if (UserModel.isNew()){
+                mPopupWindow.textView.setText("连续签到7天得3680金币");
+            }else{
+                mPopupWindow.textView.setText("今日奖励可领取");
+            }
             mPopupWindow.mContentView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -309,5 +345,4 @@ public class MainFragment extends SupportFragment {
         }
     }
 
-    private HomeBottomTipsPopupWindow mPopupWindow;
 }

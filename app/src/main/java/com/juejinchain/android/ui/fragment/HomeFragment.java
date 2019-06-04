@@ -185,8 +185,29 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
                     }
                 }, 1000); //等activity启动完才能加载pop
             }
-
+            if (!UserModel.isNew()){
+                mAddBtn.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        loadMessageHint();
+                    }
+                }, 500); //
+            }
         }
+    }
+
+    //非新用户调用，没签到的提示
+    void loadMessageHint(){
+        NetUtil.getRequest(NetConfig.API_MessageHint, null, new NetUtil.OnResponse() {
+            @Override
+            public void onResponse(JSONObject response) {
+                if (NetUtil.isSuccess(response)){
+                    if (response.getJSONObject("data").getInteger("unsigned") == 1){
+                        EventBus.getDefault().post(new ShowTabPopupWindowEvent());
+                    }
+                }
+            }
+        });
     }
 
     //加载是否可领取状态api

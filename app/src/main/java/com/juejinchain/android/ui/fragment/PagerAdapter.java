@@ -25,10 +25,9 @@ import java.util.List;
 
 
 /**
- * Created by YoKeyword on 16/6/30.
+ * 文章列表adapter
  * RecyclerAdapterWithHF
  * RecyclerView.Adapter<PagerAdapter.MyViewHolder>
- *     RecyclerView.Adapter<RecyclerView.ViewHolder>
  */
 public class PagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private List<NewsModel> mItems = new ArrayList<>();
@@ -41,7 +40,7 @@ public class PagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         super();
         mInflater = LayoutInflater.from(context);
         mItems = data;
-        //加圆角 centerCrop() 这个属性会影响
+        //加圆角 centerCrop() 属性会影响 GlideRoundTransform 对象属性
 //        glideRoundTransform = new GlideRoundTransform(mInflater.getContext(), 5);
     }
 

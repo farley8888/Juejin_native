@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dmcbig.mediapicker.utils.ScreenUtils;
@@ -20,11 +21,14 @@ import com.juejinchain.android.H5Plugin.MyPlugin;
 import com.juejinchain.android.R;
 import com.juejinchain.android.WebAppFragment;
 import com.juejinchain.android.event.ShowTabPopupWindowEvent;
+import com.juejinchain.android.event.ShowVueEvent;
 import com.juejinchain.android.event.TabSelectedEvent;
 import com.juejinchain.android.eventbus_activity.EventBusActivityScope;
+import com.juejinchain.android.model.UnreadModel;
 import com.juejinchain.android.model.UserModel;
 import com.juejinchain.android.network.NetConfig;
 import com.juejinchain.android.network.NetUtil;
+import com.juejinchain.android.network.SpUtils;
 import com.juejinchain.android.tools.L;
 import com.juejinchain.android.ui.alerter.Alerter;
 import com.juejinchain.android.ui.ppw.HomeBottomTipsPopupWindow;
@@ -34,6 +38,8 @@ import com.juejinchain.android.ui.view.BottomBarTab;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+
+import java.util.List;
 
 import me.yokeyword.fragmentation.SupportFragment;
 
@@ -50,22 +56,25 @@ public class MainFragment extends SupportFragment {
 //SupportFragment
     private SupportFragment[] mFragments = new SupportFragment[5];
 
-    private BottomBar mBottomBar;
+    public BottomBar mBottomBar;
     private FragmentManager fragmentManager;
     /**
      * 登录并没领取大礼包显示
      */
-    private AdsHolderView mAdsHolderView;
+    public AdsHolderView mAdsHolderView;
     private BottomBarTab mBottomBarMovie;
     private ImageView mBottomLineImg;
     private FrameLayout mFrameLayout;
 
     String[] vuePages;
-    public boolean startVuePage; //
-    private BottomBarTab mBottomBarTask;
+    public boolean showVuePageFromNative; //
+    public VideoDetailFragment videoDetailFragment;
+//    public WebAppFragment webAppFragment;
+    public BottomBarTab mBottomBarTask;
     private BottomBarTab mBottomBarMine;
 
     private HomeBottomTipsPopupWindow mPopupWindow;
+    Alerter mUnreadAlerter; //未读信息提示
 
     public static MainFragment newInstance() {
 
@@ -124,6 +133,7 @@ public class MainFragment extends SupportFragment {
             mFragments[3]      = findChildFragment(WebAppFragment.class);
             mFragments[4]      = findChildFragment(WebAppFragment.class);
         }
+//        webAppFragment = (WebAppFragment) mFragments[THIRD];
     }
 
     //初始化所有
@@ -166,11 +176,10 @@ public class MainFragment extends SupportFragment {
             @Override
             public void onTabSelected(int position, int prePosition) {
 
-             /* vue切换处理
-              */
+                // vue切换处理
                 if (position > 0){
                     if (vuePages == null){
-                        vuePages = new String[]{MyPlugin.PK_MOVIE, MyPlugin.PK_MakeMoney, MyPlugin.PK_TASK, MyPlugin.PK_MINE};
+                        vuePages = new String[]{MyPlugin.VP_MOVIE, MyPlugin.VP_MakeMoney, MyPlugin.VP_TASK, MyPlugin.VP_MINE};
                     }
                     WebAppFragment webFragmentVue = (WebAppFragment) mFragments[position];
                     webFragmentVue.showPage(vuePages[position-1]);
@@ -205,9 +214,13 @@ public class MainFragment extends SupportFragment {
 
             @Override
             public void onTabReselected(int position) {
+                L.d("baseMainFrg", "onTabSelected: ");
+                if (position == 0 && videoDetailFragment != null){
+//                    showVue(ShowVueEvent.PAGE_LOCK_FAN, "");
+                }
                 // 在FirstPagerFragment,FirstHomeFragment中接收, 因为是嵌套的Fragment
                 // 主要为了交互: 重选tab 如果列表不在顶部则移动到顶部,如果已经在顶部,则刷新
-                EventBusActivityScope.getDefault(_mActivity).post(new TabSelectedEvent(position));
+//                EventBusActivityScope.getDefault(_mActivity).post(new TabSelectedEvent(position));
             }
         });
     }
@@ -216,34 +229,48 @@ public class MainFragment extends SupportFragment {
     public void onResume() {
         super.onResume();
         if (UserModel.isLogin()){
+            //20s 请求一次
+            if (System.currentTimeMillis() - (long)SpUtils.get(getContext(), "unreadKey", 0l) < 10*1000 ){
+                return;
+            }
             NetUtil.getRequest(NetConfig.API_UnreadMsg, null, new NetUtil.OnResponse() {
                 @Override
                 public void onResponse(JSONObject response) {
                     if (NetUtil.isSuccess(response)){
-                        JSONArray array = response.getJSONArray("data");
-                        //content, id ,
-                    }
-                    Alerter.create(getActivity())
-                            .setTitle("title").setText("content")
-                            .setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
+                        SpUtils.put(getContext(), "unreadKey", System.currentTimeMillis());
 
-                                }
-                            }).setDuration(3000).show();
+                        JSONArray array = response.getJSONArray("data");
+                        List<UnreadModel> unreadModels = JSON.parseArray(array.toJSONString(), UnreadModel.class);
+
+                        if (unreadModels.size() > 0) showUnreadAlert(unreadModels);
+                    }
+
                 }
             }, true);
         }
     }
 
-    public void removeWebAppFragment() {
-        fragmentManager = getFragmentManager();
-        Fragment child = findChildFragment(WebAppFragment.class);
-        if (child != null) {
-            fragmentManager.beginTransaction()
-                    .remove(child).commit();
-//                    .commitAllowingStateLoss();
-        }
+    /** 显示未读消息alert */
+    public void showUnreadAlert(List<UnreadModel>  list) {
+        if (mUnreadAlerter == null) mUnreadAlerter = Alerter.create(getActivity());
+
+        UnreadModel item = list.get(0); //3秒显示一个
+        mUnreadAlerter
+                .setTitle(item.title).setText(item.content)
+                .setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Alerter.hide();
+                        showVue(ShowVueEvent.PAGE_MESSAGE_LIST, "");
+                    }
+                }).setDuration(3000).show();
+        mUnreadAlerter.enableSwipeToDismiss();
+
+    }
+
+    @Subscribe()
+    public void showVuePageEvent(ShowVueEvent event){
+        showVue(event.page, event.param);
     }
 
     /**
@@ -253,25 +280,27 @@ public class MainFragment extends SupportFragment {
      *
      */
     public void showVue(String page, String params){
-        startVuePage = true;
+        showVuePageFromNative = true;
         WebAppFragment webVueFragment = (WebAppFragment) mFragments[1];
         showHideFragment(webVueFragment, mFragments[0]);
-        webVueFragment.showPage(page+"/"+params);
+        webVueFragment.showPage(page+ ( params.length() > 0 ? "/"+params : ""));
         changeBottomTabBar(false);
     }
 
     public void showHomeFragment(){
-        if(!startVuePage) return; //未开始不处理
-        startVuePage = false;
-//        jumpVuePage--;
-        showHideFragment(mFragments[0], mFragments[1]);
+        showVuePageFromNative = false;
+        showHideFragment(mFragments[0], mFragments[1]); //这样按钮状态未能修改
+        mBottomBar.getItem(0).performClick();
         changeBottomTabBar(true);
     }
 
     public void changeBottomTabBar(boolean isShow){
+        if (isShow && showVuePageFromNative){
+            showVuePageFromNative = false;
+            showHideFragment(mFragments[0], mFragments[1]);
+        }
         mBottomBar.setVisibility(isShow ? View.VISIBLE : View.GONE);
         mBottomLineImg.setVisibility(isShow ? View.VISIBLE : View.GONE);
-        mAdsHolderView.setVisibility(isShow ? View.VISIBLE : View.GONE);
 
         FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) mFrameLayout.getLayoutParams();
         if (isShow){
@@ -315,6 +344,10 @@ public class MainFragment extends SupportFragment {
         if(mPopupWindow != null && mPopupWindow.isShowing()){
             mPopupWindow.dismiss();
         }
+    }
+
+    public void switchToVideoDetailFragment(){
+        showHideFragment(videoDetailFragment,MainFragment.this);
     }
 
     @Subscribe()

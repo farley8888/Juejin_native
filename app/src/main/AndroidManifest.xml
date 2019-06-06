@@ -459,7 +459,7 @@
             android:theme="@style/AppTheme"></activity>
 
         <activity
-            android:name=".ui.activity.search.SearchActivity"
+            android:name=".ui.activity.SearchActivity"
             android:theme="@style/AppTheme"/>
         <activity
             android:name=".ui.activity.ArticleDetailActivity"

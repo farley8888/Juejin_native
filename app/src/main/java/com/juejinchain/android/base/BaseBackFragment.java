@@ -44,13 +44,13 @@ public class BaseBackFragment extends SwipeBackFragment {
         v.findViewById(R.id.toolbar_right_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                toolbarRightButtonClick();
+                topbarRightButtonClick();
             }
         });
 
     }
 
-    protected void toolbarRightButtonClick(){
+    protected void topbarRightButtonClick(){
 
     }
 

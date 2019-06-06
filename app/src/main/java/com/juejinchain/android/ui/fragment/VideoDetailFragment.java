@@ -24,9 +24,11 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.bumptech.glide.Glide;
 import com.juejinchain.android.R;
+import com.juejinchain.android.WebAppFragment;
 import com.juejinchain.android.adapter.VideoDetailXAdapter;
 import com.juejinchain.android.base.BaseBackFragment;
 import com.juejinchain.android.base.XRecyclerViewAdapter;
+import com.juejinchain.android.event.ShowVueEvent;
 import com.juejinchain.android.model.CommentModel;
 import com.juejinchain.android.model.VideoModel;
 import com.juejinchain.android.network.NetConfig;
@@ -36,6 +38,8 @@ import com.juejinchain.android.tools.WebViewUtil;
 import com.juejinchain.android.ui.dialog.ShareDialog;
 import com.juejinchain.android.ui.view.DividerDecoration;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +47,7 @@ import java.util.Map;
 
 import cn.jzvd.Jzvd;
 import cn.jzvd.JzvdStd;
+import me.yokeyword.fragmentation.ISupportFragment;
 
 
 /**
@@ -117,7 +122,7 @@ public class VideoDetailFragment extends BaseBackFragment {
         NetUtil.getRequest(NetConfig.API_VideoRecommend, param, new NetUtil.OnResponse() {
             @Override
             public void onResponse(JSONObject response) {
-                L.d(TAG, "onResponse: "+response.toJSONString());
+//                L.d(TAG, "onResponse: "+response.toJSONString());
                 recommendList = JSON.parseArray(response.getString("data"), VideoModel.class);
                 mData.addAll(1, recommendList);
                 mAdapter.setDataList(mData); //此adapter这个方法才能刷新
@@ -166,8 +171,22 @@ public class VideoDetailFragment extends BaseBackFragment {
     }
 
     @Override
-    protected void toolbarRightButtonClick() {
-        Log.d(TAG, "toolbarRightButtonClick: ");
+    protected void topbarRightButtonClick() {
+        Log.d(TAG, "topbarRightButtonClick: ");
+//        new ShareDialog(getContext()).show();
+        ISupportFragment temp = getPreFragment();
+        if (temp instanceof VideoDetailFragment){  //多次调用下面的showHideFragment 方法会出现这种情况
+            pop();
+        }else {
+            MainFragment mainFragment = (MainFragment)temp ;
+            mainFragment.videoDetailFragment = this;
+
+            //mainFragment.webAppFragment 显示frag unable sub of parent
+            showHideFragment(mainFragment, this);
+            mainFragment.showVue(ShowVueEvent.PAGE_LOCK_FAN, "");
+
+//        start(WebAppFragment.instance("")); 不能这样add已存在的单例
+        }
 
     }
 
@@ -412,23 +431,32 @@ public class VideoDetailFragment extends BaseBackFragment {
 
 
     public boolean onBackPressedSupport() {
-        if (Jzvd.backPress()) {
-//            return;
-        }
+        Log.d(TAG, "onBackPressedSupport: ");
+        MainFragment mainFragment = (MainFragment) getPreFragment();
+        showHideFragment(mainFragment);
+        mainFragment.showHomeFragment();
         return super.onBackPressedSupport();
     }
 
-//    protected void onPause() {
-//        super.onPause();
-//        Jzvd.resetAllVideos();
-//    }
+
     @Override
     public void onSupportInvisible() {
         super.onSupportInvisible();
         Jzvd.resetAllVideos();
         // 当对用户不可见时 回调
-        // 不管是 父Fragment还是子Fragment 都有效！
+        // 不能在子fragment调用pre的view切换方法
+//        ((MainFragment)getPreFragment()).showVue(ShowVueEvent.PAGE_LOCK_FAN, "");
     }
 
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        MainFragment mainFragment = (MainFragment) getPreFragment();
+        if (mainFragment.videoDetailFragment != null){
+            mainFragment.videoDetailFragment = null;
+//            showHideFragment(mainFragment);
+        }
+
+    }
 }

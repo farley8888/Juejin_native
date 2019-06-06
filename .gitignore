@@ -4,4 +4,6 @@ build
 *.iml
 local.properties
 .svn
-assets/apps
+assets
+app/src/main/assets/apps
+*.map

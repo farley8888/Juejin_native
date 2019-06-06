@@ -219,6 +219,35 @@ class WebappModeListener implements ICoreStatusListener, IOnCreateSplashView {
 	}
 
 	/**
+	 * 保存阅读文章记录
+	 * @param json
+	 */
+	public void saveReadArticle(String json){
+		//window.setHistory vue页面的
+		iWebview.evalJS(String.format("setHistory('%s')", json), new ReceiveJSValue.ReceiveJSValueCallback() {
+			@Override
+			public String callback(JSONArray jsonArray) {
+				L.d(TAG, "saveReadArticle.callback: ");
+				return "{}";
+			}
+		});
+	}
+
+	/**
+	 * 调用vue 返回
+	 */
+	public void callVueBack(){
+		//window.setHistory vue页面的
+		iWebview.evalJS("nativeBack()", new ReceiveJSValue.ReceiveJSValueCallback() {
+			@Override
+			public String callback(JSONArray jsonArray) {
+				L.d(TAG, "callVueBack.callback: ");
+				return "{}";
+			}
+		});
+	}
+
+	/**
 	 * 5+内核初始化完成时触发
 	 * */
 	@Override

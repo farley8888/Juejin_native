@@ -100,7 +100,7 @@ public class CategoryExpandActivity extends AppCompatActivity implements View.On
         mRecy.setAdapter(adapter);
 
         adapter.setEditingListener(list -> {
-            Log.i("yang", "拖动了view: " + list.toString());
+//            Log.i("yang", "拖动了view: " + list.toString());
             SPUtils.getInstance().put(CHANNEL_CHCHE, JSON.toJSONString(list));
             showList = list;
         });

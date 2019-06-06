@@ -53,7 +53,7 @@ public class Alert extends FrameLayout implements View.OnClickListener, Animatio
     private TextView tvText;
     private ImageView ivIcon;
     private ViewGroup rlContainer;
-    private ProgressBar pbProgress;
+//    private ProgressBar pbProgress;
 
     private Animation slideInAnimation;
     private Animation slideOutAnimation;
@@ -124,7 +124,7 @@ public class Alert extends FrameLayout implements View.OnClickListener, Animatio
         tvTitle = (TextView) findViewById(R.id.tvTitle);
         tvText = (TextView) findViewById(R.id.tvText);
         rlContainer = (ViewGroup) findViewById(R.id.rlContainer);
-        pbProgress = (ProgressBar) findViewById(R.id.pbProgress);
+//        pbProgress = (ProgressBar) findViewById(R.id.pbProgress);
 
         flBackground.setOnClickListener(this);
 
@@ -235,7 +235,7 @@ public class Alert extends FrameLayout implements View.OnClickListener, Animatio
             valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                 @Override
                 public void onAnimationUpdate(final ValueAnimator animation) {
-                    pbProgress.setProgress((int) animation.getAnimatedValue());
+//                    pbProgress.setProgress((int) animation.getAnimatedValue());
                 }
             });
             valueAnimator.start();

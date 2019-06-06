@@ -11,9 +11,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.juejinchain.android.H5Plugin.MyPlugin;
 import com.juejinchain.android.base.BaseMainFragment;
+import com.juejinchain.android.event.CallVueBackEvent;
+import com.juejinchain.android.event.SaveArticleEvent;
 import com.juejinchain.android.event.ShareEvent;
+import com.juejinchain.android.model.NewsModel;
 import com.juejinchain.android.model.ShareModel;
 import com.juejinchain.android.model.UserModel;
 import com.juejinchain.android.network.NetConfig;
@@ -61,32 +66,6 @@ public class WebAppFragment extends BaseMainFragment {
     public void onAttach(Context context) {
         super.onAttach(context);
         this.context = context;
-    }
-
-    @Subscribe()
-    public void onCallShareEvent(ShareEvent event){
-        ShareModel shareModel = event.shareModel;
-        Log.d(TAG, "onCallShareEvent: "+shareModel.name);
-
-        Map<String, String> param = new HashMap<>();
-        param.put("tag", shareModel.tag);
-        param.put("url", NetConfig.BaseUrl+"/"+shareModel.tag);
-        NetUtil.getRequest(NetConfig.API_ShareCopy, param, new NetUtil.OnResponse() {
-            @Override
-            public void onResponse(JSONObject response) {
-                JSONObject data = response.getJSONObject("data");
-
-                JSONObject shareJsonParam = new JSONObject();
-                shareJsonParam.put("content", data.getString("desc"));
-                shareJsonParam.put("title", data.getString("title"));
-                shareJsonParam.put("thumbs", data.getString("img_url"));
-                //%2F是‘/’的url转义
-                String href = String.format("%s/?path=/&inviteCode=%s", NetConfig.SHARE_BASE_HREF, UserModel.getInvitation());
-                shareJsonParam.put("href", href);
-
-                webModeListener.shareTo(shareModel.way, shareJsonParam.toJSONString(), shareModel.tag);
-            }
-        }, false);
     }
 
     @Override
@@ -190,12 +169,55 @@ public class WebAppFragment extends BaseMainFragment {
         //            setContentView(f);
     }
 
+    @Subscribe()
+    public void onCallShareEvent(ShareEvent event){
+        ShareModel shareModel = event.shareModel;
+        L.d(TAG, "onCallShareEvent: "+shareModel.name);
+
+        Map<String, String> param = new HashMap<>();
+        param.put("tag", shareModel.tag);
+        param.put("url", NetConfig.BaseUrl+"/"+shareModel.tag);
+        NetUtil.getRequest(NetConfig.API_ShareCopy, param, new NetUtil.OnResponse() {
+            @Override
+            public void onResponse(JSONObject response) {
+                JSONObject data = response.getJSONObject("data");
+
+                JSONObject shareJsonParam = new JSONObject();
+                shareJsonParam.put("content", data.getString("desc"));
+                shareJsonParam.put("title", data.getString("title"));
+                shareJsonParam.put("thumbs", data.getString("img_url"));
+                //%2F是‘/’的url转义
+                String href = String.format("%s/?path=/&inviteCode=%s", NetConfig.SHARE_BASE_HREF, UserModel.getInvitation());
+                shareJsonParam.put("href", href);
+
+                webModeListener.shareTo(shareModel.way, shareJsonParam.toJSONString(), shareModel.tag);
+            }
+        }, false);
+    }
+
+    @Subscribe()
+    public void saveArticleEvent(SaveArticleEvent event){
+        L.d(TAG, "saveArticleEvent: ");
+        webModeListener.saveReadArticle(JSON.toJSONString(event.model));
+    }
+
+    @Subscribe()
+    public void callVueBack(CallVueBackEvent event){
+        webModeListener.callVueBack();
+    }
+
     @Override
     public boolean onBackPressedSupport() {
         MainFragment mainFragment = (MainFragment) getParentFragment();
-        if (mainFragment.startVuePage){
-            mainFragment.showHomeFragment();
 
+//        if (!mainFragment.mBottomBar.isVisible()){
+        if (!MyPlugin.isOnHomePage()){
+            webModeListener.callVueBack();
+            return true;
+        }
+
+        if (mainFragment.showVuePageFromNative){
+            mainFragment.showHomeFragment();
             return true;
         }
         return super.onBackPressedSupport();

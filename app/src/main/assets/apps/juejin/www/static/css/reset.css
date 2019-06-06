@@ -163,39 +163,3 @@ a {
 #cnzz_stat_icon_1276382272 {
   display: none;
 }
-
-/* 刚开始加载 */
-.page-loading {
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  background: rgba(0, 0, 0, .5);
-  height: 100vh;
-  z-index: -1;
-}
-.page-content {
-  position: absolute;
-  width: 80%;
-  left: 50%;
-  top: 50%;
-  height: 2.4rem;
-  transform: translate(-50%, -50%);
-  font-size: .32rem;
-  display: flex;
-  flex-flow: column wrap;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-  color: #fff;
-  background: rgba(0, 0, 0, .7);
-  /* background: black; */
-}
-.page-content img {
-  width: .6rem;
-  height: .6rem;
-}
-.page-content .text {
-  padding-top: .2rem;
-}

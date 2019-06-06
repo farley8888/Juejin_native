@@ -24,6 +24,7 @@ import com.dmcbig.mediapicker.utils.ScreenUtils;
 import com.juejinchain.android.MainActivity;
 import com.juejinchain.android.R;
 import com.juejinchain.android.event.ShareEvent;
+import com.juejinchain.android.event.ShowVueEvent;
 import com.juejinchain.android.model.ShareModel;
 import com.juejinchain.android.network.NetConfig;
 import com.juejinchain.android.network.NetUtil;
@@ -95,10 +96,12 @@ public class ShareDialog extends Dialog {
         });
         ImageView img = findViewById(R.id.img_share_seeButton);
         Glide.with(getContext()).load(R.drawable.share_see_button).into(img);
+        //查看攻略
         img.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                dismiss();
+                EventBus.getDefault().post(new ShowVueEvent(ShowVueEvent.PAGE_LOCK_FAN, ""));
                 if (clickListener != null) clickListener.onClick(view);
             }
         });
@@ -149,6 +152,8 @@ public class ShareDialog extends Dialog {
 
     void shareTo(ShareModel entitiy){
 //        L.d("baseDailog", "shareTo: "+entitiy.way);
+//        if (entitiy.way.equals(ShareModel.WAY_SUOFEN))
+        dismiss();
 
         EventBus.getDefault().post(new ShareEvent(entitiy));
     }

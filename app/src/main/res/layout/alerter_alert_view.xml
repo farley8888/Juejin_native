@@ -11,10 +11,12 @@
     <FrameLayout
         android:id="@+id/flAlertBackground"
         style="@style/AlertStyle"
-        android:background="@android:color/darker_gray"
+        android:background="#95000000"
         android:clickable="true"
         android:foreground="?attr/selectableItemBackground"
         tools:visibility="visible">
+        <!--
+         -->
 
         <RelativeLayout
             android:id="@+id/rlContainer"
@@ -27,7 +29,7 @@
             android:clipToPadding="false"
             android:padding="@dimen/alerter_activity_horizontal_margin">
 
-            <android.support.v7.widget.AppCompatImageView
+            <com.juejinchain.android.ui.view.RoundImageView
                 android:id="@+id/ivIcon"
                 android:layout_width="@dimen/alerter_alert_icn_size"
                 android:layout_height="@dimen/alerter_alert_icn_size"
@@ -36,8 +38,10 @@
                 android:layout_centerVertical="true"
                 android:maxHeight="@dimen/alerter_alert_icn_size"
                 android:maxWidth="@dimen/alerter_alert_icn_size"
-                android:src="@drawable/alerter_ic_notifications"
-                android:tint="@color/white" />
+                android:src="@drawable/icon"
+                />
+            <!--android.support.v7.widget.AppCompatImageView
+                android:src="@drawable/alerter_ic_notifications"-->
 
             <LinearLayout
                 android:id="@+id/llAlertTextContainer"
@@ -61,6 +65,7 @@
                     android:layout_height="wrap_content"
                     android:textAppearance="@style/AlertTextAppearance.Title"
                     android:visibility="gone"
+                    android:singleLine="true"
                     tools:text="Title"
                     tools:visibility="visible" />
 
@@ -72,6 +77,7 @@
                     android:paddingTop="@dimen/alerter_padding_small"
                     android:textAppearance="@style/AlertTextAppearance.Text"
                     android:visibility="gone"
+                    android:maxLines="2"
                     tools:text="Text"
                     tools:visibility="visible" />
 
@@ -79,13 +85,21 @@
 
         </RelativeLayout>
 
-        <ProgressBar
-            android:id="@+id/pbProgress"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/alerter_progress_bar_size"
-            android:layout_gravity="bottom"
-            tools:progress="45" />
+        <!--<ProgressBar-->
+            <!--android:id="@+id/pbProgress"-->
+            <!--style="?android:attr/progressBarStyleHorizontal"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="@dimen/alerter_progress_bar_size"-->
+            <!--android:layout_gravity="bottom"-->
+            <!--tools:progress="45" />-->
+
+        <View
+            android:layout_width="60dp"
+            android:layout_gravity="center_horizontal|bottom"
+            android:layout_marginBottom="1dp"
+            android:background="#eee"
+            android:layout_height="0.5dp"
+            />
 
     </FrameLayout>
 

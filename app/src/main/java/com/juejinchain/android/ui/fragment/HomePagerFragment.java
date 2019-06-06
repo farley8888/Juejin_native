@@ -20,6 +20,7 @@ import com.chanven.lib.cptr.PtrFrameLayout;
 import com.chanven.lib.cptr.loadmore.OnLoadMoreListener;
 import com.chanven.lib.cptr.recyclerview.RecyclerAdapterWithHF;
 import com.juejinchain.android.R;
+import com.juejinchain.android.event.SaveArticleEvent;
 import com.juejinchain.android.event.TabSelectedEvent;
 import com.juejinchain.android.eventbus_activity.EventBusActivityScope;
 import com.juejinchain.android.model.ChannelModel;
@@ -30,6 +31,7 @@ import com.juejinchain.android.network.OkHttpUtils;
 import com.juejinchain.android.network.callBack.JSONCallback;
 import com.juejinchain.android.ui.activity.ArticleDetailActivity;
 
+import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
@@ -153,14 +155,15 @@ public class HomePagerFragment extends SupportFragment  {
                 MainFragment mainFragment = (MainFragment) getParentFragment().getParentFragment();
 //                mainFragment.startBrotherFragment(NewFeatureFragment.newInstance());
 
-//                startActivity(new Intent(getContext(), ArticleDetailActivity.class));
                 mainFragment.showVue("ArticleDetails", mData.get(position).id);
+                EventBus.getDefault().post(new SaveArticleEvent(mData.get(position)));
+
                 /**
                  * 用切换隐藏tab的方式，这样重new等待时间太长
                  */
 //                mainFragment.removeWebAppFragment();
-//                mainFragment.start(WebAppFragment.instance("login"));  //, ISupportFragment.SINGLETASK
-
+//                mainFragment.start(WebAppFragment.instance("login"));
+//                startActivity(new Intent(getContext(), ArticleDetailActivity.class));
             }
         });
 

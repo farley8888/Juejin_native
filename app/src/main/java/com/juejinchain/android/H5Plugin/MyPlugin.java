@@ -1,15 +1,11 @@
 package com.juejinchain.android.H5Plugin;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.telecom.Call;
 import android.util.Log;
-import android.widget.Toast;
 
 
-import com.alibaba.fastjson.JSON;
 import com.android.dingtalk.share.ddsharemodule.DDShareApiFactory;
 import com.android.dingtalk.share.ddsharemodule.IDDShareApi;
 import com.android.dingtalk.share.ddsharemodule.message.SendAuth;
@@ -20,11 +16,15 @@ import com.baidu.api.BaiduException;
 import com.juejinchain.android.MainActivity;
 import com.juejinchain.android.ddshare.DDShareActivity;
 import com.juejinchain.android.ddshare.DDShareUtil;
+import com.juejinchain.android.event.ShareCallbackEvent;
+import com.juejinchain.android.event.ShowVueEvent;
 import com.juejinchain.android.model.UserModel;
 import com.juejinchain.android.tools.L;
+import com.juejinchain.android.ui.fragment.MainFragment;
 import com.juejinchain.android.util.Constant;
 import com.juejinchain.android.util.SPUtils;
 
+import org.greenrobot.eventbus.EventBus;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -39,12 +39,15 @@ import io.dcloud.common.util.JSUtil;
 public class MyPlugin extends StandardFeature {
 
     //vue tab页 urlName
-    public static final String PK_MINE  = "/personal_center";
-    public static final String PK_MOVIE = "/movie";
-    public static final String PK_MakeMoney = "/make_money";
-    public static final String PK_TASK  = "/task";
+    public static final String VP_MINE = "/personal_center";
+    public static final String VP_MOVIE = "/movie";
+    public static final String VP_MakeMoney = "/make_money";
+    public static final String VP_TASK = "/task";
 
-    static List<String> TAB_PAGES;
+    /** 当前显示的vue页面 */
+    public static String CurrVuePage;
+
+    public static List<String> TAB_PAGES_OF_VUE;
 
     Context ctx;
     /**
@@ -60,11 +63,16 @@ public class MyPlugin extends StandardFeature {
     int jumpVuePage; //记录跳转到vue的页数
 
     static {
-        TAB_PAGES = new ArrayList<>();
-        TAB_PAGES.add(PK_MINE);
-        TAB_PAGES.add(PK_TASK);
-        TAB_PAGES.add(PK_MOVIE);
-        TAB_PAGES.add(PK_MakeMoney);
+        TAB_PAGES_OF_VUE = new ArrayList<>();
+        TAB_PAGES_OF_VUE.add(VP_MINE);
+        TAB_PAGES_OF_VUE.add(VP_TASK);
+        TAB_PAGES_OF_VUE.add(VP_MOVIE);
+        TAB_PAGES_OF_VUE.add(VP_MakeMoney);
+    }
+
+    //是否在tab页
+    public static boolean isOnHomePage(){
+        return TAB_PAGES_OF_VUE.contains(CurrVuePage);
     }
 
     public void PluginTestFunction(IWebview pWebview, JSONArray array)
@@ -239,18 +247,17 @@ public class MyPlugin extends StandardFeature {
             if (jo != null){
                 UserModel.setLoginUserInfo(jo);
             }
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    showNativeFragment(pWebview);
-                }
-            }, 1500);
-
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
         pWebview.evalJS("callVue('from native args')");
+    }
+
+
+    public void vueShareCallback(IWebview pWebview, JSONArray array) {
+        L.d(TAG, "vueShareCallback: " + array.toString());
+
+        EventBus.getDefault().post(new ShareCallbackEvent("", 0));
     }
 
     private void showNativeFragment(IWebview pWebview){
@@ -258,22 +265,51 @@ public class MyPlugin extends StandardFeature {
         mainActivity.mainFragment.showHomeFragment();
     }
 
+    public void vueJumpto(IWebview pWebview, JSONArray array){
+        L.d(TAG, "vueJumpto: "+array.toString());
+        String from = array.optString(1);
+        String to =  array.optString(2);
+        L.d(TAG, "vueJumpto: to = "+to); //
+        if (from.equals(ShowVueEvent.PAGE_LOCK_FAN) && to.equals("home")){
+            MainFragment mainFrag = ((MainActivity) pWebview.getActivity()).mainFragment;
+            if (mainFrag.videoDetailFragment != null){
+                mainFrag.switchToVideoDetailFragment();
+                return;
+            }
+        }
+
+        if (!TAB_PAGES_OF_VUE.contains(to)){  //如果不是vue页就为原生首页
+            showNativeFragment(pWebview);
+        }else{
+            ((MainActivity) pWebview.getActivity()).mainFragment.changeBottomTabBar(true);
+        }
+    }
+
     public void vueGoNext(IWebview pWebview, JSONArray array){
         L.d(TAG, "vueGoNext: "+array.toString());
         String from = (String) array.opt(1);
-        L.d(TAG, "vueGoNext: from:"+from); // \/movie
-        L.d(TAG, "vueGoNext: to:"+array.opt(2));
-        if (TAB_PAGES.contains(from)){
+        L.d(TAG, "vueGoNext: from = "+from); // \/movie
+        CurrVuePage = (String) array.opt(2);
+        L.d(TAG, "vueGoNext: to = "+CurrVuePage);
+        if (TAB_PAGES_OF_VUE.contains(from)){
             ((MainActivity) pWebview.getActivity()).mainFragment.changeBottomTabBar(false);
         }
     }
 
     public void vueGoBack(IWebview pWebview, JSONArray array){
         L.d(TAG, "vueGoBack: "+array.toString());
+        String from = (String) array.opt(1);
         String to = (String) array.opt(2);
-        if (TAB_PAGES.contains(to)){
+        CurrVuePage = to;
+        L.d(TAG, "vueGoBack: to = "+to);
+
+        if (TAB_PAGES_OF_VUE.contains(to)){
             ((MainActivity) pWebview.getActivity()).mainFragment.changeBottomTabBar(true);
+            if (to.equals(VP_TASK)){
+                ((MainActivity) pWebview.getActivity()).mainFragment.mBottomBarTask.performClick();
+            }
         }else {
+//            L.d(TAG, "vueGoBack: showNativeFragment");
             showNativeFragment(pWebview);
         }
     }
@@ -281,8 +317,8 @@ public class MyPlugin extends StandardFeature {
     //登出
     public void vueLoginOut(IWebview pWebview, JSONArray array){
         L.d(TAG, "vueLoginOut: "+array.toString());
-        String from = (String) array.opt(1);
         UserModel.cleanData();
+        String userName = (String) array.opt(1);
     }
 
     //清缓存

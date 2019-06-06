@@ -17,7 +17,7 @@
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:background="@null"
-            android:src="@drawable/detai_back_icon" />
+            android:src="@drawable/ic_arrow_back_white_24dp" />
 
         <EditText
             android:id="@+id/edt_search"
@@ -27,6 +27,8 @@
             android:background="@drawable/search_button_shape"
             android:drawableLeft="@drawable/search_icon"
             android:drawablePadding="5dp"
+            android:maxLines="1"
+            android:singleLine="true"
             android:hint="搜索你感兴趣的内容"
             android:paddingLeft="10dp"
             android:textColor="@color/white"

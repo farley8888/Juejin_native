@@ -21,7 +21,9 @@ import com.dmcbig.mediapicker.utils.ScreenUtils;
 import com.juejinchain.android.R;
 import com.juejinchain.android.adapter.HomePagerFragmentAdapter;
 import com.juejinchain.android.base.BaseMainFragment;
+import com.juejinchain.android.event.ShareCallbackEvent;
 import com.juejinchain.android.event.ShowTabPopupWindowEvent;
+import com.juejinchain.android.event.ShowVueEvent;
 import com.juejinchain.android.event.UpdateChannelEvent;
 import com.juejinchain.android.model.ChannelModel;
 import com.juejinchain.android.model.UserModel;
@@ -31,7 +33,7 @@ import com.juejinchain.android.network.OkHttpUtils;
 import com.juejinchain.android.network.callBack.JSONCallback;
 import com.juejinchain.android.ui.ppw.HomeTipsPopupWindow;
 import com.juejinchain.android.ui.activity.CategoryExpandActivity;
-import com.juejinchain.android.ui.activity.search.SearchActivity;
+import com.juejinchain.android.ui.activity.SearchActivity;
 import com.juejinchain.android.ui.dialog.ShareDialog;
 import com.juejinchain.android.ui.view.PagerSlidingTabStrip;
 import com.juejinchain.android.util.SPUtils;
@@ -70,6 +72,8 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
     private ImageButton mShareView;
     private CountDownTimer mCountDownTimer;
     private TextView tvCountTime;
+    private boolean mIsVisible;
+    ShareDialog mShareDialog;
 
     public static HomeFragment newInstance() {
 
@@ -90,6 +94,7 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
     }
 
     private void initView(View view) {
+        mIsVisible = true;
 //        mToolbar = (Toolbar) view.findViewById(R.id.toolbar);
 //        mTab = (TabLayout) view.findViewById(R.id.tab);
         mTabs = (PagerSlidingTabStrip) view.findViewById(R.id.tabs);
@@ -163,14 +168,26 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
+        mIsVisible = !hidden;
         if (hidden){
             if (mPopupWindow != null && mPopupWindow.isShowing()) mPopupWindow.dismiss();
         }
+        MainFragment mainFragment = (MainFragment) getParentFragment();
+//        Log.d(TAG, "onHiddenChanged: "+mainFragment);
+        if (null != mainFragment.mAdsHolderView )
+            mainFragment.mAdsHolderView.setVisibility(hidden ? View.GONE:View.VISIBLE);
     }
 
     @Override
     public void onResume() {
         super.onResume();
+    }
+
+    @Subscribe()
+    public void shareCallbackEvent(ShareCallbackEvent event){
+
+        if (mShareDialog != null) mShareDialog.dismiss();
+
     }
 
     @Override
@@ -268,7 +285,8 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
         tvCoin.getLocationOnScreen(location);
         if(mPopupWindow == null || !mPopupWindow.isShowing()){
             mPopupWindow = new HomeTipsPopupWindow(getActivity());
-            mPopupWindow.showAtLocation(tvCoin, Gravity.NO_GRAVITY, location[0] - ScreenUtils.dp2px(getActivity(), 70),
+            if (mIsVisible)
+                mPopupWindow.showAtLocation(tvCoin, Gravity.NO_GRAVITY, location[0] - ScreenUtils.dp2px(getActivity(), 70),
                     location[1] + ScreenUtils.dp2px(getActivity(), 25));
         }else if(mPopupWindow != null){
 //                EventBus.getDefault().post(new ShowTabPopupWindowEvent());
@@ -284,7 +302,7 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
         });
     }
 
-    //领取奖励后加载接口倒计时
+    //领取奖励后加载 获取倒计时时间的接口
     void loadRewardTimeApi(){
         NetUtil.getRequest(NetConfig.API_Times30, null, new NetUtil.OnResponse() {
             @Override
@@ -378,11 +396,12 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
                 break;
             case R.id.button4:  //分享
                 if (UserModel.isLogin()){
-                    new ShareDialog(getActivity()).show();
+                   mShareDialog = new ShareDialog(getActivity());
+                   mShareDialog.show();
                 }
                 else{
                     MainFragment mainFragment = (MainFragment) getParentFragment();
-                    mainFragment.showVue("/login", "");
+                    mainFragment.showVue(ShowVueEvent.PAGE_LOGIN, "");
                 }
 
                 break;

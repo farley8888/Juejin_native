@@ -29,6 +29,7 @@ import com.juejinchain.android.network.NetConfig;
 import com.juejinchain.android.network.NetUtil;
 import com.juejinchain.android.network.OkHttpUtils;
 import com.juejinchain.android.network.callBack.JSONCallback;
+import com.juejinchain.android.tools.L;
 import com.juejinchain.android.ui.activity.ArticleDetailActivity;
 
 import org.greenrobot.eventbus.EventBus;
@@ -74,8 +75,8 @@ public class HomePagerFragment extends SupportFragment  {
         HomePagerFragment fragment = new HomePagerFragment();
 
         fragment.mChannel = model;
-        //第一页
-        if(model != null && "1".equals(model.getId()) ){
+        //推荐和热门
+        if(model != null && "0,1".contains(model.getId()) ){
             fragment.mAPI = NetConfig.API_NewsPull;
         }else {
             fragment.mAPI = NetConfig.API_NewsOther;
@@ -181,7 +182,8 @@ public class HomePagerFragment extends SupportFragment  {
         Map<String, String> param = new HashMap<>();
         param.put("page",currPage+"");
         param.put("per_page", pageSize+"");
-        param.put("channel_id", mChannel.getId());
+//        if (!mChannel.getName().equals("推荐"))
+            param.put("channel_id", mChannel.getId());
         if (currPage == 1 && mChannel.getId().equals("1")){
             param.put("is_first", 1+"");
         }
@@ -209,9 +211,8 @@ public class HomePagerFragment extends SupportFragment  {
                     }else {
                         array = response.getJSONObject("data").getJSONArray("data");
                     }
-//                    if (array.size() == 0) return;  //没有数据时
 
-                    Log.d(TAG, "onResponse:data.arr= "+ array.toJSONString());
+//                    L.d(TAG, "onResponse:data.arr= "+ array.toJSONString());
                     List<NewsModel> temp = JSON.parseArray(array.toJSONString(), NewsModel.class);
 
                     if (currPage == 1){

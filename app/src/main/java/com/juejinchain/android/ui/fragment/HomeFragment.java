@@ -6,6 +6,7 @@ import android.os.CountDownTimer;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,12 +42,15 @@ import com.juejinchain.android.ui.dialog.ShareDialog;
 import com.juejinchain.android.ui.ppw.TimeRewardPopup;
 import com.juejinchain.android.ui.view.PagerSlidingTabStrip;
 import com.juejinchain.android.util.SPUtils;
+import com.juejinchain.android.util.StringUtils;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import okhttp3.Call;
 
@@ -79,6 +83,7 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
     private boolean mIsVisible;
     ShareDialog mShareDialog;
     private LinearLayout mLyLing;
+    private List<ChannelModel> mChannelCacheList = new ArrayList<>();
 
     public static HomeFragment newInstance() {
 
@@ -161,12 +166,15 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
 //        setTabsValue();
 
         String channelCacheData = SPUtils.getInstance().getString(CHANNEL_CHCHE);
+
         if(TextUtils.isEmpty(channelCacheData)){
-            loadChannel();
+//            loadChannel();
         }else{
-            mChannelList = JSON.parseArray(channelCacheData, ChannelModel.class);
-            setTabsPage();
+            mChannelCacheList = JSON.parseArray(channelCacheData, ChannelModel.class);
+//            mChannelList = JSON.parseArray(channelCacheData, ChannelModel.class);
+//            setTabsPage();
         }
+        loadChannel();
     }
 
 
@@ -245,15 +253,16 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
             public void onResponse(JSONObject response) {
                 response = response.getJSONObject("data");
                 long remainTime = response.getInteger("time_remaining");
-                tvCoin.setText(response.getString("coin"));
+
 
                 if (remainTime == 0){ //可领取
                     tvCountTime.setText(getString(R.string.lingqu));
-
+                    tvCoin.setText(response.getString("coin"));
                     mLyLing.setBackgroundResource(R.drawable.ling_anchor_bg);
                 }else {               //倒计时
-                    tvCountTime.setText("");
+                    tvCoin.setText(response.getString(""));
                     mLyLing.setBackgroundResource(R.drawable.ling_anchor_bg2);
+
                     if (mCountDownTimer != null) mCountDownTimer.cancel();
                     mCountDownTimer = new CountDownTimer(remainTime*1000, 1000) {
                         @Override
@@ -283,10 +292,12 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
             public void onResponse(JSONObject response) {
                 if (NetUtil.isSuccess(response)){
                     UserModel.setGetGiftBag(true);
+
                     response = response.getJSONObject("data");
                     TimeRewardPopup timeRewardPopup = new TimeRewardPopup(getContext());
                     timeRewardPopup.setView(response);
                     timeRewardPopup.showPopupWindow();
+
                     //加载倒计时接口
                     loadLingTimeApi();
                 }
@@ -335,22 +346,44 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
 
     private void loadChannel() {
 
-        String url = NetConfig.getUrlByAPI(NetConfig.API_ChannelGet);
-        OkHttpUtils.getAsyn(url, new JSONCallback() {
-            @Override
-            public void onError(Call call, Exception e) {
-
-            }
-
+        NetUtil.getRequest(NetConfig.API_ChannelGet, null, new NetUtil.OnResponse() {
             @Override
             public void onResponse(JSONObject response) {
                 if (NetUtil.isSuccess(response)) {
-                    mChannelList = JSON.parseArray(response.getString("data"), ChannelModel.class);
-                    SPUtils.getInstance().put(CHANNEL_CHCHE, response.getString("data"));
-                    setTabsPage();
+                    Log.d(TAG, "onResponse: "+response);
+                    List<ChannelModel> tempList = JSON.parseArray(response.getString("data"), ChannelModel.class);
+
+                    boolean needUpdate = false;
+                    if (tempList.size() == mChannelCacheList.size()){
+                        for (int i = 0; i< tempList.size(); i++){
+                            //如果ID不一样
+                            if (tempList.get(i).getId().equals(mChannelCacheList.get(i).getId())){
+                                needUpdate = true;
+                                break;
+                            }
+                        }
+                    }else{
+                        needUpdate = true;
+                    }
+
+                   if (needUpdate){
+                       mChannelList = tempList;
+                       mChannelList.add(0, new ChannelModel("0", "推荐"));
+                       SPUtils.getInstance().put(CHANNEL_CHCHE, JSON.toJSONString(mChannelList));
+                   }else{
+                       mChannelList = mChannelCacheList;
+                   }
+                   setTabsPage();
+
+                }else {
+                    if (mChannelCacheList.size() > 0){
+                        mChannelList = mChannelCacheList;
+                        setTabsPage();
+                    }
                 }
             }
         });
+
     }
 
     void setTabsPage() {
@@ -444,8 +477,28 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
         String channelCacheData = SPUtils.getInstance().getString(CHANNEL_CHCHE);
         if(!TextUtils.isEmpty(channelCacheData)){
             mChannelList = JSON.parseArray(channelCacheData, ChannelModel.class);
+            if (UserModel.isLogin()){
+                saveChannelToService();
+            }
             setTabsPage();
         }
+    }
+
+    //保存频道到服务器
+    void saveChannelToService(){
+        Map<String, String> param = new HashMap<>();
+        String ids = "";
+        for (int i = 0; i<mChannelList.size(); i++){
+            ids += mChannelList.get(i).getId();
+            if (i < mChannelList.size()-1) ids += ",";
+        }
+        param.put("channel_id", ids);
+        NetUtil.postRequest(NetConfig.API_ChannelSet, param, new NetUtil.OnResponse() {
+            @Override
+            public void onResponse(JSONObject response) {
+                L.d(TAG, "onResponse: 频道列表设置："+response.toJSONString());
+            }
+        });
     }
     
     @Override

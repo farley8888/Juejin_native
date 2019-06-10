@@ -151,9 +151,6 @@ public class WebAppFragment extends BaseMainFragment {
         if (hidden){
 //            mEntryProxy.clearData(); //不能清
 //            mEntryProxy.onStop((Activity) context); //停止了
-
-        }else if (mEntryProxy.isHasStop()){
-            createVue(new Bundle());
         }
     }
 

@@ -10,9 +10,13 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.TextView;
@@ -135,6 +139,8 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     private void initEvent(){
+        setEditerListener();
+
         findViewById(R.id.btn_back).setOnClickListener(this);
         findViewById(R.id.btn_search).setOnClickListener(this);
         findViewById(R.id.btn_clear).setOnClickListener(this);
@@ -165,6 +171,30 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
                 finish();
             }
         });
+
+        mHistoryRecycle.setLayoutManager(new LinearLayoutManager(this));
+        mHistoryAdapter = new RecyclerView.Adapter<HistoryViewHolder>() {
+            @NonNull
+            @Override
+            public HistoryViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
+                return new HistoryViewHolder(LayoutInflater.from(SearchActivity.this).inflate(R.layout.item_search_history, viewGroup, false));
+            }
+
+            @Override
+            public void onBindViewHolder(@NonNull HistoryViewHolder viewHolder, int i) {
+                String text = mHistoryFilter.get(i);
+                viewHolder.bindView(text);
+            }
+
+            @Override
+            public int getItemCount() {
+                return mHistoryFilter.size();
+            }
+        };
+        mHistoryRecycle.setAdapter(mHistoryAdapter);
+    }
+
+    void setEditerListener(){
 
         mEditSearch.addTextChangedListener(new TextWatcher() {
             @Override
@@ -201,26 +231,28 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
             }
         });
 
-        mHistoryRecycle.setLayoutManager(new LinearLayoutManager(this));
-        mHistoryAdapter = new RecyclerView.Adapter<HistoryViewHolder>() {
-            @NonNull
+        mEditSearch.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
-            public HistoryViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-                return new HistoryViewHolder(LayoutInflater.from(SearchActivity.this).inflate(R.layout.item_search_history, viewGroup, false));
+            public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
+                boolean handled = false;
+                if (actionId == EditorInfo.IME_ACTION_SEARCH
+                        || actionId == EditorInfo.IME_ACTION_DONE) {
+                    String content = textView.getText().toString().trim();
+//                    Log.d(TAG, "onEditorAction: "+content);
+                    if (content.length() < 2){
+                        Toast.makeText(SearchActivity.this, "请输入完整的字段", Toast.LENGTH_SHORT).show();
+                        return true;
+                    }else{
+                       doSearch();
+                    }
+                    handled = true;
+                    /*隐藏软键盘*/
+//                    KeyboardUtil.hide(getApplicationContext());
+                }
+                return handled;
             }
+        });
 
-            @Override
-            public void onBindViewHolder(@NonNull HistoryViewHolder viewHolder, int i) {
-                String text = mHistoryFilter.get(i);
-                viewHolder.bindView(text);
-            }
-
-            @Override
-            public int getItemCount() {
-                return mHistoryFilter.size();
-            }
-        };
-        mHistoryRecycle.setAdapter(mHistoryAdapter);
     }
 
     private void initData(){
@@ -253,7 +285,6 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
         params.put("kw", keys);
         params.put("page", String.valueOf(mCurrpage));
 
-        String url = NetConfig.getUrlByParams(params, NetConfig.API_NewsSearch);
         NetUtil.getRequest(NetConfig.API_NewsSearch, params, new NetUtil.OnResponse() {
             @Override
             public void onResponse(JSONObject response) {
@@ -276,7 +307,7 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
                         mData.addAll(list);
                         mPtrLayout.loadMoreComplete(list.size() > 0);
                     }
-                    mPtrLayout.setLoadMoreEnable(totalPage != mCurrpage);
+//                    mPtrLayout.setLoadMoreEnable(totalPage != mCurrpage);
 
                     mAdapter.notifyDataSetChanged();
                     mEmptyLoadView.setVisibility(mData.size() == 0 ? View.VISIBLE : View.GONE);
@@ -301,9 +332,7 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
                     return;
                 }
 
-                saveHistory();
-                AlertProDialog.showLoading(true);
-                loadData();
+                doSearch();
                 break;
             case R.id.btn_clear:
                 new AlertDialog.Builder(this)
@@ -322,6 +351,12 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
                         .show();
                 break;
         }
+    }
+
+    void doSearch(){
+        saveHistory();
+        AlertProDialog.showLoading(true);
+        loadData();
     }
 
     private void saveHistory(){

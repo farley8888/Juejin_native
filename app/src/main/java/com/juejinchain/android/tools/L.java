@@ -70,6 +70,10 @@ public class L {
 		if (IS_DEBUG)
 			Log.d(tag, msg);
 	}
+	public static void w(String tag, String msg) {
+		if (IS_DEBUG)
+			Log.w(tag, msg);
+	}
 
 	public static void e(String tag, String msg) {
 		if (IS_DEBUG)

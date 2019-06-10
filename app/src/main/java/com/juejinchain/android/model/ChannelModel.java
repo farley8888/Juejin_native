@@ -7,6 +7,14 @@ public class ChannelModel {
     private String id;
     private String name;
 
+    public ChannelModel(){
+
+    }
+
+    public ChannelModel(String id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 
     public String getId() {
         return id;

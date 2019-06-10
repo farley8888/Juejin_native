@@ -7,8 +7,8 @@
         android:id="@+id/text"
         style="@style/JJ.Label.Minor"
         android:layout_width="match_parent"
-        android:drawableLeft="@drawable/delete_icon"
-        android:drawablePadding="5dp"
+        android:drawableLeft="@drawable/time_icon"
+        android:drawablePadding="15dp"
         android:gravity="center_vertical"
         android:padding="15dp"
         android:text="到" />

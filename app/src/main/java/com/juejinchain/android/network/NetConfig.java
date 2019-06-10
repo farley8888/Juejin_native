@@ -103,14 +103,17 @@ public class NetConfig {
     //频道管理的，推荐频道
     public static final String API_ChannelRecommend = "channel/recommend";
 
-    //新闻推荐
+    /**
+     * 推荐和热门
+     * 推荐频道id=0 ,热门1
+     */
     public static final String API_NewsPull     = "article/pull_up";
     //新闻非推荐,频道ID：channel_id
     public static final String API_NewsOther    = "article/pagelist";
     //搜索新闻 kw=王思聪&page=1&source_style=6
     public static final String API_NewsSearch   = "article/search";
     /**
-     * 读文章，后30s请求
+     * 读文章后30s请求
      * aid=132323, type: arc，成功提示一下
      */
     public static final String API_NewsReading  = "article/reading_article";

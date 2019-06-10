@@ -155,6 +155,7 @@ public class SDK_WebApp extends Activity {
 class WebappModeListener implements ICoreStatusListener, IOnCreateSplashView {
 
 	final String TAG = "WebappModeListener";
+	boolean vueLaunchFinish;
 	Activity activity;
 	View splashView = null;
 	ViewGroup rootView;
@@ -174,7 +175,10 @@ class WebappModeListener implements ICoreStatusListener, IOnCreateSplashView {
 	public void switchPage(final String page, @Nullable ReceiveJSValue.ReceiveJSValueCallback jsCallback){
 //        iWebview.evalJS("nativeJump('"+page+"')");
 		L.d(TAG, "switchPage: "+page);
-
+		if (!vueLaunchFinish){
+			L.w(TAG, "switchPage: vue还未启动完");
+			return;
+		}
 		iWebview.evalJS("nativeJump('"+page+"')", new ReceiveJSValue.ReceiveJSValueCallback() {
 			@Override
 			public String callback(JSONArray jsonArray) {
@@ -237,7 +241,7 @@ class WebappModeListener implements ICoreStatusListener, IOnCreateSplashView {
 	 * 调用vue 返回
 	 */
 	public void callVueBack(){
-		//window.setHistory vue页面的
+
 		iWebview.evalJS("nativeBack()", new ReceiveJSValue.ReceiveJSValueCallback() {
 			@Override
 			public String callback(JSONArray jsonArray) {
@@ -293,6 +297,7 @@ class WebappModeListener implements ICoreStatusListener, IOnCreateSplashView {
 					case IWebviewStateListener.ON_PAGE_FINISHED:
 						// WebApp首页面加载完成事件
 //					iWebview.evalJS("nativeJump('"+name+"')");
+						vueLaunchFinish = true;
 						L.d("webAppListener."+name, "ON_PAGE_FINISHED: ");
 						if (pd != null) {
 							pd.dismiss();

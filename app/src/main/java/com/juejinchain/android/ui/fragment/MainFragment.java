@@ -37,6 +37,7 @@ import com.juejinchain.android.ui.ppw.HomeBottomTipsPopupWindow;
 import com.juejinchain.android.ui.view.AdsHolderView;
 import com.juejinchain.android.ui.view.BottomBar;
 import com.juejinchain.android.ui.view.BottomBarTab;
+import com.juejinchain.android.util.StringUtils;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -74,7 +75,7 @@ public class MainFragment extends BaseMainFragment {
     String[] vuePages;
     public boolean showVuePageFromNative; //
     public VideoDetailFragment videoDetailFragment;
-//    public WebAppFragment webAppFragment;
+    public WebAppFragment webAppFragment;
     public BottomBarTab mBottomBarTask;
     private BottomBarTab mBottomBarMine;
 
@@ -139,7 +140,7 @@ public class MainFragment extends BaseMainFragment {
             mFragments[3]      = findChildFragment(WebAppFragment.class);
             mFragments[4]      = findChildFragment(WebAppFragment.class);
         }
-//        webAppFragment = (WebAppFragment) mFragments[THIRD];
+        webAppFragment = (WebAppFragment) mFragments[THIRD];
     }
 
     //加载所有
@@ -261,8 +262,10 @@ public class MainFragment extends BaseMainFragment {
         if (mUnreadAlerter == null) mUnreadAlerter = Alerter.create(getActivity());
 
         UnreadModel item = list.get(0); //3秒显示一个
+
         mUnreadAlerter
-                .setTitle(item.title).setText(item.content)
+                .setTitle(StringUtils.filterHTMLTag(item.title))
+                .setText(StringUtils.filterHTMLTag(item.content))
                 .setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {

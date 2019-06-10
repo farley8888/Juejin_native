@@ -177,7 +177,7 @@ public class WebAppFragment extends BaseMainFragment {
         Map<String, String> param = new HashMap<>();
         param.put("tag", shareModel.tag);
         param.put("url", NetConfig.BaseUrl+"/"+shareModel.tag);
-        NetUtil.getRequest(NetConfig.API_ShareCopy, param, new NetUtil.OnResponse() {
+        NetUtil.getRequestShowLoading(NetConfig.API_ShareCopy, param, new NetUtil.OnResponse() {
             @Override
             public void onResponse(JSONObject response) {
                 JSONObject data = response.getJSONObject("data");
@@ -187,7 +187,15 @@ public class WebAppFragment extends BaseMainFragment {
                 shareJsonParam.put("title", data.getString("title"));
                 shareJsonParam.put("thumbs", data.getString("img_url"));
                 //%2F是‘/’的url转义
-                String href = String.format("%s/?path=/&inviteCode=%s", NetConfig.SHARE_BASE_HREF, UserModel.getInvitation());
+                String href = "";
+                /**
+                 * path 视频 = VideoDetail/id
+                 * path 首页 = /
+                 * path 文章 = Article/id
+                 */
+                href = String.format("%s/?path=%s&inviteCode=%s",
+                        NetConfig.SHARE_BASE_HREF, event.typePath , UserModel.getInvitation());
+
                 shareJsonParam.put("href", href);
 
                 webModeListener.shareTo(shareModel.way, shareJsonParam.toJSONString(), shareModel.tag);
@@ -220,7 +228,8 @@ public class WebAppFragment extends BaseMainFragment {
             mainFragment.showHomeFragment();
             return true;
         }
-        return super.onBackPressedSupport();
+//        return super.onBackPressedSupport();
+        return false;
     }
 
     public void showPage(String page){

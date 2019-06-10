@@ -17,6 +17,7 @@ import com.dmcbig.mediapicker.utils.ScreenUtils;
 import com.juejinchain.android.R;
 import com.juejinchain.android.network.NetConfig;
 import com.juejinchain.android.network.NetUtil;
+import com.juejinchain.android.ui.ppw.GiftSuccessPopup;
 
 /**
  * 首页弹窗提示
@@ -76,13 +77,25 @@ public class HomeTipsAlertDialog extends Dialog {
             public void onResponse(JSONObject response) {
                 if (NetUtil.isSuccess(response)){
                     response = response.getJSONObject("data");
-
+                    showGiftSuccessDialog(response);
                 }else{
                     Toast.makeText(getContext(), response.getString("msg"), Toast.LENGTH_LONG).show();
                 }
                 dismiss();
             }
         });
+    }
+
+    void showGiftSuccessDialog(JSONObject jo){
+        GiftSuccessPopup successPopup = new GiftSuccessPopup(getContext());
+        successPopup.setView(jo);
+        successPopup.mLookButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                successPopup.dismiss();
+            }
+        });
+        successPopup.showPopupWindow();
     }
 
     private void initView(){

@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#F44336</color>
     <color name="colorPrimaryDark">#D32F2F</color>
-    <color name="colorAccent">#536DFE</color>
+    <!-- tab文字色 -->
+    <color name="colorPrimary">#FFAA00</color>
+    <!-- tab图标色 -->
+    <color name="colorAccent">#FFAA00</color>
+    <!-- tab未选中色 -->
+    <color name="tab_unselect">#c9c9c9</color>
+
+    <color name="tab_selected_color">#666666</color>
+
     <color name="bg_app">#F1F1F1</color>
     <color name="video_tabText">#666666</color>
 
@@ -18,9 +25,7 @@
     <color name="text_darker">#666</color>
     <color name="text_darker_lighter">#999</color>
     <color name="text_yellow">#FFAA00</color>
-    <color name="tab_selected_color">#666666</color>
 
-    <color name="tab_unselect">#c9c9c9</color>
     <color name="bg_btn">#dadada</color>
 
     <color name="X_text_gray">#8a8a8a</color>
@@ -33,6 +38,7 @@
     <color name="toolbar_bg">#FFC125</color>
 
     <color name="line_bg">#CDCDCD</color>
+    <color name="gift_txtColor">#F6A00A</color>
 
     <color name="ccc">#ccc</color>
 

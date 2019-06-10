@@ -7,7 +7,6 @@ import android.support.annotation.NonNull;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,36 +15,41 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.alibaba.fastjson.JSONObject;
 import com.bumptech.glide.Glide;
 import com.dmcbig.mediapicker.utils.ScreenUtils;
-import com.juejinchain.android.MainActivity;
 import com.juejinchain.android.R;
 import com.juejinchain.android.event.ShareEvent;
 import com.juejinchain.android.event.ShowVueEvent;
 import com.juejinchain.android.model.ShareModel;
-import com.juejinchain.android.network.NetConfig;
-import com.juejinchain.android.network.NetUtil;
-import com.juejinchain.android.tools.L;
 
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 分享对话框
  */
 public class ShareDialog extends Dialog {
     Activity mActivity ;
+    String mType;
+    String mId;
 
-    public ShareDialog(Context context) {
+    /**
+     * @param context
+     *
+     * @param type 类型
+     * @see ShareEvent TYPE_
+     *
+     * @param id
+     * @see ShareEvent
+     */
+    public ShareDialog(Context context, String type, String id) {
         this(context, 0);
         mActivity = (Activity) context;
+        mType = type;
+        mId = id;
     }
 
     private View.OnClickListener clickListener;
@@ -94,14 +98,16 @@ public class ShareDialog extends Dialog {
                 return list.size();
             }
         });
-        ImageView img = findViewById(R.id.img_share_seeButton);
+        ImageView img = findViewById(R.id.img_share_seeFanc);
         Glide.with(getContext()).load(R.drawable.share_see_button).into(img);
+
         //查看攻略
         img.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 dismiss();
-                EventBus.getDefault().post(new ShowVueEvent(ShowVueEvent.PAGE_LOCK_FAN, ""));
+                if (mType != ShareEvent.TYPE_VIDEO)
+                    EventBus.getDefault().post(new ShowVueEvent(ShowVueEvent.PAGE_LOCK_FAN, ""));
                 if (clickListener != null) clickListener.onClick(view);
             }
         });
@@ -155,35 +161,8 @@ public class ShareDialog extends Dialog {
 //        if (entitiy.way.equals(ShareModel.WAY_SUOFEN))
         dismiss();
 
-        EventBus.getDefault().post(new ShareEvent(entitiy));
+        EventBus.getDefault().post(new ShareEvent(entitiy, mType, mId));
     }
 
-//    private class ShareModel{
-//
-//        /**
-//         * 名称
-//         */
-//        public String name;
-//        public String way;
-//        /**
-//         * logo
-//         */
-//        public int logo;
-//        /**
-//         * 是否含有推荐
-//         */
-//        public boolean withDot;
-//
-//        public ShareModel(String name, int logo, boolean withDot) {
-//            this.name = name;
-//            this.logo = logo;
-//            this.withDot = withDot;
-//        }
-//
-//
-//        public ShareModel(String name, String way, int logo, boolean withDot) {
-//            this(name, logo, withDot);
-//            this.way = way;
-//        }
-//    }
+
 }

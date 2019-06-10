@@ -24,10 +24,10 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.bumptech.glide.Glide;
 import com.juejinchain.android.R;
-import com.juejinchain.android.WebAppFragment;
 import com.juejinchain.android.adapter.VideoDetailXAdapter;
 import com.juejinchain.android.base.BaseBackFragment;
 import com.juejinchain.android.base.XRecyclerViewAdapter;
+import com.juejinchain.android.event.ShareEvent;
 import com.juejinchain.android.event.ShowVueEvent;
 import com.juejinchain.android.model.CommentModel;
 import com.juejinchain.android.model.VideoModel;
@@ -37,8 +37,6 @@ import com.juejinchain.android.tools.L;
 import com.juejinchain.android.tools.WebViewUtil;
 import com.juejinchain.android.ui.dialog.ShareDialog;
 import com.juejinchain.android.ui.view.DividerDecoration;
-
-import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -76,6 +74,7 @@ public class VideoDetailFragment extends BaseBackFragment {
     private int totalSize;
     ReplyCommentPopup mCommentPopup;
     private EditText mEditView;
+    ShareDialog mShareDialog;
 
     public static VideoDetailFragment newInstance(VideoModel model) {
         VideoDetailFragment self = new VideoDetailFragment();
@@ -170,23 +169,38 @@ public class VideoDetailFragment extends BaseBackFragment {
         },false);
     }
 
+    void showShareDialog(){
+        if(mShareDialog == null){
+            mShareDialog = new ShareDialog(getContext(), ShareEvent.TYPE_VIDEO, model.id);
+        }
+        mShareDialog.show();
+        mShareDialog.setClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //查看攻略
+                if (view.getId() == R.id.img_share_seeFanc){
+                    ISupportFragment temp = getPreFragment();
+                    if (temp instanceof VideoDetailFragment){  //多次调用下面的showHideFragment 方法会出现这种情况
+                        pop();
+                    }else {
+                        MainFragment mainFragment = (MainFragment)temp ;
+                        mainFragment.videoDetailFragment = VideoDetailFragment.this;
+
+                        //mainFragment.webAppFragment 显示frag unable sub of parent
+                        showHideFragment(mainFragment, VideoDetailFragment.this);
+                        mainFragment.showVue(ShowVueEvent.PAGE_LOCK_FAN, "");
+
+                    }
+                }
+            }
+        });
+    }
+
     @Override
     protected void topbarRightButtonClick() {
         Log.d(TAG, "topbarRightButtonClick: ");
+        showShareDialog();
 //        new ShareDialog(getContext()).show();
-        ISupportFragment temp = getPreFragment();
-        if (temp instanceof VideoDetailFragment){  //多次调用下面的showHideFragment 方法会出现这种情况
-            pop();
-        }else {
-            MainFragment mainFragment = (MainFragment)temp ;
-            mainFragment.videoDetailFragment = this;
-
-            //mainFragment.webAppFragment 显示frag unable sub of parent
-            showHideFragment(mainFragment, this);
-            mainFragment.showVue(ShowVueEvent.PAGE_LOCK_FAN, "");
-
-//        start(WebAppFragment.instance("")); 不能这样add已存在的单例
-        }
 
     }
 
@@ -220,7 +234,7 @@ public class VideoDetailFragment extends BaseBackFragment {
 
                         break;
                     case R.id.btn_btmShare:  //分享
-                        new ShareDialog(getActivity()).show();
+                        showShareDialog();
                         break;
                 }
             }
@@ -288,7 +302,7 @@ public class VideoDetailFragment extends BaseBackFragment {
                         doFabulous(tv, model);
                         break;
                     case R.id.buttonShare://分享
-                        new ShareDialog(getActivity()).show();
+                        showShareDialog();
                         break;
                     case R.id.btn_cmtReply: //回复评论
                         CommentModel cmodel = commentList.get(position - recommendList.size() -1);

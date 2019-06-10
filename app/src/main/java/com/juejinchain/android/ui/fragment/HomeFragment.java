@@ -6,6 +6,7 @@ import android.os.CountDownTimer;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,6 +23,7 @@ import com.juejinchain.android.R;
 import com.juejinchain.android.adapter.HomePagerFragmentAdapter;
 import com.juejinchain.android.base.BaseMainFragment;
 import com.juejinchain.android.event.ShareCallbackEvent;
+import com.juejinchain.android.event.ShareEvent;
 import com.juejinchain.android.event.ShowTabPopupWindowEvent;
 import com.juejinchain.android.event.ShowVueEvent;
 import com.juejinchain.android.event.UpdateChannelEvent;
@@ -31,6 +33,7 @@ import com.juejinchain.android.network.NetConfig;
 import com.juejinchain.android.network.NetUtil;
 import com.juejinchain.android.network.OkHttpUtils;
 import com.juejinchain.android.network.callBack.JSONCallback;
+import com.juejinchain.android.tools.L;
 import com.juejinchain.android.ui.ppw.HomeTipsPopupWindow;
 import com.juejinchain.android.ui.activity.CategoryExpandActivity;
 import com.juejinchain.android.ui.activity.SearchActivity;
@@ -173,9 +176,14 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
             if (mPopupWindow != null && mPopupWindow.isShowing()) mPopupWindow.dismiss();
         }
         MainFragment mainFragment = (MainFragment) getParentFragment();
+        if (UserModel.isLogin()){
+
 //        Log.d(TAG, "onHiddenChanged: "+mainFragment);
-        if (null != mainFragment.mAdsHolderView )
-            mainFragment.mAdsHolderView.setVisibility(hidden ? View.GONE:View.VISIBLE);
+            if (null != mainFragment.mAdsHolderView )
+                mainFragment.mAdsHolderView.setVisibility(UserModel.hasGetGiftBag() ? View.GONE:View.VISIBLE);
+        }else{
+            mainFragment.mAdsHolderView.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -396,7 +404,7 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
                 break;
             case R.id.button4:  //分享
                 if (UserModel.isLogin()){
-                   mShareDialog = new ShareDialog(getActivity());
+                   if (mShareDialog == null) mShareDialog = new ShareDialog(getActivity(), ShareEvent.TYPE_INDEX, "");
                    mShareDialog.show();
                 }
                 else{
@@ -413,12 +421,10 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        EventBus.getDefault().unregister(this);
-        if(mPopupWindow != null && !mPopupWindow.isShowing()){
-            mPopupWindow.dismiss();
-        }
+    public boolean onBackPressedSupport() {
+        L.d(TAG, "onBackPressedSupport: ");
+//        return super.onBackPressedSupport();
+        return false; //返回false 让MainFragment处理
     }
 
     @Subscribe
@@ -427,6 +433,15 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
         if(!TextUtils.isEmpty(channelCacheData)){
             mChannelList = JSON.parseArray(channelCacheData, ChannelModel.class);
             setTabsPage();
+        }
+    }
+    
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        EventBus.getDefault().unregister(this);
+        if(mPopupWindow != null && !mPopupWindow.isShowing()){
+            mPopupWindow.dismiss();
         }
     }
 

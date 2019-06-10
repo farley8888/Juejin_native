@@ -20,10 +20,10 @@ import com.dmcbig.mediapicker.utils.ScreenUtils;
 import com.juejinchain.android.H5Plugin.MyPlugin;
 import com.juejinchain.android.R;
 import com.juejinchain.android.WebAppFragment;
+import com.juejinchain.android.base.BaseMainFragment;
 import com.juejinchain.android.event.ShowTabPopupWindowEvent;
 import com.juejinchain.android.event.ShowVueEvent;
-import com.juejinchain.android.event.TabSelectedEvent;
-import com.juejinchain.android.eventbus_activity.EventBusActivityScope;
+import com.juejinchain.android.listener.OnItemClickListener;
 import com.juejinchain.android.model.UnreadModel;
 import com.juejinchain.android.model.UserModel;
 import com.juejinchain.android.network.NetConfig;
@@ -31,6 +31,8 @@ import com.juejinchain.android.network.NetUtil;
 import com.juejinchain.android.network.SpUtils;
 import com.juejinchain.android.tools.L;
 import com.juejinchain.android.ui.alerter.Alerter;
+import com.juejinchain.android.ui.dialog.BackExitDialog;
+import com.juejinchain.android.ui.ppw.GiftSuccessPopup;
 import com.juejinchain.android.ui.ppw.HomeBottomTipsPopupWindow;
 import com.juejinchain.android.ui.view.AdsHolderView;
 import com.juejinchain.android.ui.view.BottomBar;
@@ -42,12 +44,15 @@ import org.greenrobot.eventbus.Subscribe;
 import java.util.List;
 
 import me.yokeyword.fragmentation.SupportFragment;
+import razerdp.basepopup.QuickPopupBuilder;
 
 
 /**
  * 所有fragment控制器
+ * SupportFragment
+ * BaseMainFragment
  */
-public class MainFragment extends SupportFragment {
+public class MainFragment extends BaseMainFragment {
     private static final int REQ_MSG = 10;
 
     public static final int FIRST = 0;
@@ -73,8 +78,9 @@ public class MainFragment extends SupportFragment {
     public BottomBarTab mBottomBarTask;
     private BottomBarTab mBottomBarMine;
 
-    private HomeBottomTipsPopupWindow mPopupWindow;
+    public HomeBottomTipsPopupWindow mBottomPopupWindow;
     Alerter mUnreadAlerter; //未读信息提示
+    private BackExitDialog mBackDialog;
 
     public static MainFragment newInstance() {
 
@@ -136,7 +142,7 @@ public class MainFragment extends SupportFragment {
 //        webAppFragment = (WebAppFragment) mFragments[THIRD];
     }
 
-    //初始化所有
+    //加载所有
     void addFragments(){
         //因使用了框架，直接加载不能正常显示！
         fragmentManager = getActivity().getSupportFragmentManager();
@@ -157,12 +163,12 @@ public class MainFragment extends SupportFragment {
 
         mBottomBar = (BottomBar) view.findViewById(R.id.bottomBar);
         //影视动态加载
-        mBottomBarMovie = new BottomBarTab(_mActivity, R.drawable.ic_discover_white_24dp, getString(R.string.movie));
-        mBottomBarTask = new BottomBarTab(_mActivity, R.drawable.ic_discover_white_24dp, getString(R.string.task));
-        mBottomBarMine = new BottomBarTab(_mActivity, R.drawable.ic_discover_white_24dp, getString(R.string.mine));
+        mBottomBarMovie = new BottomBarTab(_mActivity, R.drawable.ic_nav_movie, getString(R.string.movie));
+        mBottomBarTask = new BottomBarTab(_mActivity, R.drawable.ic_nav_task, getString(R.string.task));
+        mBottomBarMine = new BottomBarTab(_mActivity, R.drawable.ic_nav_my, getString(R.string.mine));
 
         mBottomBar
-                .addItem(new BottomBarTab(_mActivity, R.drawable.ic_message_white_24dp, getString(R.string.home)))
+                .addItem(new BottomBarTab(_mActivity, R.drawable.ic_nav_home, getString(R.string.home)))
                 .addItem(mBottomBarMovie)
                 .addItem(new BottomBarTab(_mActivity, R.drawable.ic_car_and_money, null))
                 .addItem(mBottomBarTask)
@@ -295,6 +301,7 @@ public class MainFragment extends SupportFragment {
     }
 
     public void changeBottomTabBar(boolean isShow){
+        changeBottomPopup(isShow);
         if (isShow && showVuePageFromNative){
             showVuePageFromNative = false;
             showHideFragment(mFragments[0], mFragments[1]);
@@ -329,6 +336,44 @@ public class MainFragment extends SupportFragment {
         }
     }
 
+
+    private void changeBottomPopup(boolean isShow) {
+        if (isShow){
+            if(mBottomPopupWindow != null) onBottomTabPopShowEvent(null);
+        }else {
+            if(mBottomPopupWindow != null && mBottomPopupWindow.isShowing()){
+                mBottomPopupWindow.dismiss();
+            }
+        }
+    }
+
+    @Override
+    public boolean onBackPressedSupport() {
+//        L.d("MainFragment", "onBackPressedSupport: ");
+        showExitDialog();
+//        QuickPopupBuilder.with(getContext()).contentView(R.layout.dialog_get_gift_success).show();
+
+//        return super.onBackPressedSupport(); 此行再按一次退出
+        return true;
+    }
+
+    //弹出退出对话框
+    void showExitDialog(){
+       if(mBackDialog == null) mBackDialog = new BackExitDialog(getContext());
+        mBackDialog.show();
+        mBackDialog.setClickListener(new OnItemClickListener() {
+            @Override
+            public void onItemClick(int position, View view) {
+                if (view.getId() == R.id.btn_toGet){    //去领取
+                    //切换到任务页
+                    mBottomBarTask.performClick();
+                }else if(view.getId() == R.id.btn_exit){ //退出
+                    getActivity().finish();
+                }
+            }
+        });
+    }
+
     /**
      * start other BrotherFragment
      */
@@ -341,8 +386,8 @@ public class MainFragment extends SupportFragment {
         super.onDestroyView();
         EventBus.getDefault().unregister(this);
 
-        if(mPopupWindow != null && mPopupWindow.isShowing()){
-            mPopupWindow.dismiss();
+        if(mBottomPopupWindow != null && mBottomPopupWindow.isShowing()){
+            mBottomPopupWindow.dismiss();
         }
     }
 
@@ -358,21 +403,22 @@ public class MainFragment extends SupportFragment {
 
         View anchor = mBottomBarTask;
         anchor.getLocationOnScreen(location);
-        if(mPopupWindow == null || !mPopupWindow.isShowing()){
-            mPopupWindow = new HomeBottomTipsPopupWindow(getActivity());
-            mPopupWindow.showAtLocation(anchor, Gravity.NO_GRAVITY, location[0] - anchor.getWidth()/2,
+        if(mBottomPopupWindow == null || !mBottomPopupWindow.isShowing()){
+            mBottomPopupWindow = new HomeBottomTipsPopupWindow(getActivity());
+            mBottomPopupWindow.showAtLocation(anchor, Gravity.NO_GRAVITY, location[0] - anchor.getWidth()/2,
                     location[1] - ScreenUtils.dp2px(getActivity(), delta));
 
             if (UserModel.isNew()){
-                mPopupWindow.textView.setText("连续签到7天得3680金币");
+                mBottomPopupWindow.textView.setText("连续签到7天得3680金币");
             }else{
-                mPopupWindow.textView.setText("今日奖励可领取");
+                mBottomPopupWindow.textView.setText("今日奖励可领取");
             }
-            mPopupWindow.mContentView.setOnClickListener(new View.OnClickListener() {
+            mBottomPopupWindow.mContentView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    mPopupWindow.dismiss();
+                    mBottomPopupWindow.dismiss();
                     mBottomBarTask.performClick();
+                    mBottomPopupWindow = null;
                 }
             });
         }

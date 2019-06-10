@@ -63,7 +63,7 @@ public class NetConfig {
 
     //获取大礼包随机车型数据
     public static final String API_GiftImage    = "gift_image";
-    //领取大礼包 （随机车 对话框 领取按钮 点击调取
+    //领取大礼包 点击对话框的领取按钮 调用
     public static final String API_GiftBag      = "task/gift_bag";
     //首页半小时
     public static final String API_Times30      = "task/minute30";
@@ -85,6 +85,10 @@ public class NetConfig {
      * 获取随机分享内容
      */
     public static final String API_ShareCopy    = "share/copywriting";
+    /**
+     * 首页返回奖励Dialog接口
+     */
+    public static final String API_ShareTop     = "share/top_car";
 
 
     //获取频道，默认调用此接口，没登录返回8个，登录后重新获取

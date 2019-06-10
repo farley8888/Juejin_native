@@ -65,10 +65,16 @@ public class NetConfig {
     public static final String API_GiftImage    = "gift_image";
     //领取大礼包 点击对话框的领取按钮 调用
     public static final String API_GiftBag      = "task/gift_bag";
-    //首页半小时
+    //首页半小时 计时
     public static final String API_Times30      = "task/minute30";
-    //首页半小时 已保存
+    //首页半小时 点击获取
     public static final String API_Times30_Save = "task/minute30_save";
+    /**
+     * 首页阅读60分钟奖励,每次显示时调用
+     */
+    public static final String API_Read60Min    = "user/read_60minute";
+
+
     /**
      * 提示签到接口，非新用户登录后回到首页时调用
      * 如未签到底部弹签到提示popup
@@ -89,7 +95,6 @@ public class NetConfig {
      * 首页返回奖励Dialog接口
      */
     public static final String API_ShareTop     = "share/top_car";
-
 
     //获取频道，默认调用此接口，没登录返回8个，登录后重新获取
     public static final String API_ChannelGet       = "channel/user";

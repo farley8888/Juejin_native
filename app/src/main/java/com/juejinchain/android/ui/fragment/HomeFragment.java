@@ -6,7 +6,6 @@ import android.os.CountDownTimer;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +13,7 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.alibaba.fastjson.JSON;
@@ -38,6 +38,7 @@ import com.juejinchain.android.ui.ppw.HomeTipsPopupWindow;
 import com.juejinchain.android.ui.activity.CategoryExpandActivity;
 import com.juejinchain.android.ui.activity.SearchActivity;
 import com.juejinchain.android.ui.dialog.ShareDialog;
+import com.juejinchain.android.ui.ppw.TimeRewardPopup;
 import com.juejinchain.android.ui.view.PagerSlidingTabStrip;
 import com.juejinchain.android.util.SPUtils;
 
@@ -77,6 +78,7 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
     private TextView tvCountTime;
     private boolean mIsVisible;
     ShareDialog mShareDialog;
+    private LinearLayout mLyLing;
 
     public static HomeFragment newInstance() {
 
@@ -130,14 +132,14 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
 //        mTab.addTab(mTab.newTab());
         setOnClickListener();
 
-        View lyLing = view.findViewById(R.id.ly_ling);
-        lyLing.setOnClickListener(this);
+        mLyLing = view.findViewById(R.id.ly_ling);
+        mLyLing.setOnClickListener(this);
 
         view.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
                 view.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                lyLing.performClick();
+                mLyLing.performClick();
             }
         });
     }
@@ -236,7 +238,7 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
     }
 
     //加载是否可领取状态api
-    void loadLingStatusApi(){
+    void loadLingTimeApi(){
         //
         NetUtil.getRequest(NetConfig.API_Times30, null, new NetUtil.OnResponse() {
             @Override
@@ -246,8 +248,12 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
                 tvCoin.setText(response.getString("coin"));
 
                 if (remainTime == 0){ //可领取
-                    doLingApi();
+                    tvCountTime.setText(getString(R.string.lingqu));
+
+                    mLyLing.setBackgroundResource(R.drawable.ling_anchor_bg);
                 }else {               //倒计时
+                    tvCountTime.setText("");
+                    mLyLing.setBackgroundResource(R.drawable.ling_anchor_bg2);
                     if (mCountDownTimer != null) mCountDownTimer.cancel();
                     mCountDownTimer = new CountDownTimer(remainTime*1000, 1000) {
                         @Override
@@ -270,13 +276,19 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
         });
     }
 
-    //调用领取接口后，才保存在服务器
+    //点击领取
     void doLingApi(){
         NetUtil.getRequest(NetConfig.API_Times30_Save, null, new NetUtil.OnResponse() {
             @Override
             public void onResponse(JSONObject response) {
                 if (NetUtil.isSuccess(response)){
                     UserModel.setGetGiftBag(true);
+                    response = response.getJSONObject("data");
+                    TimeRewardPopup timeRewardPopup = new TimeRewardPopup(getContext());
+                    timeRewardPopup.setView(response);
+                    timeRewardPopup.showPopupWindow();
+                    //加载倒计时接口
+                    loadLingTimeApi();
                 }
 
             }
@@ -303,7 +315,7 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
         mPopupWindow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                loadLingStatusApi();
+                doLingApi();
                 if (UserModel.isNew())
                     EventBus.getDefault().post(new ShowTabPopupWindowEvent());
             }
@@ -415,7 +427,7 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
                 break;
             case R.id.ly_ling:  //领奖励
                 if (mPopupWindow != null) mPopupWindow.dismiss();
-                loadLingStatusApi();
+                doLingApi();
                 break;
         }
     }

@@ -82,6 +82,7 @@ public class MainFragment extends BaseMainFragment {
     public HomeBottomTipsPopupWindow mBottomPopupWindow;
     Alerter mUnreadAlerter; //未读信息提示
     private BackExitDialog mBackDialog;
+    private int currShowPosition; //当前显示的
 
     public static MainFragment newInstance() {
 
@@ -120,8 +121,8 @@ public class MainFragment extends BaseMainFragment {
             mFragments[SECOND] = WebAppFragment.instance("");
 //            mFragments[SECOND] = BlankFragment.newInstance("","");
 
-            mFragments[THIRD] = WebAppFragment.instance("task");
-            mFragments[3]     = WebAppFragment.instance("");
+            mFragments[THIRD] = WebAppFragment.instance("");
+            mFragments[3]     = WebAppFragment.instance("task");
             mFragments[4]     = WebAppFragment.instance("");
 
             loadMultipleRootFragment(R.id.fl_tab_container, FIRST,
@@ -182,7 +183,7 @@ public class MainFragment extends BaseMainFragment {
 
             @Override
             public void onTabSelected(int position, int prePosition) {
-
+                currShowPosition = position;
                 // vue切换处理
                 if (position > 0){
                     if (vuePages == null){
@@ -236,7 +237,7 @@ public class MainFragment extends BaseMainFragment {
     public void onResume() {
         super.onResume();
         if (UserModel.isLogin()){
-            //20s 请求一次
+            //vue是20s 请求一次
             if (System.currentTimeMillis() - (long)SpUtils.get(getContext(), "unreadKey", 0l) < 10*1000 ){
                 return;
             }
@@ -261,7 +262,7 @@ public class MainFragment extends BaseMainFragment {
     public void showUnreadAlert(List<UnreadModel>  list) {
         if (mUnreadAlerter == null) mUnreadAlerter = Alerter.create(getActivity());
 
-        UnreadModel item = list.get(0); //3秒显示一个
+        UnreadModel item = list.get(0); //vue是3秒显示一个。其实没必要，因为跳转过去会自动全部阅读
 
         mUnreadAlerter
                 .setTitle(StringUtils.filterHTMLTag(item.title))
@@ -290,6 +291,7 @@ public class MainFragment extends BaseMainFragment {
      */
     public void showVue(String page, String params){
         showVuePageFromNative = true;
+        currShowPosition = 1;
         WebAppFragment webVueFragment = (WebAppFragment) mFragments[1];
         showHideFragment(webVueFragment, mFragments[0]);
         webVueFragment.showPage(page+ ( params.length() > 0 ? "/"+params : ""));
@@ -298,6 +300,7 @@ public class MainFragment extends BaseMainFragment {
 
     public void showHomeFragment(){
         showVuePageFromNative = false;
+        currShowPosition = 0;
         showHideFragment(mFragments[0], mFragments[1]); //这样按钮状态未能修改
         mBottomBar.getItem(0).performClick();
         changeBottomTabBar(true);
@@ -353,16 +356,20 @@ public class MainFragment extends BaseMainFragment {
     @Override
     public boolean onBackPressedSupport() {
 //        L.d("MainFragment", "onBackPressedSupport: ");
-        showExitDialog();
-//        QuickPopupBuilder.with(getContext()).contentView(R.layout.dialog_get_gift_success).show();
-
+        if (currShowPosition != 0){
+            showHomeFragment();
+        }else{
+            showExitDialog();
+        }
 //        return super.onBackPressedSupport(); 此行再按一次退出
         return true;
     }
 
     //弹出退出对话框
     void showExitDialog(){
-       if(mBackDialog == null) mBackDialog = new BackExitDialog(getContext());
+//        QuickPopupBuilder.with(getContext()).contentView(R.layout.dialog_get_gift_success).show();
+        if(mBackDialog == null) mBackDialog = new BackExitDialog(getContext());
+        mBackDialog.setCanceledOnTouchOutside(false);
         mBackDialog.show();
         mBackDialog.setClickListener(new OnItemClickListener() {
             @Override

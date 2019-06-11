@@ -32,7 +32,9 @@ import android.view.Window;
 import android.widget.FrameLayout;
 
 import com.alibaba.fastjson.JSONObject;
+import com.juejinchain.android.H5Plugin.MyPlugin;
 import com.juejinchain.android.tools.L;
+import com.juejinchain.android.ui.fragment.MainFragment;
 
 import org.json.JSONArray;
 
@@ -246,6 +248,17 @@ class WebappModeListener implements ICoreStatusListener, IOnCreateSplashView {
 			@Override
 			public String callback(JSONArray jsonArray) {
 				L.d(TAG, "callVueBack.callback: ");
+				MyPlugin.VueCallBackTimes++;
+				rootView.postDelayed(new Runnable() {
+					@Override
+					public void run() {
+						if (MyPlugin.VueCallBackTimes > 1){
+							MainActivity mainActivity = (MainActivity) iWebview.getActivity();
+							mainActivity.mainFragment.showHomeFragment();
+							MyPlugin.VueCallBackTimes = 0;
+						}
+					}
+				},300);
 				return "{}";
 			}
 		});

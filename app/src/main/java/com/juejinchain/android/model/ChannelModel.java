@@ -4,6 +4,9 @@ import java.util.Objects;
 
 public class ChannelModel {
 
+    /**
+     * 频道id, 推荐为0，热门1，其它用接口的
+     */
     private String id;
     private String name;
 

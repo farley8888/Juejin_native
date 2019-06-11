@@ -82,6 +82,7 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
     private TextView tvCountTime;
     private boolean mIsVisible;
     ShareDialog mShareDialog;
+    //领取奖励
     private LinearLayout mLyLing;
     private List<ChannelModel> mChannelCacheList = new ArrayList<>();
 
@@ -140,13 +141,15 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
         mLyLing = view.findViewById(R.id.ly_ling);
         mLyLing.setOnClickListener(this);
 
-        view.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                view.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                mLyLing.performClick();
-            }
-        });
+        //怪事年年有，今年特别多，此监听+goLogin()会导致vue强制显示成第一个fragment
+        //因为启动前不能调用两次vue
+//        view.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+//            @Override
+//            public void onGlobalLayout() {
+//                view.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+//                mLyLing.performClick();
+//            }
+//        });
     }
 
     private void setOnClickListener() {
@@ -253,11 +256,11 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
             public void onResponse(JSONObject response) {
                 response = response.getJSONObject("data");
                 long remainTime = response.getInteger("time_remaining");
-
+                String coin = response.getString("coin");
 
                 if (remainTime == 0){ //可领取
                     tvCountTime.setText(getString(R.string.lingqu));
-                    tvCoin.setText(response.getString("coin"));
+                    tvCoin.setText(coin);
                     mLyLing.setBackgroundResource(R.drawable.ling_anchor_bg);
                 }else {               //倒计时
                     tvCoin.setText(response.getString(""));
@@ -276,6 +279,8 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
                         @Override
                         public void onFinish() {
                             tvCountTime.setText(getString(R.string.lingqu));
+                            tvCoin.setText(coin);
+                            mLyLing.setBackgroundResource(R.drawable.ling_anchor_bg);
                             showLingRewardPop();
                         }
                     };
@@ -402,8 +407,8 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
      * 对PagerSlidingTabStrip的各项属性进行赋值。
      */
     private void setTabsValue() {
-        // 设置Tab是自动填充满屏幕的
-        mTabs.setShouldExpand(true);
+        // 设置Tab是自动填充满屏幕的，true不扩展填充！！
+//        mTabs.setShouldExpand(true);
 
         // 设置Tab的分割线的颜色
 //        mTabs.setDividerColor(getResources().getColor(R.color.color_80cbc4));
@@ -453,16 +458,25 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
                    mShareDialog.show();
                 }
                 else{
-                    MainFragment mainFragment = (MainFragment) getParentFragment();
-                    mainFragment.showVue(ShowVueEvent.PAGE_LOGIN, "");
+                    goLogin();
                 }
 
                 break;
             case R.id.ly_ling:  //领奖励
-                if (mPopupWindow != null) mPopupWindow.dismiss();
-                doLingApi();
+                if(UserModel.isLogin()){
+                    if (mPopupWindow != null) mPopupWindow.dismiss();
+                    doLingApi();
+                }else{
+                    goLogin();
+                }
                 break;
         }
+    }
+
+    //
+    private void goLogin(){
+        MainFragment mainFragment = (MainFragment) getParentFragment();
+        mainFragment.showVue(ShowVueEvent.PAGE_LOGIN, "");
     }
 
     @Override

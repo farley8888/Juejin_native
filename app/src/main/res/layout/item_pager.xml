@@ -132,7 +132,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="5dp"
             android:text="来源"
-            android:textColor="@android:color/secondary_text_dark"
+            android:textColor="@color/text_666666"
             android:textSize="12sp" />
         <TextView
             android:id="@+id/tv_readTimes"
@@ -140,7 +140,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="5dp"
             android:text="阅读 10W"
-            android:textColor="@android:color/secondary_text_dark"
+            android:textColor="@color/text_666666"
             android:textSize="12sp" />
         <TextView
             android:id="@+id/tv_date"
@@ -149,7 +149,7 @@
             android:gravity="right"
             android:layout_weight="1"
             android:text="04:25 12:00"
-            android:textColor="@android:color/secondary_text_dark"
+            android:textColor="@color/text_666666"
             android:textSize="12sp" />
 
 
@@ -158,6 +158,6 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="0.2dp"
-        android:background="#c9c9c9"/>
+        android:background="#DBDBDB"/>
 
 </LinearLayout>

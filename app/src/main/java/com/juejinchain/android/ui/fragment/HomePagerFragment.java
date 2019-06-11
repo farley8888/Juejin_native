@@ -184,7 +184,7 @@ public class HomePagerFragment extends SupportFragment  {
         param.put("per_page", pageSize+"");
 //        if (!mChannel.getName().equals("推荐"))
             param.put("channel_id", mChannel.getId());
-        if (currPage == 1 && mChannel.getId().equals("1")){
+        if (currPage == 1 && mChannel.getId().equals("0")){
             param.put("is_first", 1+"");
         }
 

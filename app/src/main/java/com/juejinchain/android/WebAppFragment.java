@@ -127,6 +127,13 @@ public class WebAppFragment extends BaseMainFragment {
         }
         mEntryProxy.onResume((Activity) context);
         showPage(currPage);
+
+    }
+
+
+    @Override
+    public void onSupportVisible() {
+        super.onSupportVisible();
         if (NetConfig.SHARE_BASE_HREF == null){
             getShareHref();
         }
@@ -162,7 +169,7 @@ public class WebAppFragment extends BaseMainFragment {
         // 初始化5+内核
         mEntryProxy = new MyEntryProxy().init((Activity) context, webModeListener);
         // 启动5+内核
-        mEntryProxy.onCreate((Activity) context, savedInstanceState, SDK.IntegratedMode.WEBAPP, null);
+        mEntryProxy.onCreate((Activity) context, savedInstanceState, SDK.IntegratedMode.RUNTIME, null);
         //            setContentView(f);
     }
 
@@ -230,7 +237,7 @@ public class WebAppFragment extends BaseMainFragment {
     }
 
     public void showPage(String page){
-
+        //启动前不能调用两次vue，会导致vue强制显示成第一个fragment
         webModeListener.switchPage(page, null);
     }
 

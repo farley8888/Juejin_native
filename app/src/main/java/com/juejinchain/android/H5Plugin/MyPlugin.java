@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.View;
 
 
 import com.android.dingtalk.share.ddsharemodule.DDShareApiFactory;
@@ -46,6 +47,11 @@ public class MyPlugin extends StandardFeature {
 
     /** 当前显示的vue页面 */
     public static String CurrVuePage;
+    /**
+     * 调用vue返回方法次数
+     * 超过2两次没触发插件的返回方法，强制显示原生首页
+     */
+    public static int VueCallBackTimes;
 
     public static List<String> TAB_PAGES_OF_VUE;
 
@@ -292,23 +298,33 @@ public class MyPlugin extends StandardFeature {
         CurrVuePage = (String) array.opt(2);
         L.d(TAG, "vueGoNext: to = "+CurrVuePage);
         if (TAB_PAGES_OF_VUE.contains(from)){
-            ((MainActivity) pWebview.getActivity()).mainFragment.changeBottomTabBar(false);
+            L.d(TAG, "vueGoNext: hideBottomTabBar");
+            MainFragment mainFragment = ((MainActivity) pWebview.getActivity()).mainFragment;
+            mainFragment.changeBottomTabBar(false);
+            if (CurrVuePage.equals("登录")){ //如果跳到登录页面，说明vue登录失效了
+                UserModel.cleanData();
+                mainFragment.mAdsHolderView.setVisibility(View.GONE);
+            }
         }
     }
 
     public void vueGoBack(IWebview pWebview, JSONArray array){
+        VueCallBackTimes = 0; //触发后置零
         L.d(TAG, "vueGoBack: "+array.toString());
         String from = (String) array.opt(1);
         String to = (String) array.opt(2);
         CurrVuePage = to;
         L.d(TAG, "vueGoBack: to = "+to);
 
+        MainActivity mainActivity = (MainActivity) pWebview.getActivity();
         if (TAB_PAGES_OF_VUE.contains(to)){
-            ((MainActivity) pWebview.getActivity()).mainFragment.changeBottomTabBar(true);
-            if (to.equals(VP_TASK)){
-                ((MainActivity) pWebview.getActivity()).mainFragment.mBottomBarTask.performClick();
+            mainActivity.mainFragment.changeBottomTabBar(true);
+            //如果通过首页或视频详情去查看攻略，则不用执行显示任务
+            if (to.equals(VP_TASK) && !from.equals(ShowVueEvent.PAGE_LOCK_FAN)){
+                mainActivity.mainFragment.mBottomBarTask.performClick();
             }
-        }else {
+        }
+        else if (CurrVuePage.equals("/")){ // '/'表示首页
 //            L.d(TAG, "vueGoBack: showNativeFragment");
             showNativeFragment(pWebview);
         }

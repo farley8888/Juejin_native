@@ -6,4 +6,5 @@ local.properties
 .svn
 assets
 app/src/main/assets/apps
+app/release
 *.map

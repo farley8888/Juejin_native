@@ -87,19 +87,32 @@
                     android:layout_gravity="center_vertical"
                     android:text="历史记录" />
 
-                <ImageButton
-                    android:id="@+id/btn_clear"
-                    android:layout_width="50dp"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="50dp"
-                    android:layout_gravity="right"
-                    android:background="@null"
-                    android:src="@drawable/delete_icon" />
+                    android:gravity="center_vertical|right">
+                    <ImageView
+                        android:id="@+id/btn_clear"
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:scaleType="fitXY"
+                        android:layout_marginRight="13dp"
+                        android:src="@drawable/qkicon" />
+                </LinearLayout>
+
+
             </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="50dp"
+                android:background="@color/gray_e9"></LinearLayout>
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/history_view"
                 style="@style/JJ.MatchParent"
-                android:layout_marginTop="50dp" />
+                android:layout_marginTop="51dp" />
 
             <FrameLayout
                 android:id="@+id/search_empty"

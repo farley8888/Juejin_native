@@ -22,6 +22,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -257,7 +258,7 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
                         cleckAll(i);
                     }
                 });
-                viewHolder.textView.setOnClickListener(new View.OnClickListener() {
+                viewHolder.linearLayout.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         Log.i("lgq","aabb");
@@ -457,11 +458,13 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
     private class HistoryViewHolder extends RecyclerView.ViewHolder {
         private TextView textView;
         private ImageView imageView;
+        private LinearLayout linearLayout;
 
         public HistoryViewHolder(@NonNull View itemView) {
             super(itemView);
             textView = itemView.findViewById(R.id.text);
             imageView = itemView.findViewById(R.id.deleig);
+            linearLayout = itemView.findViewById(R.id.sosli);
         }
 
     }

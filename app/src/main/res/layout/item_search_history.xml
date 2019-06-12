@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     style="@style/JJ.WidthFill"
     android:background="@color/white"
+    android:id="@+id/sosli"
     android:orientation="horizontal">
 
     <TextView

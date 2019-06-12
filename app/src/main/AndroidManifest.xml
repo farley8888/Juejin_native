@@ -453,7 +453,7 @@
             android:hardwareAccelerated="true"
             android:configChanges="orientation|keyboardHidden|screenSize|keyboard|navigation|mcc|mnc|fontScale"
             android:screenOrientation="user"
-            android:theme="@style/AppTheme"> <!-- AppCompatActivity需要用Theme.AppCompat 不能用:DCloudTheme -->
+            android:theme="@style/AppTheme.Splash"> <!-- AppCompatActivity需要用Theme.AppCompat 不能用:DCloudTheme -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

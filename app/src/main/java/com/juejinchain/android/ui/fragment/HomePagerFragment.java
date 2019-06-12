@@ -186,6 +186,9 @@ public class HomePagerFragment extends SupportFragment  {
             param.put("channel_id", mChannel.getId());
         if (currPage == 1 && mChannel.getId().equals("0")){
             param.put("is_first", 1+"");
+
+            if (mData.size() == 0) NetUtil.showLoading(3000); //加个延时，因为有启动动画
+
         }
 
         String url = NetConfig.getUrlByParams(param, mAPI);

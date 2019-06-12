@@ -69,9 +69,26 @@
 
         </com.chanven.lib.cptr.PtrClassicFrameLayout>
 
-        <include
-            layout="@layout/no_data_view"
-            android:visibility="gone" />
+        <LinearLayout
+            android:id="@+id/ly_no_searchdata"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:orientation="vertical">
+
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/no_search_data" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:text="暂无搜索记录~" />
+        </LinearLayout>
 
         <FrameLayout
             android:id="@+id/history_layout"
@@ -123,7 +140,7 @@
                 <TextView
                     style="@style/JJ.Label.Minor.Large"
                     android:layout_gravity="center"
-                    android:drawableTop="@drawable/x_loading_empty"
+                    android:drawableTop="@drawable/no_search_data"
                     android:drawablePadding="10dp"
                     android:text="暂无历史记录~" />
             </FrameLayout>

@@ -26,12 +26,14 @@ import com.juejinchain.android.adapter.VideoPagerAdapter;
 import com.juejinchain.android.event.TabSelectedEvent;
 import com.juejinchain.android.eventbus_activity.EventBusActivityScope;
 import com.juejinchain.android.model.NewsModel;
+import com.juejinchain.android.model.UserModel;
 import com.juejinchain.android.model.VideoCategoryModel;
 import com.juejinchain.android.model.VideoModel;
 import com.juejinchain.android.network.NetConfig;
 import com.juejinchain.android.network.NetUtil;
 import com.juejinchain.android.network.OkHttpUtils;
 import com.juejinchain.android.network.callBack.JSONCallback;
+import com.juejinchain.android.tools.L;
 
 import org.greenrobot.eventbus.Subscribe;
 import org.w3c.dom.Text;
@@ -210,25 +212,20 @@ public class VideoPagerFragment extends SupportFragment  {
         NetUtil.postRequestShowLoading(NetConfig.API_VideoFabulous, param, new NetUtil.OnResponse() {
             @Override
             public void onResponse(JSONObject response) {
-                Log.d(TAG, "onResponse:点赞 "+response.toJSONString());
-                model.video_like_count += 1;
-                model.is_fabulous = true;
-                mAdapter.notifyDataSetChanged();
+                L.d(TAG, "onResponse:点赞 "+response.toJSONString());
+                if (NetUtil.isSuccess(response)){
+                    model.video_like_count += 1;
+                    model.is_fabulous = true;
+                    mAdapter.notifyDataSetChanged();
+                }else {
+                    if (response.getInteger("code") == NetConfig.NR_CODE_LOGIN_TIMEOUT){
+                        UserModel.cleanData();
+                        ((MainFragment) getParentFragment().getParentFragment().getParentFragment()).goLogin();
+                    }
+                }
             }
-        }, false);
+        }, true);
 
-//        String url = NetConfig.getUrlByAPI(NetConfig.API_VideoFabulous);
-//        OkHttpUtils.postAsyn(url, param, new JSONCallback() {
-//            @Override
-//            public void onError(Call call, Exception e) {
-//
-//            }
-//
-//            @Override
-//            public void onResponse(JSONObject response) {
-//
-//            }
-//        });
 
     }
 

@@ -9,6 +9,14 @@
 
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar" />
 
+    <style name="AppTheme.Full" parent="AppTheme.NoActionBar">
+        <item name="android:windowFullscreen">true</item>
+    </style>
+
+    <style name="AppTheme.Splash" parent="AppTheme.Full">
+        <item name="android:windowBackground">@drawable/splash</item>
+    </style>
+
     <style name="AlertTextAppearance">
         <item name="android:textColor">@color/white</item>
     </style>

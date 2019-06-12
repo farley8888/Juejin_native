@@ -476,7 +476,7 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
     //
     private void goLogin(){
         MainFragment mainFragment = (MainFragment) getParentFragment();
-        mainFragment.showVue(ShowVueEvent.PAGE_LOGIN, "");
+        mainFragment.goLogin();
     }
 
     @Override

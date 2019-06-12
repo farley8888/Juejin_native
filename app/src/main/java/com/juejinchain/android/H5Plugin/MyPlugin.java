@@ -276,13 +276,14 @@ public class MyPlugin extends StandardFeature {
         String from = array.optString(1);
         String to =  array.optString(2);
         L.d(TAG, "vueJumpto: to = "+to); //
-        if (from.equals(ShowVueEvent.PAGE_LOCK_FAN) && to.equals("home")){
-            MainFragment mainFrag = ((MainActivity) pWebview.getActivity()).mainFragment;
+
+        MainFragment mainFrag = ((MainActivity) pWebview.getActivity()).mainFragment;
+//        if (from.equals(ShowVueEvent.PAGE_LOCK_FAN)){
             if (mainFrag.videoDetailFragment != null){
                 mainFrag.switchToVideoDetailFragment();
                 return;
             }
-        }
+//        }
 
         if (!TAB_PAGES_OF_VUE.contains(to)){  //如果不是vue页就为原生首页
             showNativeFragment(pWebview);
@@ -316,13 +317,22 @@ public class MyPlugin extends StandardFeature {
         CurrVuePage = to;
         L.d(TAG, "vueGoBack: to = "+to);
 
-        MainActivity mainActivity = (MainActivity) pWebview.getActivity();
+        MainFragment mainFrag = ((MainActivity) pWebview.getActivity()).mainFragment;
+//        if (from.equals(ShowVueEvent.PAGE_LOCK_FAN)){
+        if (mainFrag.videoDetailFragment != null){
+            mainFrag.switchToVideoDetailFragment();
+            return;
+        }
+
         if (TAB_PAGES_OF_VUE.contains(to)){
-            mainActivity.mainFragment.changeBottomTabBar(true);
-            //如果通过首页或视频详情去查看攻略，则不用执行显示任务
-            if (to.equals(VP_TASK) && !from.equals(ShowVueEvent.PAGE_LOCK_FAN)){
-                mainActivity.mainFragment.mBottomBarTask.performClick();
+//            L.d(TAG, "vueGoBack: "+mainActivity.mainFragment.showVuePageFromNative);
+
+            //如果通过首页或视频详情等native跳转过来的，则不用执行显示vue的任务页面
+            if (to.equals(VP_TASK) && !mainFrag.showVuePageFromNative){  //!from.equals(ShowVueEvent.PAGE_LOCK_FAN)
+                mainFrag.mBottomBarTask.performClick();
             }
+
+            mainFrag.changeBottomTabBar(true);
         }
         else if (CurrVuePage.equals("/")){ // '/'表示首页
 //            L.d(TAG, "vueGoBack: showNativeFragment");

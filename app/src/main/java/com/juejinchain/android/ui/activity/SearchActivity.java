@@ -122,20 +122,6 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
 
     private boolean iffilter=false;
 
-    private Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch(msg.what){
-                case 1 :
-//                    NetUtil.showLoading(null);
-
-                    break;
-            }
-        }
-    };
-
-    private static More_LoadDialog dialog;
-
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -144,13 +130,13 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
         initView();
         initEvent();
         initData();
-        dialog = new More_LoadDialog(this);
+//        dialog = new More_LoadDialog(this);
     }
 
     private void initView() {
         mPtrLayout = findViewById(R.id.ptr_layout);
         mRecycleView = findViewById(R.id.recy);
-        mEmptyLoadView = findViewById(R.id.ly_no_data);
+        mEmptyLoadView = findViewById(R.id.ly_no_searchdata);
         mEditSearch = findViewById(R.id.edt_search);
 
         mHistoryLayout = findViewById(R.id.history_layout);
@@ -168,6 +154,7 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
         findViewById(R.id.btn_search).setOnClickListener(this);
         findViewById(R.id.btn_clear).setOnClickListener(this);
 
+        //不用下拉刷新
         mPtrLayout.setPtrHandler(new PtrDefaultHandler() {
             @Override
             public void onRefreshBegin(PtrFrameLayout frame) {
@@ -267,7 +254,7 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
                         mEditSearch.setText(text);
                         mEditSearch.setSelection(text.length());
                         saveHistoryadd();
-                        dialog.show();
+
                         performRefresh();
 
                     }
@@ -328,18 +315,18 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
         if (TextUtils.isEmpty(keys)) {
             return;
         }
+        if (mCurrpage == 1) NetUtil.showLoading(false);
 
         Map<String, String> params = new HashMap<>(3);
         params.put("kw", keys);
         params.put("page", String.valueOf(mCurrpage));
 
-        String url = NetConfig.getUrlByParams(params, NetConfig.API_NewsSearch);
         NetUtil.getRequest(NetConfig.API_NewsSearch, params, new NetUtil.OnResponse() {
             @Override
             public void onResponse(JSONObject response) {
+                mPtrLayout.refreshComplete();
                 if (NetUtil.isSuccess(response)) {
                     JSONArray array;
-                    dialog.dismiss();
                     if (response.get("data") instanceof JSONArray) {
                         array = response.getJSONArray("data");
                     } else {
@@ -352,12 +339,12 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
                     if (mCurrpage == 1) {
                         mData.clear();
                         mData.addAll(list);
-                        mPtrLayout.refreshComplete();
+
                     } else {  //更多
                         mData.addAll(list);
-                        mPtrLayout.loadMoreComplete(list.size() > 0);
+//                    mPtrLayout.loadMoreComplete(totalPage == mCurrpage);
                     }
-                    mPtrLayout.setLoadMoreEnable(totalPage != mCurrpage);
+                    mPtrLayout.setLoadMoreEnable(totalPage > mCurrpage);
 
                     mAdapter.notifyDataSetChanged();
                     mEmptyLoadView.setVisibility(mData.size() == 0 ? View.VISIBLE : View.GONE);
@@ -383,7 +370,6 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
                 }
 
                 saveHistoryadd();
-                dialog.show();
                 loadData();
                 break;
             case R.id.btn_clear:
@@ -445,7 +431,6 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
                 return false;
             }
             saveHistoryadd();
-            dialog.show();
             loadData();
 
             //处理事件

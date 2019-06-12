@@ -23,6 +23,7 @@ import com.juejinchain.android.WebAppFragment;
 import com.juejinchain.android.base.BaseMainFragment;
 import com.juejinchain.android.event.ShowTabPopupWindowEvent;
 import com.juejinchain.android.event.ShowVueEvent;
+import com.juejinchain.android.event.VideoDetailEvent;
 import com.juejinchain.android.listener.OnItemClickListener;
 import com.juejinchain.android.model.UnreadModel;
 import com.juejinchain.android.model.UserModel;
@@ -54,6 +55,8 @@ import razerdp.basepopup.QuickPopupBuilder;
  * BaseMainFragment
  */
 public class MainFragment extends BaseMainFragment {
+
+    private final String TAG = MainFragment.class.getSimpleName();
     private static final int REQ_MSG = 10;
 
     public static final int FIRST = 0;
@@ -73,7 +76,8 @@ public class MainFragment extends BaseMainFragment {
     private FrameLayout mFrameLayout;
 
     String[] vuePages;
-    public boolean showVuePageFromNative; //
+    //是否从原始跳转到vue页面
+    public boolean showVuePageFromNative;
     public VideoDetailFragment videoDetailFragment;
     public WebAppFragment webAppFragment;
     public BottomBarTab mBottomBarTask;
@@ -202,7 +206,7 @@ public class MainFragment extends BaseMainFragment {
                 fragmentManager = getActivity().getSupportFragmentManager();
                 FragmentTransaction transaction = fragmentManager.beginTransaction();
                 Fragment frg = fragmentManager.findFragmentByTag(String.valueOf(position));
-                L.d("MainFragment", "onTabSelected: "+position + ", frag ="+frg);
+                L.d(TAG, "onTabSelected: "+position + ", frag ="+frg);
                 //只有两个fragment ,size 会不止2 时间长了frg会为空！
 //                if (frg == null && fragmentManager.getFragments().size() < 2)
 //                    transaction.add(R.id.fl_tab_container, mFragments[position], String.valueOf(position));
@@ -306,6 +310,11 @@ public class MainFragment extends BaseMainFragment {
         changeBottomTabBar(true);
     }
 
+    //跳转到vue登录页面
+    public void goLogin(){
+        showVue(ShowVueEvent.PAGE_LOGIN, "");
+    }
+
     public void changeBottomTabBar(boolean isShow){
         changeBottomPopup(isShow);
         if (isShow && showVuePageFromNative){
@@ -355,7 +364,7 @@ public class MainFragment extends BaseMainFragment {
 
     @Override
     public boolean onBackPressedSupport() {
-//        L.d("MainFragment", "onBackPressedSupport: ");
+//        L.d(TAG, "onBackPressedSupport: ");
         if (currShowPosition != 0){
             showHomeFragment();
         }else{
@@ -403,6 +412,12 @@ public class MainFragment extends BaseMainFragment {
 
     public void switchToVideoDetailFragment(){
         showHideFragment(videoDetailFragment,MainFragment.this);
+    }
+    
+    @Subscribe()
+    public void resetVideoDetailEvent(VideoDetailEvent event){
+        L.d(TAG, "resetVideoDetail: ");
+        videoDetailFragment = null;
     }
 
     @Subscribe()

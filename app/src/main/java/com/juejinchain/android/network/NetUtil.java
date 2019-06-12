@@ -2,6 +2,8 @@ package com.juejinchain.android.network;
 
 import android.content.Context;
 import android.graphics.drawable.AnimationDrawable;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.Gravity;
@@ -29,6 +31,7 @@ import okhttp3.Call;
 public class NetUtil {
 
     private static AlertProDialog dialog;
+    private static Handler handler;
 
     public static interface OnResponse{
         void onResponse(JSONObject response);
@@ -97,6 +100,23 @@ public class NetUtil {
         });
     }
 
+    public static void showLoading(int delay){
+        if (handler == null){
+            handler = new Handler(){
+                @Override
+                public void handleMessage(Message msg) {
+                    super.handleMessage(msg);
+                    AlertProDialog.showLoading(true);
+                }
+            };
+        }
+        handler.sendEmptyMessageDelayed(0, delay);
+    }
+
+    public static void showLoading(boolean isCancelable){
+        AlertProDialog.showLoading(isCancelable);
+    }
+
     public static void showLoading(String msg){
         AlertProDialog.showLoading(true);
 //        AlertProDialog.showPopupWindow(MyApplication.getInstance());
@@ -107,6 +127,7 @@ public class NetUtil {
 
     public static void dismissLoading(){
 //        if(dialog != null) dialog.dissmiss();
+        if (handler != null) handler.removeMessages(0);
         AlertProDialog.dissmiss();
     }
 

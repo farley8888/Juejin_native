@@ -114,7 +114,7 @@ public class NetConfig {
     public static final String API_NewsSearch   = "article/search";
     /**
      * 读文章后30s请求
-     * aid=132323, type: arc，成功提示一下
+     * aid=132323, type: arc|video 成功提示一下
      */
     public static final String API_NewsReading  = "article/reading_article";
 

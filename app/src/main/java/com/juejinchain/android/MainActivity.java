@@ -4,8 +4,15 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowManager;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.widget.ImageView;
 
+import com.juejinchain.android.ui.dialog.HomeTipsAlertDialog;
 import com.juejinchain.android.ui.fragment.MainFragment;
 
 import io.dcloud.common.DHInterface.ISysEventListener;
@@ -17,17 +24,69 @@ import me.yokeyword.fragmentation.SupportActivity;
 public class MainActivity extends SupportActivity {
 
     public MainFragment mainFragment;
+    ImageView launchImg;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
+//        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN , WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main);
+
+        startSplashAnim();
 
         if (findFragment(MainFragment.class) == null) {
             mainFragment =MainFragment.newInstance();
             loadRootFragment(R.id.frameLayout, mainFragment);
         }
+
+    }
+
+    private void startSplashAnim(){
+        ViewGroup vg = findViewById(R.id.frameLayout);
+//        vg.setVisibility(View.GONE);
+
+        launchImg = findViewById(R.id.img_launch);
+        launchImg.setVisibility(View.GONE); //可以不用显示，因为在style已经设置了启动图
+//        launchImg.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//
+//            }
+//        }, 2500);
+
+        // 此动画不够理想
+        AlphaAnimation alphaAnimation = new AlphaAnimation(1.0f, 0.8f);//透明度从
+        alphaAnimation.setDuration(2000);//持续时间
+        alphaAnimation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                launchImg.setVisibility(View.GONE);
+                vg.setVisibility(View.VISIBLE);
+                showGiftDialogAndSetWindowBackground();
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+        launchImg.startAnimation(alphaAnimation);
+
+    }
+
+    /**
+     * 首次启动
+     * 显示车大礼包、设置全局背景色
+     */
+    void showGiftDialogAndSetWindowBackground(){
+        new HomeTipsAlertDialog(MainActivity.this).show();
+        getWindow().getDecorView().setBackgroundResource(R.color.default_bg);
     }
 
 //    @Override

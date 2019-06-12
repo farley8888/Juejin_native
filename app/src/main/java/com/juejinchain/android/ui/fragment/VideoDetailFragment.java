@@ -1,8 +1,10 @@
 package com.juejinchain.android.ui.fragment;
 
 import android.graphics.Color;
+import android.inputmethodservice.Keyboard;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
@@ -29,14 +31,20 @@ import com.juejinchain.android.base.BaseBackFragment;
 import com.juejinchain.android.base.XRecyclerViewAdapter;
 import com.juejinchain.android.event.ShareEvent;
 import com.juejinchain.android.event.ShowVueEvent;
+import com.juejinchain.android.event.VideoDetailEvent;
 import com.juejinchain.android.model.CommentModel;
+import com.juejinchain.android.model.UserModel;
 import com.juejinchain.android.model.VideoModel;
 import com.juejinchain.android.network.NetConfig;
 import com.juejinchain.android.network.NetUtil;
 import com.juejinchain.android.tools.L;
 import com.juejinchain.android.tools.WebViewUtil;
 import com.juejinchain.android.ui.dialog.ShareDialog;
+import com.juejinchain.android.ui.ppw.TimeRewardPopup;
 import com.juejinchain.android.ui.view.DividerDecoration;
+import com.juejinchain.android.util.KeyboardUtil;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -59,7 +67,7 @@ public class VideoDetailFragment extends BaseBackFragment {
     public VideoModel model;
     private RecyclerView mRecyclerView;
     private VideoDetailXAdapter mAdapter;
-    private Handler mHandler = new Handler();
+
     JzvdStd mJzvdPlayer;
     private WebView parseWebView;
     List<Object> mData = new ArrayList<>();
@@ -75,6 +83,17 @@ public class VideoDetailFragment extends BaseBackFragment {
     ReplyCommentPopup mCommentPopup;
     private EditText mEditView;
     ShareDialog mShareDialog;
+
+    Handler mHandler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            questReadRewardApi();
+        }
+    };
+    private final int READ_What = 122;
+    private int readTimes       = 30*1000; //阅读30秒才请求奖励接口
+
 
     public static VideoDetailFragment newInstance(VideoModel model) {
         VideoDetailFragment self = new VideoDetailFragment();
@@ -94,12 +113,33 @@ public class VideoDetailFragment extends BaseBackFragment {
         initToolbar(view, "视频详情");
 
         mJzvdPlayer = view.findViewById(R.id.jzvdStdPlayer);
+        mHandler.sendEmptyMessageDelayed(READ_What, readTimes);
 
         initView(view);
         parseWebView = new WebView(getContext());
         setViewData();
         return attachToSwipeBack(view);
     }
+
+    //请求奖励接口
+    private void questReadRewardApi(){
+        Map<String, String> param = new HashMap<>();
+        param.put("aid", model.id);
+        param.put("type", "video");
+        NetUtil.postRequest(NetConfig.API_NewsReading, param, new NetUtil.OnResponse() {
+            @Override
+            public void onResponse(JSONObject response) {
+                if (NetUtil.isSuccess(response)){
+                    JSONObject jo = response.getJSONObject("data");
+                    TimeRewardPopup popup = new TimeRewardPopup(getContext(), TimeRewardPopup.TYPE_VIDEO);
+                    popup.setView(jo);
+                    popup.showPopupWindow();
+                }
+            }
+        }, true);
+
+    }
+
 
     /**
      * 点击推荐列表时重新加载数据
@@ -131,7 +171,7 @@ public class VideoDetailFragment extends BaseBackFragment {
         },false);
     }
 
-    //加载详情（和列表一样，可不用请求
+    //加载详情（和列表的一样，可不用请求
     void loadDetail(){
         Map<String, String> param = new HashMap<>();
         param.put("vid", model.id);
@@ -180,7 +220,7 @@ public class VideoDetailFragment extends BaseBackFragment {
                 //查看攻略
                 if (view.getId() == R.id.img_share_seeFanc){
                     ISupportFragment temp = getPreFragment();
-                    if (temp instanceof VideoDetailFragment){  //多次调用下面的showHideFragment 方法会出现这种情况
+                    if (temp instanceof VideoDetailFragment){  //多次调用,如果上一个没pop或手动返回，会出现这种情况
                         pop();
                     }else {
                         MainFragment mainFragment = (MainFragment)temp ;
@@ -196,10 +236,28 @@ public class VideoDetailFragment extends BaseBackFragment {
         });
     }
 
+    boolean isLogin(){
+        if (UserModel.isLogin()){
+            return true;
+        }
+        ISupportFragment temp = getPreFragment();
+        if (temp instanceof VideoDetailFragment){
+            pop();
+        }else {
+            MainFragment mainFragment = (MainFragment) temp;
+            mainFragment.videoDetailFragment = VideoDetailFragment.this;
+
+            //mainFragment.webAppFragment 显示frag can't used sub of parent
+            showHideFragment(mainFragment, VideoDetailFragment.this);
+            mainFragment.goLogin();
+        }
+        return false;
+    }
+
     @Override
     protected void topbarRightButtonClick() {
         Log.d(TAG, "topbarRightButtonClick: ");
-        showShareDialog();
+        if (isLogin()) showShareDialog();
 //        new ShareDialog(getContext()).show();
 
     }
@@ -234,7 +292,8 @@ public class VideoDetailFragment extends BaseBackFragment {
 
                         break;
                     case R.id.btn_btmShare:  //分享
-                        showShareDialog();
+                        if (isLogin())
+                            showShareDialog();
                         break;
                 }
             }
@@ -242,6 +301,8 @@ public class VideoDetailFragment extends BaseBackFragment {
         v.findViewById(R.id.btn_btmBack).setOnClickListener(listener);
         v.findViewById(R.id.btn_btmShare).setOnClickListener(listener);
         v.findViewById(R.id.btn_btmComment).setOnClickListener(listener);
+
+//        mEditView.setOnClickListener(listener); editView要点击两次才触发,通过焦点监听
         mEditView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
@@ -268,6 +329,17 @@ public class VideoDetailFragment extends BaseBackFragment {
 //                return false;
             }
         });
+        mEditView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                if (b) {
+                    if (!isLogin()){
+                        mEditView.clearFocus();
+                        hideSoftInput(); //未登录隐藏键盘
+                    }
+                }
+            }
+        });
     }
 
     void setListener(){
@@ -291,7 +363,12 @@ public class VideoDetailFragment extends BaseBackFragment {
             @Override
             public void onItemClick(int position, View view, RecyclerView.ViewHolder vh) {
                 TextView tv = (TextView) view;
-                Log.d(TAG, "onItemClick: "+tv.getText()+",position="+position);
+                L.d(TAG, "onItemClick: "+tv.getText()+",position="+position);
+
+                if (view.getId() != R.id.button1 && view.getId() != R.id.btn_cmtReply){
+                    //需要登录时
+                    if (!isLogin()) return;
+                }
                 switch (view.getId()){
                     case R.id.button1:     //定位到评论
 
@@ -466,11 +543,9 @@ public class VideoDetailFragment extends BaseBackFragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        MainFragment mainFragment = (MainFragment) getPreFragment();
-        if (mainFragment.videoDetailFragment != null){
-            mainFragment.videoDetailFragment = null;
-//            showHideFragment(mainFragment);
-        }
-
+        //多次showHideFragment时，有时是self
+//        MainFragment mainFragment = (MainFragment) getPreFragment();
+        EventBus.getDefault().post(new VideoDetailEvent());
+        mHandler.removeMessages(READ_What);
     }
 }

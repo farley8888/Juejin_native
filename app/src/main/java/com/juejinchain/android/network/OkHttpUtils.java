@@ -36,7 +36,8 @@ import okhttp3.Response;
  */
 public class OkHttpUtils
 {
-    public static final long DEFAULT_MILLISECONDS = 10_000L;
+    //超时秒数
+    public static final int DEFAULT_MILLISECONDS = 20;
     private static OkHttpUtils mInstance;
     private OkHttpClient mOkHttpClient;
     private Platform mPlatform;
@@ -48,8 +49,8 @@ public class OkHttpUtils
         if (okHttpClient == null)
         {
             mOkHttpClient = new OkHttpClient.Builder()
-                    .connectTimeout(15, TimeUnit.SECONDS)
-                    .build();;
+                    .connectTimeout(DEFAULT_MILLISECONDS, TimeUnit.SECONDS)
+                    .build();
         } else
         {
             mOkHttpClient = okHttpClient;

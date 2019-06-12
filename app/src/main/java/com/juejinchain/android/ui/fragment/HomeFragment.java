@@ -171,13 +171,18 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
         String channelCacheData = SPUtils.getInstance().getString(CHANNEL_CHCHE);
 
         if(TextUtils.isEmpty(channelCacheData)){
-//            loadChannel();
+            loadChannel();
         }else{
             mChannelCacheList = JSON.parseArray(channelCacheData, ChannelModel.class);
-//            mChannelList = JSON.parseArray(channelCacheData, ChannelModel.class);
-//            setTabsPage();
+
+            if (UserModel.isLogin()){
+                loadChannel();
+            }else{
+                //未登录并且有缓存情况下直接加载
+                mChannelList = mChannelCacheList;
+                setTabsPage();
+            }
         }
-        loadChannel();
     }
 
 
@@ -351,7 +356,16 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
 
     private void loadChannel() {
 
-        NetUtil.getRequest(NetConfig.API_ChannelGet, null, new NetUtil.OnResponse() {
+        OkHttpUtils.getAsyn(NetConfig.getUrlByAPI(NetConfig.API_ChannelGet), new JSONCallback() {
+            @Override
+            public void onError(Call call, Exception e) {
+                e.printStackTrace();
+                if (mChannelCacheList.size() > 0){
+                    mChannelList = mChannelCacheList;
+                    setTabsPage();
+                }
+            }
+
             @Override
             public void onResponse(JSONObject response) {
                 if (NetUtil.isSuccess(response)) {
@@ -371,14 +385,14 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
                         needUpdate = true;
                     }
 
-                   if (needUpdate){
-                       mChannelList = tempList;
-                       mChannelList.add(0, new ChannelModel("0", "推荐"));
-                       SPUtils.getInstance().put(CHANNEL_CHCHE, JSON.toJSONString(mChannelList));
-                   }else{
-                       mChannelList = mChannelCacheList;
-                   }
-                   setTabsPage();
+                    if (needUpdate){
+                        mChannelList = tempList;
+                        mChannelList.add(0, new ChannelModel("0", "推荐"));
+                        SPUtils.getInstance().put(CHANNEL_CHCHE, JSON.toJSONString(mChannelList));
+                    }else{
+                        mChannelList = mChannelCacheList;
+                    }
+                    setTabsPage();
 
                 }else {
                     if (mChannelCacheList.size() > 0){
@@ -388,6 +402,12 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
                 }
             }
         });
+
+//        NetUtil.getRequest(NetConfig.API_ChannelGet, null, new NetUtil.OnResponse() {
+//            @Override
+//            public void onResponse(JSONObject response) {
+//            }
+//        });
 
     }
 

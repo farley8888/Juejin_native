@@ -318,11 +318,14 @@ public class MyPlugin extends StandardFeature {
 
         MainActivity mainActivity = (MainActivity) pWebview.getActivity();
         if (TAB_PAGES_OF_VUE.contains(to)){
-            mainActivity.mainFragment.changeBottomTabBar(true);
-            //如果通过首页或视频详情去查看攻略，则不用执行显示任务
-            if (to.equals(VP_TASK) && !from.equals(ShowVueEvent.PAGE_LOCK_FAN)){
+//            L.d(TAG, "vueGoBack: "+mainActivity.mainFragment.showVuePageFromNative);
+
+            //如果通过首页或视频详情等native跳转过来的，则不用执行显示vue的任务页面
+            if (to.equals(VP_TASK) && !mainActivity.mainFragment.showVuePageFromNative){  //!from.equals(ShowVueEvent.PAGE_LOCK_FAN)
                 mainActivity.mainFragment.mBottomBarTask.performClick();
             }
+
+            mainActivity.mainFragment.changeBottomTabBar(true);
         }
         else if (CurrVuePage.equals("/")){ // '/'表示首页
 //            L.d(TAG, "vueGoBack: showNativeFragment");

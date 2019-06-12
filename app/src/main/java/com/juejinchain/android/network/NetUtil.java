@@ -97,6 +97,10 @@ public class NetUtil {
         });
     }
 
+    public static void showLoading(boolean cancel){
+        AlertProDialog.showLoading(cancel);
+    }
+
     public static void showLoading(String msg){
         AlertProDialog.showLoading(true);
 //        AlertProDialog.showPopupWindow(MyApplication.getInstance());

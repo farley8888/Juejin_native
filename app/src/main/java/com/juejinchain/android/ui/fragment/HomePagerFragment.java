@@ -186,17 +186,22 @@ public class HomePagerFragment extends SupportFragment  {
             param.put("channel_id", mChannel.getId());
         if (currPage == 1 && mChannel.getId().equals("0")){
             param.put("is_first", 1+"");
+            if (mData.size() == 0) NetUtil.showLoading(false);
         }
 
         String url = NetConfig.getUrlByParams(param, mAPI);
         OkHttpUtils.getAsyn(url, new JSONCallback() {
             @Override
             public void onError(Call call, Exception e) {
-
+                ptrClassicFrameLayout.refreshComplete();
+                if (currPage == 1) NetUtil.dismissLoading();
             }
 
             @Override
             public void onResponse(JSONObject response) {
+                ptrClassicFrameLayout.refreshComplete();
+                if (currPage == 1) NetUtil.dismissLoading();
+
                 if (NetUtil.isSuccess(response)){
                     /** 变态的接口设计
                      * 没数据时
@@ -219,7 +224,6 @@ public class HomePagerFragment extends SupportFragment  {
                         mData.clear();
 //                        mData = temp; //不能用这个赋值，adapter会监听不到数据有变化
                         mData.addAll(temp);
-                        ptrClassicFrameLayout.refreshComplete();
                         if (mData.size() > 5)ptrClassicFrameLayout.setLoadMoreEnable(true);
                     }else {  //更多
                         mData.addAll(temp);

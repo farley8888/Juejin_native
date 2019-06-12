@@ -1,5 +1,6 @@
 package com.juejinchain.android.ui.activity;
 
+import android.app.Dialog;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -37,6 +38,7 @@ import com.juejinchain.android.network.NetConfig;
 import com.juejinchain.android.network.NetUtil;
 import com.juejinchain.android.ui.fragment.PagerAdapter;
 import com.juejinchain.android.ui.view.AlertProDialog;
+import com.juejinchain.android.ui.view.More_LoadDialog;
 import com.juejinchain.android.util.KeyboardUtil;
 import com.juejinchain.android.util.SPUtils;
 
@@ -118,6 +120,21 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
 
     private boolean iffilter=false;
 
+    private Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch(msg.what){
+                case 1 :
+//                    NetUtil.showLoading(null);
+
+                    break;
+            }
+        }
+    };
+
+    private static More_LoadDialog dialog;
+
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -125,6 +142,7 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
         initView();
         initEvent();
         initData();
+        dialog = new More_LoadDialog(this);
     }
 
     private void initView() {
@@ -247,8 +265,9 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
                         mEditSearch.setText(text);
                         mEditSearch.setSelection(text.length());
                         saveHistoryadd();
-//                NetUtil.showLoading(null);
-//                performRefresh();
+                        dialog.show();
+                        performRefresh();
+
                     }
                 });
             }
@@ -318,6 +337,7 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
             public void onResponse(JSONObject response) {
                 if (NetUtil.isSuccess(response)) {
                     JSONArray array;
+                    dialog.dismiss();
                     if (response.get("data") instanceof JSONArray) {
                         array = response.getJSONArray("data");
                     } else {
@@ -361,8 +381,8 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
                 }
 
                 saveHistoryadd();
-//                AlertProDialog.showLoading(true);
-//                loadData();
+                dialog.show();
+                loadData();
                 break;
             case R.id.btn_clear:
                 new AlertDialog.Builder(this)

@@ -444,6 +444,7 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
                 Toast.makeText(this, "请输入关键字", Toast.LENGTH_SHORT).show();
                 return false;
             }
+            saveHistoryadd();
             dialog.show();
             loadData();
 

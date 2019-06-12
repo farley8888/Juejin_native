@@ -5,6 +5,17 @@
     android:id="@+id/sosli"
     android:orientation="horizontal">
 
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="8dp"
+        android:gravity="center">
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/time_icon"/>
+    </LinearLayout>
+
     <TextView
         android:id="@+id/text"
         style="@style/JJ.Label.Minor"

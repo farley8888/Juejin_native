@@ -121,7 +121,6 @@
             android:id="@+id/tv_hot"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="5dp"
             android:text="置顶"
             android:textColor="@android:color/holo_red_light"
             android:textSize="12sp"
@@ -131,6 +130,7 @@
             android:id="@+id/tv_from"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
             android:text="来源"
             android:textColor="@color/text_666666"
             android:textSize="12sp" />

@@ -54,12 +54,6 @@ public class BackExitDialog extends Dialog {
         loadData();
     }
 
-    //禁止返回键消失
-    @Override
-    public void onBackPressed() {
-//        super.onBackPressed();
-    }
-
     void loadData(){
 
         NetUtil.getRequest(NetConfig.API_ShareTop, null, new NetUtil.OnResponse() {

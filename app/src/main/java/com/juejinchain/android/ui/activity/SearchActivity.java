@@ -15,6 +15,7 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -430,6 +431,27 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
             SPUtils.getInstance().put("search_history", builder.substring(0, builder.lastIndexOf(",")));
         }
     }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        //这里注意要作判断处理，ActionDown、ActionUp都会回调到这里，不作处理的话就会调用两次
+        if (KeyEvent.KEYCODE_ENTER == event.getKeyCode() && KeyEvent.ACTION_DOWN == event.getAction()) {
+            String name = mEditSearch.getText().toString();
+
+            if (TextUtils.isEmpty(name)) {
+//                    ToastUtil.showInfo(this, "请输入用户名", Toast.LENGTH_LONG);
+                Toast.makeText(this, "请输入关键字", Toast.LENGTH_SHORT).show();
+                return false;
+            }
+            dialog.show();
+            loadData();
+
+            //处理事件
+            return true;
+        }
+        return super.dispatchKeyEvent(event);
+    }
+
 
 
     private class HistoryViewHolder extends RecyclerView.ViewHolder {

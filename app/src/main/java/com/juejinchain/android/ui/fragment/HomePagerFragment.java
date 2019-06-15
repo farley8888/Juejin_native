@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -31,6 +32,7 @@ import com.juejinchain.android.network.OkHttpUtils;
 import com.juejinchain.android.network.callBack.JSONCallback;
 import com.juejinchain.android.tools.L;
 import com.juejinchain.android.ui.activity.ArticleDetailActivity;
+import com.juejinchain.android.util.AnimUtil;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -69,6 +71,10 @@ public class HomePagerFragment extends SupportFragment  {
     public String mAPI;
     HomeFragment homeFragment;
 
+    private TextView mTvRecommend;
+
+    private boolean manuallyRefresh;
+
     public static HomePagerFragment newInstance(ChannelModel model) {
 
         Bundle args = new Bundle();
@@ -99,7 +105,8 @@ public class HomePagerFragment extends SupportFragment  {
         super.onActivityCreated(savedInstanceState);
         currPage = 1;
         homeFragment = (HomeFragment) getParentFragment();
-        ptrClassicFrameLayout.autoRefresh(true);
+//        ptrClassicFrameLayout.autoRefresh(true);
+        loadData();
     }
 
     @Override
@@ -168,6 +175,7 @@ public class HomePagerFragment extends SupportFragment  {
             }
         });
 
+        mTvRecommend = view.findViewById(R.id.tvRecommend);
 
         init();
     }
@@ -224,6 +232,10 @@ public class HomePagerFragment extends SupportFragment  {
                         mData.addAll(temp);
                         ptrClassicFrameLayout.refreshComplete();
                         if (mData.size() > 5)ptrClassicFrameLayout.setLoadMoreEnable(true);
+
+                        if(mData.size() > 0 && manuallyRefresh){
+                            startRecommend(mData.size());
+                        }
                     }else {  //更多
                         mData.addAll(temp);
                         ptrClassicFrameLayout.loadMoreComplete(temp.size()>0);
@@ -235,6 +247,13 @@ public class HomePagerFragment extends SupportFragment  {
                 }
             }
         });
+    }
+
+    private void startRecommend(int count){
+        mTvRecommend.setText(new StringBuilder("为您推荐").append(count).append("条更新"));
+        AnimUtil.animHeightToView(getActivity(), mTvRecommend, true, 500);
+
+        manuallyRefresh = false;
     }
 
     private void init() {
@@ -254,6 +273,8 @@ public class HomePagerFragment extends SupportFragment  {
 //                mData.clear();
 //                     for (int i = 0; i < 17; i++)  mData.add(new String("  RecyclerView item  -" + i));
                 if (noDataView.getVisibility() == View.VISIBLE) noDataView.setVisibility(View.GONE);
+
+                manuallyRefresh = true;
                 loadData();
 
             }

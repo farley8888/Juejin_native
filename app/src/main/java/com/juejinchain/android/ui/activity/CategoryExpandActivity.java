@@ -36,6 +36,15 @@ public class CategoryExpandActivity extends AppCompatActivity implements View.On
 
 //    private String url = "http://api.juejinchain.com/v1/channel/recommend?user_token=6f735e3e7b871f71785b283f6a8a719b&source_style=6";
 
+    public static final int Default_Min = 4;
+    public static final int Default_Max = 16;
+    /**
+     * 默认频道，如果删除少于7个使用
+     * 推荐、热门、视频、掘金宝、社会、娱乐、体育。就算把这7个频道删除了，在进入频道就默认展示这7个频道
+     */
+    private List<ChannelModel> defaultList = new ArrayList<>();
+    private String defaultChannelNames = "推荐,热门,视频,掘金宝,社会,娱乐,体育";
+
     private RecyclerView mRecy;
     private ImageView mBackIv;
 
@@ -65,6 +74,15 @@ public class CategoryExpandActivity extends AppCompatActivity implements View.On
 
     }
 
+    void setDefalutList(){
+        for (ChannelModel model:originList){
+            if (defaultChannelNames.contains(model.getName())){
+//                Log.d("categorybase", "loadChannel: "+model.getName());
+                defaultList.add(model);
+            }
+        }
+    }
+
     private void setData(List<ChannelModel> otherChannels) {
         String channelCacheData = SPUtils.getInstance().getString(CHANNEL_CHCHE);
         showList = JSON.parseArray(channelCacheData, ChannelModel.class);
@@ -80,7 +98,7 @@ public class CategoryExpandActivity extends AppCompatActivity implements View.On
             }
             otherChannels.removeAll(duplications);
         }
-
+        setDefalutList();
         GridLayoutManager manager = new GridLayoutManager(this, 4);
         mRecy.setLayoutManager(manager);
 
@@ -130,6 +148,10 @@ public class CategoryExpandActivity extends AppCompatActivity implements View.On
         }
 
         if(notifyUpdate){
+            if (showList.size() < defaultList.size()){
+                //如果小时默认个数则使用默认的
+                SPUtils.getInstance().put(CHANNEL_CHCHE, JSON.toJSONString(defaultList));
+            }
             EventBus.getDefault().post(new UpdateChannelEvent());
         }
     }

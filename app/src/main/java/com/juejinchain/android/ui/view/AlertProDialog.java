@@ -125,44 +125,41 @@ public class AlertProDialog {
 	 * @param isCancelable
 	 */
 	public static void showLoading(final Boolean isCancelable) {
-		Context context = MyApplication.getInstance();
-		AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.TransparentStyle);
-		/*true 代表点击空白可消失   false代表点击空白哦不可消失 */
-		builder.setCancelable(isCancelable);
-		View view = View.inflate(context, R.layout.loading_view, null);
-//		TextView tv_itemdialog_ok = (TextView) view.findViewById(R.id.tv_itemdialog_ok);
-//		TextView tv_itemdialog_close = (TextView) view.findViewById(R.id.tv_itemdialog_close);
 
-//		tv_itemdialog_ok.setText(ok);
-//		tv_itemdialog_close.setText(close);
+		try {
 
-//		builder.setView(view);
-		dialog = builder.create();
-		//设置弹出全局对话框
-		dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_TOAST);
-		//设置昏暗度为0
-		dialog.getWindow().setDimAmount(0.2f);
-
-		dialog.show();
-		//设置自定义布局，必须要在show之后, 否则透明度无效
-		dialog.getWindow().setContentView(view);
-//		dialog.getWindow().setContentView(R.layout.layout_menu_black);
+			Context context = MyApplication.currentAct;
+			if (context == null)
+				//Unable to add window -- token null is not valid; is your activity running?
+				context = MyApplication.getInstance(); //这个context 部分手机会出现以上问题
 
 
-//		tv_itemdialog_title.setText(title);
-//		tv_itemdialog_ok.setOnClickListener(new View.OnClickListener() {
-//			@Override
-//			public void onClick(View v) {
-//				callback.onPositive(dialog);
-//			}
-//		});
+			AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.TransparentStyle);
+			/*true 代表点击空白可消失   false代表点击空白哦不可消失 */
+			builder.setCancelable(isCancelable);
+			View view = View.inflate(context, R.layout.loading_view, null);
+	//		TextView tv_itemdialog_ok = (TextView) view.findViewById(R.id.tv_itemdialog_ok);
+	//		TextView tv_itemdialog_close = (TextView) view.findViewById(R.id.tv_itemdialog_close);
 
-//		tv_itemdialog_close.setOnClickListener(new View.OnClickListener() {
-//			@Override
-//			public void onClick(View v) {
-//				callback.onNegative(dialog);
-//			}
-//		});
+	//		tv_itemdialog_ok.setText(ok);
+	//		tv_itemdialog_close.setText(close);
+
+	//		builder.setView(view);
+			dialog = builder.create();
+			//设置弹出全局对话框
+			dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_TOAST);
+			//设置昏暗度为0
+			dialog.getWindow().setDimAmount(0.2f);
+
+			dialog.show();
+			//设置自定义布局，必须要在show之后, 否则透明度无效
+			dialog.getWindow().setContentView(view);
+	//		dialog.getWindow().setContentView(R.layout.layout_menu_black);
+
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+
 	}
 
 

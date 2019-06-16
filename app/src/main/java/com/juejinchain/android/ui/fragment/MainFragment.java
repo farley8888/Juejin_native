@@ -5,7 +5,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,8 +20,10 @@ import com.juejinchain.android.H5Plugin.MyPlugin;
 import com.juejinchain.android.R;
 import com.juejinchain.android.WebAppFragment;
 import com.juejinchain.android.base.BaseMainFragment;
+import com.juejinchain.android.event.HideShowGiftCarButtonEvent;
 import com.juejinchain.android.event.ShowTabPopupWindowEvent;
 import com.juejinchain.android.event.ShowVueEvent;
+import com.juejinchain.android.event.TabSelectEvent;
 import com.juejinchain.android.event.VideoDetailEvent;
 import com.juejinchain.android.listener.OnItemClickListener;
 import com.juejinchain.android.model.UnreadModel;
@@ -33,7 +34,6 @@ import com.juejinchain.android.network.SpUtils;
 import com.juejinchain.android.tools.L;
 import com.juejinchain.android.ui.alerter.Alerter;
 import com.juejinchain.android.ui.dialog.BackExitDialog;
-import com.juejinchain.android.ui.ppw.GiftSuccessPopup;
 import com.juejinchain.android.ui.ppw.HomeBottomTipsPopupWindow;
 import com.juejinchain.android.ui.view.AdsHolderView;
 import com.juejinchain.android.ui.view.BottomBar;
@@ -45,8 +45,8 @@ import org.greenrobot.eventbus.Subscribe;
 
 import java.util.List;
 
+import io.dcloud.common.adapter.ui.ReceiveJSValue;
 import me.yokeyword.fragmentation.SupportFragment;
-import razerdp.basepopup.QuickPopupBuilder;
 
 
 /**
@@ -59,9 +59,11 @@ public class MainFragment extends BaseMainFragment {
     private final String TAG = MainFragment.class.getSimpleName();
     private static final int REQ_MSG = 10;
 
-    public static final int FIRST = 0;
-    public static final int SECOND = 1;
-    public static final int THIRD = 2;
+    public static final int HOME = 0;
+    public static final int VIDEO = 1;      //影视
+    public static final int Make_Money = 2; //赚车赚房
+    public static final int TASK = 3;       //任务
+    public static final int MINE = 4;       //我的
 //SupportFragment
     private SupportFragment[] mFragments = new SupportFragment[5];
 
@@ -102,9 +104,22 @@ public class MainFragment extends BaseMainFragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_main, container, false);
         initView(view);
-
+//        removeAll();
         EventBus.getDefault().register(this);
         return view;
+    }
+
+
+    void removeAll(){
+        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+        List<Fragment> frags = fragmentManager.getFragments();
+        if (frags.size() > 0){
+            FragmentTransaction transaction = fragmentManager.beginTransaction();
+            for (Fragment frg: frags ) {
+                transaction.remove(frg);
+            }
+            transaction.commitNowAllowingStateLoss();
+        }
     }
 
     @Override
@@ -115,37 +130,37 @@ public class MainFragment extends BaseMainFragment {
 
         if (firstFragment == null) {
 
-//            mFragments[FIRST] = new DiscoverFragment();
-            mFragments[FIRST] = HomeFragment.newInstance();
+//            mFragments[HOME] = new DiscoverFragment();
+            mFragments[HOME] = HomeFragment.newInstance();
 
             /*
              * WebViewFragment 不能同时加两个，
              * 如同时加载WebAppFragment，webViewFragment要先加载
              */
-            mFragments[SECOND] = WebAppFragment.instance("");
-//            mFragments[SECOND] = BlankFragment.newInstance("","");
+            mFragments[VIDEO] = WebAppFragment.instance("");
+//            mFragments[VIDEO] = BlankFragment.newInstance("","");
 
-            mFragments[THIRD] = WebAppFragment.instance("");
-            mFragments[3]     = WebAppFragment.instance("task");
-            mFragments[4]     = WebAppFragment.instance("");
+            mFragments[Make_Money] = WebAppFragment.instance("");
+            mFragments[TASK]     = WebAppFragment.instance("task");
+            mFragments[MINE]     = WebAppFragment.instance("");
 
-            loadMultipleRootFragment(R.id.fl_tab_container, FIRST,
-                    mFragments[FIRST],
-                    mFragments[SECOND]);  //,mFragments[THIRD] 2、3一样的不能同时加载
+            loadMultipleRootFragment(R.id.fl_tab_container, HOME,
+                    mFragments[HOME],
+                    mFragments[VIDEO]);  //,mFragments[Make_Money] 2、3一样的不能同时加载
 //            addFragments();
         } else {
             // 这里库已经做了Fragment恢复,所有不需要额外的处理了, 不会出现重叠问题
 
             // 这里我们需要拿到mFragments的引用
-            mFragments[FIRST] = firstFragment;
+            mFragments[HOME] = firstFragment;
 
-            mFragments[SECOND] = findChildFragment(WebAppFragment.class);
+            mFragments[VIDEO] = findChildFragment(WebAppFragment.class);
 
-            mFragments[THIRD]  = findChildFragment(WebAppFragment.class);
-            mFragments[3]      = findChildFragment(WebAppFragment.class);
-            mFragments[4]      = findChildFragment(WebAppFragment.class);
+            mFragments[Make_Money] = findChildFragment(WebAppFragment.class);
+            mFragments[TASK]      = findChildFragment(WebAppFragment.class);
+            mFragments[MINE]      = findChildFragment(WebAppFragment.class);
         }
-        webAppFragment = (WebAppFragment) mFragments[THIRD];
+        webAppFragment = (WebAppFragment) mFragments[Make_Money];
     }
 
     //加载所有
@@ -188,16 +203,35 @@ public class MainFragment extends BaseMainFragment {
             @Override
             public void onTabSelected(int position, int prePosition) {
                 currShowPosition = position;
-                // vue切换处理
+
                 if (position > 0){
                     if (vuePages == null){
                         vuePages = new String[]{MyPlugin.VP_MOVIE, MyPlugin.VP_MakeMoney, MyPlugin.VP_TASK, MyPlugin.VP_MINE};
                     }
                     WebAppFragment webFragmentVue = (WebAppFragment) mFragments[position];
-                    webFragmentVue.showPage(vuePages[position-1]);
+                    // vue内部切换处理
+                    webFragmentVue.showPage(vuePages[position - 1], new ReceiveJSValue.ReceiveJSValueCallback() {
+                        @Override
+                        public String callback(org.json.JSONArray jsonArray) {
+
+                            return null;
+                        }
+                    });
                 }
 
-                showHideFragment(mFragments[position], mFragments[prePosition]);
+                if (prePosition == 0){
+                    //从首页native切换到vue时加个延时, 太早切换显示会有个白屏的过程
+                    mBottomBar.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            showHideFragment(mFragments[position], mFragments[prePosition]);
+                        }
+                    }, 300);
+                }else if (position == 0){
+                    //从vue切回首页native
+                    showHideFragment(mFragments[position], mFragments[prePosition]);
+                }
+
 
                 if (mFragments[prePosition] == mFragments[position] ){
                     return;
@@ -242,7 +276,7 @@ public class MainFragment extends BaseMainFragment {
         super.onResume();
         if (UserModel.isLogin()){
             //vue是20s 请求一次
-            if (System.currentTimeMillis() - (long)SpUtils.get(getContext(), "unreadKey", 0l) < 10*1000 ){
+            if (System.currentTimeMillis() - (long)SpUtils.get(getContext(), "unreadKey", 0l) > 10*1000 ){
                 return;
             }
             NetUtil.getRequest(NetConfig.API_UnreadMsg, null, new NetUtil.OnResponse() {
@@ -288,17 +322,21 @@ public class MainFragment extends BaseMainFragment {
     }
 
     /**
-     * 子页使用显示vue
+     * 子页使用vue显示
      * ArticleDetails/5090577 文章详情
      * login 登录
-     *
+     * 等等
+     * @see ShowVueEvent
      */
     public void showVue(String page, String params){
         showVuePageFromNative = true;
         currShowPosition = 1;
         WebAppFragment webVueFragment = (WebAppFragment) mFragments[1];
-        showHideFragment(webVueFragment, mFragments[0]);
-        webVueFragment.showPage(page+ ( params.length() > 0 ? "/"+params : ""));
+//        showHideFragment(webVueFragment, mFragments[0]);
+        webVueFragment.showPage(page+ ( params.length() > 0 ? "/"+params : ""), jsonArray -> {
+            showHideFragment(webVueFragment, mFragments[0]);
+            return null;
+        });
         changeBottomTabBar(false);
     }
 
@@ -308,6 +346,7 @@ public class MainFragment extends BaseMainFragment {
         showHideFragment(mFragments[0], mFragments[1]); //这样按钮状态未能修改
         mBottomBar.getItem(0).performClick();
         changeBottomTabBar(true);
+
     }
 
     //跳转到vue登录页面
@@ -320,17 +359,29 @@ public class MainFragment extends BaseMainFragment {
         if (isShow && showVuePageFromNative){
             showVuePageFromNative = false;
             showHideFragment(mFragments[0], mFragments[1]);
+            //返回vue的首页，即空白页
+//            webAppFragment.callBackIndex(new CallVueBackIndexEvent());
         }
         mBottomBar.setVisibility(isShow ? View.VISIBLE : View.GONE);
         mBottomLineImg.setVisibility(isShow ? View.VISIBLE : View.GONE);
 
         FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) mFrameLayout.getLayoutParams();
+        FrameLayout.LayoutParams vueParams = (FrameLayout.LayoutParams) webAppFragment.webFrame.getLayoutParams();
+
+        float bottomHeight = getContext().getResources().getDimension(R.dimen.bottombar_height); //此结果单位为px
+//        Log.d(TAG, "changeBottomTabBar: "+bottomHeight);
         if (isShow){
-            params.setMargins(0,0, 0, ScreenUtils.dp2px(getContext(), 50));
+            //ScreenUtils.dp2px(getContext(), 50)
+            params.setMargins(0,0, 0, (int) bottomHeight);
+            //因为vue取的是手机的高度，所以要加个负值
+            vueParams.setMargins(0,0, 0, -(int) bottomHeight);
         }else{
             params.setMargins(0,0, 0, 0);
+            vueParams.setMargins(0,0, 0, 0);
         }
+
         mFrameLayout.setLayoutParams(params);
+        webAppFragment.webFrame.setLayoutParams(vueParams);
     }
 
     public void removeChildFragment(Fragment parentFragment) {
@@ -418,6 +469,22 @@ public class MainFragment extends BaseMainFragment {
     public void resetVideoDetailEvent(VideoDetailEvent event){
         L.d(TAG, "resetVideoDetail: ");
         videoDetailFragment = null;
+    }
+
+    @Subscribe()
+    public void hideShowAdsEvent(HideShowGiftCarButtonEvent event){
+        mAdsHolderView.setVisibility(event.isShow?View.VISIBLE: View.GONE);
+    }
+
+    @Subscribe()
+    public void switchTabEvent(TabSelectEvent event){
+        L.d(TAG, "switchTabEvent: ");
+        if (event.position == MINE){
+            if (UserModel.hasGetGiftBag()){
+                mAdsHolderView.setVisibility(View.GONE);
+            }
+        }
+        mBottomBar.getItem(event.position).performClick();
     }
 
     @Subscribe()

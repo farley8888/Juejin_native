@@ -8,6 +8,10 @@ import android.widget.TextView;
 
 import com.alibaba.fastjson.JSONObject;
 import com.juejinchain.android.R;
+import com.juejinchain.android.event.TabSelectEvent;
+import com.juejinchain.android.ui.fragment.MainFragment;
+
+import org.greenrobot.eventbus.EventBus;
 
 import razerdp.basepopup.BasePopupWindow;
 
@@ -35,6 +39,12 @@ public class GiftSuccessPopup extends BasePopupWindow {
 
         mTvJJB = findViewById(R.id.tv_juejinBao);
         mTvMoney = findViewById(R.id.tv_money);
+
+        //点击去看看，显示我的页面
+        findViewById(R.id.btn_seeGift).setOnClickListener(view -> {
+            dismiss();
+            EventBus.getDefault().post(new TabSelectEvent(MainFragment.MINE));
+        });
     }
 
     @Override

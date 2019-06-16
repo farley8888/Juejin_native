@@ -1,9 +1,6 @@
 package com.juejinchain.android.ui.activity;
 
-import android.app.Dialog;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
@@ -14,7 +11,6 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,8 +35,7 @@ import com.juejinchain.android.model.NewsModel;
 import com.juejinchain.android.network.NetConfig;
 import com.juejinchain.android.network.NetUtil;
 import com.juejinchain.android.ui.fragment.PagerAdapter;
-import com.juejinchain.android.ui.view.AlertProDialog;
-import com.juejinchain.android.ui.view.More_LoadDialog;
+import com.juejinchain.android.ui.ppw.SearchingPopup;
 import com.juejinchain.android.util.KeyboardUtil;
 import com.juejinchain.android.util.SPUtils;
 
@@ -121,6 +116,7 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
     private RecyclerView.ItemDecoration itemDecoration;
 
     private boolean iffilter=false;
+    private SearchingPopup mLoading;
 
 
     @Override
@@ -238,17 +234,17 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
 
 
                 viewHolder.textView.setText(text);
-                viewHolder.imageView.setOnClickListener(new View.OnClickListener() {
+                viewHolder.deletBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Log.i("lgq","aabbscccc");
+//                        Log.i("lgq","aabbscccc");
                         cleckAll(i);
                     }
                 });
                 viewHolder.linearLayout.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Log.i("lgq","aabb");
+//                        Log.i("lgq","aabb");
                         String text = viewHolder.textView.getText().toString();
 
                         mEditSearch.setText(text);
@@ -277,14 +273,9 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
                     if (is_checked==a){
                         mHistoryList.remove(is_checked);
                         saveHistoryrm();
-                        Log.i("lgq","aabbscccc1111");
                     }
                 }
                 notifyDataSetChanged();
-//                Log.i("lgq","aabbscccc2222");
-//                Message msg = new Message();
-//                msg.what = 1;
-//                handler.sendMessage(msg);//用activity中的handler发送消息
             }
         };
         mHistoryRecycle.setAdapter(mHistoryAdapter);
@@ -315,7 +306,10 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
         if (TextUtils.isEmpty(keys)) {
             return;
         }
-        if (mCurrpage == 1) NetUtil.showLoading(false);
+        if (mCurrpage == 1){
+            if (mLoading == null)mLoading = new SearchingPopup(this);
+            mLoading.showPopupWindow();
+        }
 
         Map<String, String> params = new HashMap<>(3);
         params.put("kw", keys);
@@ -324,6 +318,7 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
         NetUtil.getRequest(NetConfig.API_NewsSearch, params, new NetUtil.OnResponse() {
             @Override
             public void onResponse(JSONObject response) {
+                if (mLoading != null) mLoading.dismiss();
                 mPtrLayout.refreshComplete();
                 if (NetUtil.isSuccess(response)) {
                     JSONArray array;
@@ -342,9 +337,10 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
 
                     } else {  //更多
                         mData.addAll(list);
-//                    mPtrLayout.loadMoreComplete(totalPage == mCurrpage);
                     }
                     mPtrLayout.setLoadMoreEnable(totalPage > mCurrpage);
+                    if (totalPage == mCurrpage)
+                        mPtrLayout.loadMoreComplete(true);
 
                     mAdapter.notifyDataSetChanged();
                     mEmptyLoadView.setVisibility(mData.size() == 0 ? View.VISIBLE : View.GONE);
@@ -443,13 +439,14 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
 
     private class HistoryViewHolder extends RecyclerView.ViewHolder {
         private TextView textView;
-        private ImageView imageView;
+        private ImageView deletBtn;
         private LinearLayout linearLayout;
 
         public HistoryViewHolder(@NonNull View itemView) {
             super(itemView);
             textView = itemView.findViewById(R.id.text);
-            imageView = itemView.findViewById(R.id.deleig);
+            deletBtn = itemView.findViewById(R.id.deleig);
+            deletBtn.setVisibility(View.GONE);
             linearLayout = itemView.findViewById(R.id.sosli);
         }
 

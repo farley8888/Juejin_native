@@ -2,7 +2,6 @@ package com.juejinchain.android.ui.dialog;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
@@ -15,16 +14,25 @@ import com.alibaba.fastjson.JSONObject;
 import com.bumptech.glide.Glide;
 import com.dmcbig.mediapicker.utils.ScreenUtils;
 import com.juejinchain.android.R;
+import com.juejinchain.android.event.HideShowGiftCarButtonEvent;
+import com.juejinchain.android.event.ShowVueEvent;
+import com.juejinchain.android.event.TabSelectEvent;
+import com.juejinchain.android.model.UserModel;
 import com.juejinchain.android.network.NetConfig;
 import com.juejinchain.android.network.NetUtil;
+import com.juejinchain.android.ui.fragment.MainFragment;
 import com.juejinchain.android.ui.ppw.GiftSuccessPopup;
 
+import org.greenrobot.eventbus.EventBus;
+
 /**
- * 首页弹窗提示
+ * 首页大礼包弹窗提示
+ * 每次进入APP都提示且点击外面不消失
  */
 public class HomeTipsAlertDialog extends Dialog {
     public HomeTipsAlertDialog(Context context) {
         this(context,0);
+        setCanceledOnTouchOutside(false);
     }
 
     public HomeTipsAlertDialog(Context context, int themeResId) {
@@ -43,6 +51,11 @@ public class HomeTipsAlertDialog extends Dialog {
 
         initView();
         loadData();
+    }
+
+    @Override
+    public void onBackPressed() {
+
     }
 
     void loadData(){
@@ -69,44 +82,64 @@ public class HomeTipsAlertDialog extends Dialog {
         Glide.with(getContext()).load(jo.getString("images")).into(image);
     }
 
-
+    /**
+     * 加载领取大礼包接口
+     */
     void loadGiftApi(){
-        //
         NetUtil.getRequest(NetConfig.API_GiftBag, null, new NetUtil.OnResponse() {
             @Override
             public void onResponse(JSONObject response) {
+                dismiss();
                 if (NetUtil.isSuccess(response)){
                     response = response.getJSONObject("data");
+                    UserModel.setGetGiftBag(true);
                     showGiftSuccessDialog(response);
+                    EventBus.getDefault().post(new HideShowGiftCarButtonEvent(false));
                 }else{
                     Toast.makeText(getContext(), response.getString("msg"), Toast.LENGTH_LONG).show();
+                    //已领取
+                    if (response.getInteger("code") == 1){
+                        UserModel.setGetGiftBag(true);
+                        EventBus.getDefault().post(new TabSelectEvent(MainFragment.MINE));
+                    }
                 }
-                dismiss();
+
             }
         });
     }
 
+    /**
+     * 显示领取成功对话框
+     * @param jo
+     */
     void showGiftSuccessDialog(JSONObject jo){
         GiftSuccessPopup successPopup = new GiftSuccessPopup(getContext());
         successPopup.setView(jo);
-        successPopup.mLookButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                successPopup.dismiss();
-            }
-        });
         successPopup.showPopupWindow();
     }
 
     private void initView(){
         ImageView gifImage = findViewById(R.id.img_get);
         Glide.with(getContext()).load(R.drawable.get_button).into(gifImage);
+
+        //点击领取按钮
         gifImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                loadGiftApi();
+                if (UserModel.isLogin()){
+                    loadGiftApi();
+                }
+                else{
+                    dismiss();
+                    //去登录
+                    EventBus.getDefault().post(new ShowVueEvent(ShowVueEvent.PAGE_LOGIN, ""));
+//                    new GiftSuccessPopup(getContext()).showPopupWindow(); //测试领取成功
+                }
             }
         });
-        findViewById(R.id.cancel).setOnClickListener(v -> dismiss());
+        findViewById(R.id.cancel).setOnClickListener(v -> {
+            dismiss();
+            EventBus.getDefault().post(new HideShowGiftCarButtonEvent(true));
+        });
     }
 }

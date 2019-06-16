@@ -6,19 +6,20 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.juejinchain.android.H5Plugin.MyPlugin;
 import com.juejinchain.android.base.BaseMainFragment;
 import com.juejinchain.android.event.CallVueBackEvent;
+import com.juejinchain.android.event.CallVueBackIndexEvent;
 import com.juejinchain.android.event.SaveArticleEvent;
 import com.juejinchain.android.event.ShareEvent;
-import com.juejinchain.android.model.NewsModel;
 import com.juejinchain.android.model.ShareModel;
 import com.juejinchain.android.model.UserModel;
 import com.juejinchain.android.network.NetConfig;
@@ -33,15 +34,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.dcloud.common.DHInterface.ISysEventListener;
+import io.dcloud.common.adapter.ui.ReceiveJSValue;
 import io.dcloud.common.util.BaseInfo;
 import io.dcloud.feature.internal.sdk.SDK;
 
 public class WebAppFragment extends BaseMainFragment {
 
-    static Context context;
-    boolean doHardAcc = true;
-    static MyEntryProxy mEntryProxy = null;
-    static ViewGroup webFrame;
+    Context context;
+//    boolean doHardAcc = true;
+    MyEntryProxy mEntryProxy = null;
+    public FrameLayout webFrame;
     private static String FNAME = "name";
     private String TAG = WebAppFragment.class.getSimpleName();
 
@@ -71,10 +73,8 @@ public class WebAppFragment extends BaseMainFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-//        System.out.println("baseWeb.onCreateView");
-        View view = inflater.inflate(R.layout.fragment_blank, container, false);
-        webFrame = (ViewGroup) view;  //container 不能用这个，切换后无法隐藏
+        View view = inflater.inflate(R.layout.fragment_webvue, container, false);
+        webFrame = (FrameLayout) view;  //container 不能用这个，切换后无法隐藏
         EventBus.getDefault().register(this);
         return view;
     }
@@ -126,7 +126,7 @@ public class WebAppFragment extends BaseMainFragment {
             BaseInfo.mDeStatusBarBackground =  ((Activity) context).getWindow().getStatusBarColor();
         }
         mEntryProxy.onResume((Activity) context);
-        showPage(currPage);
+        showPage(currPage, null);
 
     }
 
@@ -214,17 +214,28 @@ public class WebAppFragment extends BaseMainFragment {
     }
 
     @Subscribe()
-    public void callVueBack(CallVueBackEvent event){
+    public void  callVueBack(CallVueBackEvent event){
         webModeListener.callVueBack();
+    }
+
+    @Subscribe()
+    public void  callBackIndex(CallVueBackIndexEvent event){
+        webModeListener.backVueIndex();
     }
 
     @Override
     public boolean onBackPressedSupport() {
         MainFragment mainFragment = (MainFragment) getParentFragment();
 
-//        if (!mainFragment.mBottomBar.isVisible()){
         if (!MyPlugin.isOnHomePage()){
-            webModeListener.callVueBack();
+            //这个是vue提供的返回方法
+//            webModeListener.callVueBack();
+
+            //DCloud框架的返回方法
+            boolean _ret = mEntryProxy != null && mEntryProxy.onActivityExecute(getActivity(), ISysEventListener.SysEventType.onKeyUp, new Object[]{KeyEvent.KEYCODE_BACK, null});
+//            if(!_ret && mEntryProxy != null)
+//                mEntryProxy.destroy(this);
+
             return true;
         }
 
@@ -236,9 +247,9 @@ public class WebAppFragment extends BaseMainFragment {
         return false;
     }
 
-    public void showPage(String page){
+    public void showPage(String page , @Nullable ReceiveJSValue.ReceiveJSValueCallback jsCallback){
         //启动前不能调用两次vue，会导致vue强制显示成第一个fragment
-        webModeListener.switchPage(page, null);
+        webModeListener.switchPage(page, jsCallback);
     }
 
     @Override
@@ -252,5 +263,7 @@ public class WebAppFragment extends BaseMainFragment {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
     }
+
+
 }
 

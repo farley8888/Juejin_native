@@ -1,7 +1,8 @@
 package com.juejinchain.android.event;
 
 /**
- * Created by YoKeyword on 16/6/5.
+ * 选中后第二次点击
+ * 用于更新页面等
  */
 public class TabSelectedEvent {
     public int position;

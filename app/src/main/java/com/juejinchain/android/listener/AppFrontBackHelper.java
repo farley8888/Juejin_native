@@ -9,6 +9,9 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.juejinchain.android.MainActivity;
+import com.juejinchain.android.MyApplication;
+
 import java.util.List;
 
 import static android.content.Context.KEYGUARD_SERVICE;
@@ -54,6 +57,7 @@ public class AppFrontBackHelper {
         @Override
         public void onActivityStarted(Activity activity) {
             Log.d("FrontBackHelper", "onActivityStarted: ");
+            MyApplication.currentAct = activity;
             activityStartCount++;
             //数值从0变到1说明是从后台切到前台
             if (activityStartCount == 1){

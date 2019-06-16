@@ -120,8 +120,6 @@ public class VideoPagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     }
 
 
-
-    @SuppressLint("ResourceAsColor")
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int position) {
         VideoModel model = mItems.get(position);
@@ -144,7 +142,6 @@ public class VideoPagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         holder.tvLength.setText(model.getVideo_duration());
 
         holder.tvZan.setText(model.video_like_count+"");
-        holder.tvZan.setTextColor(model.is_fabulous? R.color.text_red:R.color.colorDarker_gray);
         holder.tvZan.setEnabled(!model.is_fabulous);
 
         holder.tvComments.setText(model.comment_count+"");
@@ -174,6 +171,7 @@ public class VideoPagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                     jzvdPlayer.setVisibility(View.VISIBLE);
                     jzvdPlayer.setUp(src, playerModel.title, Jzvd.SCREEN_NORMAL);
                     Glide.with(context).load(playerModel.large_img_url).into(jzvdPlayer.thumbImageView);
+                    jzvdPlayer.startVideo();
                 }
             });
 

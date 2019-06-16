@@ -1,6 +1,7 @@
 package com.juejinchain.android.ui.fragment;
 
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.inputmethodservice.Keyboard;
 import android.os.Bundle;
 import android.os.Handler;
@@ -25,6 +26,10 @@ import android.widget.Toast;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.juejinchain.android.R;
 import com.juejinchain.android.adapter.VideoDetailXAdapter;
 import com.juejinchain.android.base.BaseBackFragment;
@@ -92,7 +97,7 @@ public class VideoDetailFragment extends BaseBackFragment {
         }
     };
     private final int READ_What = 122;
-    private int readTimes       = 30*1000; //阅读30秒才请求奖励接口
+    private int readTimes       = 5*1000; //阅读30秒才请求奖励接口
 
 
     public static VideoDetailFragment newInstance(VideoModel model) {
@@ -136,7 +141,7 @@ public class VideoDetailFragment extends BaseBackFragment {
                     popup.showPopupWindow();
                 }
             }
-        }, true);
+        }, false);
 
     }
 
@@ -147,8 +152,11 @@ public class VideoDetailFragment extends BaseBackFragment {
     private void setViewData(){
         if (model.src == null){
             setPlayHtml(model, parseWebView);
+        }else{
+            mJzvdPlayer.setUp(model.src, model.title);
+            mJzvdPlayer.startVideo();
         }
-        mJzvdPlayer.setUp(model.src, model.title);
+
         Glide.with(getContext()).load(model.large_img_url).into(mJzvdPlayer.thumbImageView);
         mData.add(model);
         mAdapter.setDataList(mData);
@@ -256,9 +264,7 @@ public class VideoDetailFragment extends BaseBackFragment {
 
     @Override
     protected void topbarRightButtonClick() {
-        Log.d(TAG, "topbarRightButtonClick: ");
         if (isLogin()) showShareDialog();
-//        new ShareDialog(getContext()).show();
 
     }
 
@@ -289,7 +295,7 @@ public class VideoDetailFragment extends BaseBackFragment {
                         _mActivity.onBackPressed();
                         break;
                     case R.id.btn_btmComment: //底部评论数按钮
-
+                        mRecyclerView.scrollToPosition(5);
                         break;
                     case R.id.btn_btmShare:  //分享
                         if (isLogin())
@@ -371,7 +377,7 @@ public class VideoDetailFragment extends BaseBackFragment {
                 }
                 switch (view.getId()){
                     case R.id.button1:     //定位到评论
-
+                        mRecyclerView.scrollToPosition(5);
                         break;
                     case R.id.buttonZan:  //点赞视频
                         VideoPagerFragment frg = (VideoPagerFragment) getParentFragment();
@@ -499,7 +505,22 @@ public class VideoDetailFragment extends BaseBackFragment {
                 @Override
                 public void run() {
                     mJzvdPlayer.setUp(src, model.title, Jzvd.SCREEN_NORMAL);
-                    Glide.with(getContext()).load(model.large_img_url).into(mJzvdPlayer.thumbImageView);
+
+                    Glide.with(getContext())
+                            .load(model.large_img_url)
+                            .addListener(new RequestListener<Drawable>() {
+                                @Override
+                                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                                    return false;
+                                }
+
+                                @Override
+                                public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                                    mJzvdPlayer.startVideo();
+                                    return false;
+                                }
+                            })
+                            .into(mJzvdPlayer.thumbImageView);
                 }
             });
 

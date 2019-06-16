@@ -13,7 +13,7 @@
         <item name="android:windowFullscreen">true</item>
     </style>
 
-    <style name="AppTheme.Splash" parent="AppTheme.Full">
+    <style name="AppTheme.Splash" parent="AppTheme">
         <item name="android:windowBackground">@drawable/splash</item>
     </style>
 

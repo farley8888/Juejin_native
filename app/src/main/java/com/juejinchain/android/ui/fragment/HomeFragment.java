@@ -6,12 +6,10 @@ import android.os.CountDownTimer;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -23,18 +21,19 @@ import com.dmcbig.mediapicker.utils.ScreenUtils;
 import com.juejinchain.android.R;
 import com.juejinchain.android.adapter.HomePagerFragmentAdapter;
 import com.juejinchain.android.base.BaseMainFragment;
+import com.juejinchain.android.event.CallVueBackIndexEvent;
+import com.juejinchain.android.event.HideShowGiftCarButtonEvent;
 import com.juejinchain.android.event.ShareCallbackEvent;
 import com.juejinchain.android.event.ShareEvent;
 import com.juejinchain.android.event.ShowTabPopupWindowEvent;
-import com.juejinchain.android.event.ShowVueEvent;
+import com.juejinchain.android.event.StopCounterEvent;
 import com.juejinchain.android.event.UpdateChannelEvent;
 import com.juejinchain.android.model.ChannelModel;
 import com.juejinchain.android.model.UserModel;
 import com.juejinchain.android.network.NetConfig;
 import com.juejinchain.android.network.NetUtil;
-import com.juejinchain.android.network.OkHttpUtils;
-import com.juejinchain.android.network.callBack.JSONCallback;
 import com.juejinchain.android.tools.L;
+import com.juejinchain.android.ui.dialog.HomeTipsAlertDialog;
 import com.juejinchain.android.ui.ppw.HomeTipsPopupWindow;
 import com.juejinchain.android.ui.activity.CategoryExpandActivity;
 import com.juejinchain.android.ui.activity.SearchActivity;
@@ -42,7 +41,6 @@ import com.juejinchain.android.ui.dialog.ShareDialog;
 import com.juejinchain.android.ui.ppw.TimeRewardPopup;
 import com.juejinchain.android.ui.view.PagerSlidingTabStrip;
 import com.juejinchain.android.util.SPUtils;
-import com.juejinchain.android.util.StringUtils;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -51,8 +49,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import okhttp3.Call;
 
 import static com.juejinchain.android.util.Constant.CHANNEL_CHCHE;
 
@@ -84,7 +80,10 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
     ShareDialog mShareDialog;
     //领取奖励
     private LinearLayout mLyLing;
+    boolean onCounting; //是否在计时
+
     private List<ChannelModel> mChannelCacheList = new ArrayList<>();
+    private boolean hasShowGiftDialog;
 
     public static HomeFragment newInstance() {
 
@@ -101,6 +100,7 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
         View view = inflater.inflate(R.layout.fragment_home, container, false);
         initView(view);
         EventBus.getDefault().register(this);
+        L.d(TAG, "onCreateView: ");
         return view;
     }
 
@@ -161,8 +161,6 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
     @Override
     public void onLazyInitView(@Nullable Bundle savedInstanceState) {
         super.onLazyInitView(savedInstanceState);
-//        String[] array = new String[]{getString(R.string.msg), getString(R.string.more),"热门s爽肤水","农人asfdasf","NBA都是","CBA地方","视频艾艾","国际afaf"};
-//        mViewPager.setAdapter(new HomePagerFragmentAdapter(getChildFragmentManager(), array));
 
 //        mTab.setupWithViewPager(mViewPager);
 //        mTabs.setViewPager(mViewPager);
@@ -171,13 +169,17 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
         String channelCacheData = SPUtils.getInstance().getString(CHANNEL_CHCHE);
 
         if(TextUtils.isEmpty(channelCacheData)){
-//            loadChannel();
+            loadChannel();
         }else{
             mChannelCacheList = JSON.parseArray(channelCacheData, ChannelModel.class);
-//            mChannelList = JSON.parseArray(channelCacheData, ChannelModel.class);
-//            setTabsPage();
+            if (UserModel.isLogin()){
+                loadChannel();
+            }else {
+                mChannelList = mChannelCacheList;
+                setTabsPage();
+            }
         }
-        loadChannel();
+
     }
 
 
@@ -187,16 +189,16 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
         mIsVisible = !hidden;
         if (hidden){
             if (mPopupWindow != null && mPopupWindow.isShowing()) mPopupWindow.dismiss();
-        }
-        MainFragment mainFragment = (MainFragment) getParentFragment();
-        if (UserModel.isLogin()){
-
-//        Log.d(TAG, "onHiddenChanged: "+mainFragment);
-            if (null != mainFragment.mAdsHolderView )
-                mainFragment.mAdsHolderView.setVisibility(UserModel.hasGetGiftBag() ? View.GONE:View.VISIBLE);
+            EventBus.getDefault().post(new HideShowGiftCarButtonEvent(false));
         }else{
-            mainFragment.mAdsHolderView.setVisibility(View.GONE);
+            //返回vue的首页，即空白页
+            MainFragment mainFragment = (MainFragment) getParentFragment();
+            mainFragment.webAppFragment.callBackIndex(new CallVueBackIndexEvent());
+            if(!mainFragment.mAdsHolderView.isClick){
+                mainFragment.mAdsHolderView.setVisibility(View.VISIBLE);
+            }
         }
+
     }
 
     @Override
@@ -211,9 +213,15 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
 
     }
 
+    public void showHomeGiftDialog(){
+        hasShowGiftDialog = true;
+        new HomeTipsAlertDialog(getContext()).show();
+    }
+
     @Override
     public void onSupportVisible() {
         super.onSupportVisible();
+
         if (UserModel.isLogin()){
             if (!UserModel.hasGetGiftBag()){ //未领取
                 mAddBtn.postDelayed(new Runnable() {
@@ -221,7 +229,7 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
                     public void run() {
                         showLingRewardPop();
                     }
-                }, 1000); //等activity启动完才能加载pop
+                }, 1000); //等全局大礼包dialog提示完才能加载pop
             }
             if (!UserModel.isNew()){
                 mAddBtn.postDelayed(new Runnable() {
@@ -232,7 +240,13 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
                 }, 500); //
             }
         }
+        if (mChannelList.size() ==0){
+            loadChannel();
+        }
+        if (!hasShowGiftDialog) showHomeGiftDialog();
+        loadLingTimeApi();
     }
+
 
     //非新用户调用，没签到的提示
     void loadMessageHint(){
@@ -250,6 +264,10 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
 
     //加载是否可领取状态api
     void loadLingTimeApi(){
+        if (onCounting){
+            L.d(TAG, "loadLingTimeApi: 还在计时……");
+            return;
+        }
         //
         NetUtil.getRequest(NetConfig.API_Times30, null, new NetUtil.OnResponse() {
             @Override
@@ -266,13 +284,15 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
                     tvCoin.setText(response.getString(""));
                     mLyLing.setBackgroundResource(R.drawable.ling_anchor_bg2);
 
-                    if (mCountDownTimer != null) mCountDownTimer.cancel();
+                    if (mCountDownTimer != null){
+                        mCountDownTimer.cancel();
+                    }
                     mCountDownTimer = new CountDownTimer(remainTime*1000, 1000) {
                         @Override
                         public void onTick(long millisUntilFinished) {
                             long min = millisUntilFinished/1000 / 60;
                             long s = millisUntilFinished/1000 % 60;
-
+                            onCounting = true;
                             tvCountTime.setText(String.format("%02d:%02d",min ,s));
                         }
 
@@ -280,6 +300,7 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
                         public void onFinish() {
                             tvCountTime.setText(getString(R.string.lingqu));
                             tvCoin.setText(coin);
+                            onCounting = false;
                             mLyLing.setBackgroundResource(R.drawable.ling_anchor_bg);
                             showLingRewardPop();
                         }
@@ -292,6 +313,7 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
 
     //点击领取
     void doLingApi(){
+        if (onCounting) return;
         NetUtil.getRequest(NetConfig.API_Times30_Save, null, new NetUtil.OnResponse() {
             @Override
             public void onResponse(JSONObject response) {
@@ -308,7 +330,12 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
                 }
 
             }
-        });
+        }, false);
+    }
+
+    @Subscribe()
+    public void stopCounterEvent(StopCounterEvent event){
+        if (mCountDownTimer != null) mCountDownTimer.cancel();
     }
 
     //显示领取奖励popup
@@ -355,7 +382,7 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
             @Override
             public void onResponse(JSONObject response) {
                 if (NetUtil.isSuccess(response)) {
-                    Log.d(TAG, "onResponse: "+response);
+                    L.d(TAG, "loadChannel.onResponse: "+response);
                     List<ChannelModel> tempList = JSON.parseArray(response.getString("data"), ChannelModel.class);
 
                     boolean needUpdate = false;
@@ -392,10 +419,11 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
     }
 
     void setTabsPage() {
+        mViewPager.removeAllViews();
 //        String[] array = new String[mChannelList.size()];
 //        for (int i = 0 ; i < mChannelList.size(); i++)
 //            array[i] = mChannelList.get(i).getName();
-
+        L.d(TAG, "setTabsPage: ");
         mViewPager.setAdapter(new HomePagerFragmentAdapter(getChildFragmentManager(), mChannelList));
 
         mTabs.setViewPager(mViewPager);

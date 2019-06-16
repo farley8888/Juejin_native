@@ -2,8 +2,10 @@ package com.juejinchain.android.model;
 
 import android.util.Log;
 
+import com.juejinchain.android.event.StopCounterEvent;
 import com.juejinchain.android.util.SPUtils;
 
+import org.greenrobot.eventbus.EventBus;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -82,7 +84,7 @@ public class UserModel {
     }
 
     public static void cleanData(){
-
+        EventBus.getDefault().post(new StopCounterEvent());
         SPUtils.getInstance().put(Key_ISLogin, false);
 
         SPUtils.getInstance().put(Key_UserToken, "");

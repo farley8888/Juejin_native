@@ -12,8 +12,50 @@ public class NewsModel {
      */
     public int type;
 
-    //0：正常；1：置顶；2：热门；3：营销；
+    //0：正常 1：置顶 2：热
     public int is_top;
+
+    //前提is_top=0; 1微热；2：热文；3：爆文
+    public int read_mark;
+
+    /**
+     * 前提is_top=0; 1小议；2：热议；3：爆评
+     * 可能和read_mark同时显示，用空格隔开
+     */
+    public int comment_mark;
+
+    public String getIs_top() {
+        if (is_top == 0) {
+            String isTopStr = "";
+            if (read_mark == 1){
+                isTopStr = "微热";
+            }else if (read_mark == 2){
+                isTopStr = "热文";
+            }else if (read_mark == 3){
+                isTopStr = "爆文";
+            }
+
+            if (isTopStr.length()>0) isTopStr += " ";
+
+            if (comment_mark == 1){
+                isTopStr += "小议";
+            }else if (comment_mark == 2){
+                isTopStr += "热议";
+            }else if (comment_mark == 3){
+                isTopStr += "爆评";
+            }
+
+            return isTopStr;
+
+        }else if (is_top == 1){
+            return "置顶";
+        }else if (is_top == 2){
+            return "热";
+        }
+        return "";
+
+    }
+
     public int read_num;
 
     public boolean is_follow;
@@ -39,15 +81,8 @@ public class NewsModel {
     public String redirect_url;
 
     public String getPublish_time() {
-        if (publish_time_date == null) return "00";
+        if (publish_time_date == null || publish_time_date.length() < 8) return "";
         return publish_time_date.substring(5,publish_time_date.length()-3);
-    }
-
-    public String getIs_top() {
-        if (is_top == 0) return ""; //正常
-        if (is_top == 1) return "置顶";
-        if (is_top == 2) return "热门";
-        else return "营销";
     }
 
     public String getRead_num() {

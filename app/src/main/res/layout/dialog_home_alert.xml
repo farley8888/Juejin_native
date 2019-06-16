@@ -69,9 +69,10 @@
             android:textColor="@color/light_white" />
     </LinearLayout>
 
-    <View
+    <Button
         android:id="@+id/cancel"
         android:layout_width="300dp"
         android:layout_height="40dp"
+        android:background="@null"
         android:layout_gravity="bottom" />
 </FrameLayout>

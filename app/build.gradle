@@ -10,7 +10,7 @@ android {
         minSdkVersion rootProject.minSdkVersion
         targetSdkVersion rootProject.targetSdkVersion     //有些应用市场要26以上
         versionCode 10803
-        versionName "1.8.3"
+        versionName "1.8.3.3"
         multiDexEnabled true
         ndk {
             abiFilters 'x86', 'armeabi'  //使用uniapp时必须同时选择二者或选其一

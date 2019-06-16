@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Bundle;
 import android.util.Log;
 
 import com.juejinchain.android.hook.ADOpenActivity;
@@ -29,6 +30,7 @@ public class MyApplication extends DCloudApplication {
     public boolean isQihooTrafficFreeValidate = true;
     private static MyApplication b;
     private static Context c = null;
+    public static Activity currentAct;
 
     private HomeListener mHomeListen = null;
     private PowerListener mPowerListen ;

@@ -11,6 +11,7 @@
         android:text="@string/other_channel" />
 
     <TextView
+        android:id="@+id/tv_channel_otherEdit"
         style="@style/JJ.Label.Minor.Small"
         android:layout_alignBaseline="@id/title"
         android:layout_marginLeft="10dp"

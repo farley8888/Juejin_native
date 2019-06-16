@@ -9,14 +9,14 @@
         android:id="@+id/fl_tab_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="@dimen/bottombar_wechat_height" />
+        android:layout_marginBottom="@dimen/bottombar_height" />
 
     <ImageView
         android:id="@+id/img_bottomLine"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:layout_marginBottom="@dimen/bottombar_wechat_height"
+        android:layout_marginBottom="@dimen/bottombar_height"
         android:background="@drawable/actionbar_shadow_up" />
 
     <com.juejinchain.android.ui.view.BottomBar

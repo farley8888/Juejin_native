@@ -1,5 +1,7 @@
 package com.juejinchain.android.ui.view.DragHelper;
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Handler;
@@ -20,6 +22,7 @@ import android.widget.Toast;
 
 import com.juejinchain.android.R;
 import com.juejinchain.android.model.ChannelModel;
+import com.juejinchain.android.ui.activity.CategoryExpandActivity;
 
 import java.util.List;
 
@@ -179,8 +182,8 @@ public class ChannelAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     public void onClick(final View v) {
                         int position = myHolder.getAdapterPosition();
                         if (parent instanceof RecyclerView) {
-                            if (mMyChannelItems.size() <= 4){
-                                Toast.makeText(mInflater.getContext(), "我的频道至少有4个", Toast.LENGTH_SHORT).show();
+                            if (mMyChannelItems.size() <= CategoryExpandActivity.Default_Min){
+                                Toast.makeText(mInflater.getContext(), "我的频道至少有"+CategoryExpandActivity.Default_Min+"个", Toast.LENGTH_SHORT).show();
                                 return;
                             }
                             remove((RecyclerView) parent, position, myHolder);
@@ -332,6 +335,18 @@ public class ChannelAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             } else {
                 headerHolder.tvBtnEdit.setText(R.string.edit);
             }
+        }else if (holder instanceof RecyclerView.ViewHolder){
+            TextView tvOtherEdit = holder.itemView.findViewById(R.id.tv_channel_otherEdit);
+
+            Context act = mInflater.getContext();
+            if ( mMyChannelItems.size() < CategoryExpandActivity.Default_Max) {
+                tvOtherEdit.setText(R.string.other_channel_click_add);
+
+                tvOtherEdit.setTextColor(act.getResources().getColor(R.color.ccc));
+            }else {
+                tvOtherEdit.setText(R.string.other_channel_click_remove);
+                tvOtherEdit.setTextColor(act.getResources().getColor(R.color.text_red));
+            }
         }
     }
 
@@ -400,8 +415,9 @@ public class ChannelAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
      * @param otherHolder
      */
     private void moveOtherToMy(OtherViewHolder otherHolder) {
-        if(mMyChannelItems.size() > 11){
-            Toast.makeText(mInflater.getContext(), "我的频道最多12个", Toast.LENGTH_SHORT).show();
+        if(mMyChannelItems.size() >= CategoryExpandActivity.Default_Max){
+            Toast.makeText(mInflater.getContext(), "我的频道最多"+CategoryExpandActivity.Default_Max+"个", Toast.LENGTH_SHORT).show();
+            notifyDataSetChanged();
             return;
         }
         int position = processItemRemoveAdd(otherHolder);
@@ -437,6 +453,9 @@ public class ChannelAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private void updateChannel(){
         if(editingListener != null){
             editingListener.updateChannel(mMyChannelItems);
+        }
+        if (mMyChannelItems.size() == CategoryExpandActivity.Default_Max-1){
+            notifyDataSetChanged();
         }
     }
 

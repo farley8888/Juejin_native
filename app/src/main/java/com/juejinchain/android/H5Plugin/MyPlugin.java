@@ -53,6 +53,7 @@ public class MyPlugin extends StandardFeature {
      */
     public static int VueCallBackTimes;
 
+    /**所有首页tab */
     public static List<String> TAB_PAGES_OF_VUE;
 
     Context ctx;
@@ -111,7 +112,7 @@ public class MyPlugin extends StandardFeature {
     public void authorLogin(IWebview pWebview, JSONArray array){
         String CallBackID = array.optString(0);
         String way = array.optString(1);
-        Log.d(TAG, "authorLogin: "+way);
+        L.d(TAG, "authorLogin: "+way);
         if (way.equals("baidu")){
             baiduAuthor(pWebview, CallBackID);
         }else if (way.equals("dingding")){
@@ -127,11 +128,11 @@ public class MyPlugin extends StandardFeature {
     public void shareTo(IWebview pWebview, JSONArray array){
         String CallBackID = array.optString(0);
         String way = array.optString(1);
-        Log.d(TAG, "shareTo: array ="+array.toString());
+        L.d(TAG, "shareTo: array ="+array.toString());
         JSONObject json = array.optJSONObject(2);
         String title = json.optString("title");
 
-        Log.d(TAG, "shareTo: "+title);
+        L.d(TAG, "shareTo: "+title);
          if (way.equals("dingding")) {
              if (checkDDAndInitApi(pWebview, CallBackID, false)) {
                  new DDShareUtil(iddShareApi).sendWebPageMessage(false, json);
@@ -298,14 +299,17 @@ public class MyPlugin extends StandardFeature {
         L.d(TAG, "vueGoNext: from = "+from); // \/movie
         CurrVuePage = (String) array.opt(2);
         L.d(TAG, "vueGoNext: to = "+CurrVuePage);
+
+        MainFragment mainFragment = ((MainActivity) pWebview.getActivity()).mainFragment;
+
         if (TAB_PAGES_OF_VUE.contains(from)){
             L.d(TAG, "vueGoNext: hideBottomTabBar");
-            MainFragment mainFragment = ((MainActivity) pWebview.getActivity()).mainFragment;
             mainFragment.changeBottomTabBar(false);
-            if (CurrVuePage.equals("登录")){ //如果跳到登录页面，说明vue登录失效了
-                UserModel.cleanData();
-                mainFragment.mAdsHolderView.setVisibility(View.GONE);
-            }
+        }
+
+        if (CurrVuePage.equals("登录")){ //如果跳到登录页面，说明vue登录失效了
+            UserModel.cleanData();
+            mainFragment.mAdsHolderView.setVisibility(View.GONE);
         }
     }
 

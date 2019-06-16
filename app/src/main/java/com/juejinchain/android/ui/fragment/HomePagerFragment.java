@@ -1,12 +1,10 @@
 package com.juejinchain.android.ui.fragment;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +20,7 @@ import com.chanven.lib.cptr.loadmore.OnLoadMoreListener;
 import com.chanven.lib.cptr.recyclerview.RecyclerAdapterWithHF;
 import com.juejinchain.android.R;
 import com.juejinchain.android.event.SaveArticleEvent;
+import com.juejinchain.android.event.ShowVueEvent;
 import com.juejinchain.android.event.TabSelectedEvent;
 import com.juejinchain.android.eventbus_activity.EventBusActivityScope;
 import com.juejinchain.android.model.ChannelModel;
@@ -33,6 +32,8 @@ import com.juejinchain.android.network.callBack.JSONCallback;
 import com.juejinchain.android.tools.L;
 import com.juejinchain.android.ui.activity.ArticleDetailActivity;
 import com.juejinchain.android.util.AnimUtil;
+import com.juejinchain.android.util.StringUtils;
+
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -80,7 +81,8 @@ public class HomePagerFragment extends SupportFragment  {
         Bundle args = new Bundle();
         HomePagerFragment fragment = new HomePagerFragment();
 
-        fragment.mChannel = model;
+//        fragment.mChannel = model; //保存在bundle里面，这样直接赋值，从子页闪退回来会变null
+        args.putString("model", JSON.toJSONString(model));
         //推荐和热门
         if(model != null && "0,1".contains(model.getId()) ){
             fragment.mAPI = NetConfig.API_NewsPull;
@@ -97,12 +99,16 @@ public class HomePagerFragment extends SupportFragment  {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_tab_pager_first, container, false);
         initView(view);
+        L.d(TAG, "onCreateView: ");
         return view;
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        L.d(TAG, "onActivityCreated: ");
+        Bundle bundle = getArguments();
+        mChannel = JSON.parseObject(bundle.getString("model"), ChannelModel.class);
         currPage = 1;
         homeFragment = (HomeFragment) getParentFragment();
 //        ptrClassicFrameLayout.autoRefresh(true);
@@ -118,7 +124,7 @@ public class HomePagerFragment extends SupportFragment  {
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
-        Log.d(TAG, "onHiddenChanged: "+mChannel.getName());
+        if (hidden) NetUtil.dismissLoading();
     }
 
     private void initView(View view) {
@@ -162,9 +168,18 @@ public class HomePagerFragment extends SupportFragment  {
                 // 通知MainFragment跳转至NewFeatureFragment
                 MainFragment mainFragment = (MainFragment) getParentFragment().getParentFragment();
 //                mainFragment.startBrotherFragment(NewFeatureFragment.newInstance());
-
-                mainFragment.showVue("ArticleDetails", mData.get(position).id);
-                EventBus.getDefault().post(new SaveArticleEvent(mData.get(position)));
+                NewsModel model = mData.get(position);
+                if (!StringUtils.isEmpty(model.redirect_url)){
+                    if (model.redirect_url.startsWith("http")){
+                        mainFragment.showVue(ShowVueEvent.PAGE_BROWSER, model.id);
+                    }else {
+                        String vuePage = model.redirect_url.replace("#", "");
+                        mainFragment.showVue(vuePage, model.id);
+                    }
+                }else {
+                    mainFragment.showVue(ShowVueEvent.PAGE_ART_DETAIL, mData.get(position).id);
+                    EventBus.getDefault().post(new SaveArticleEvent(mData.get(position)));
+                }
 
                 /**
                  * 用切换隐藏tab的方式，这样重new等待时间太长
@@ -175,13 +190,13 @@ public class HomePagerFragment extends SupportFragment  {
             }
         });
 
-        mTvRecommend = view.findViewById(R.id.tvRecommend);
 
+        mTvRecommend = view.findViewById(R.id.tvRecommend);
         init();
     }
 
     void loadData(){
-
+        L.d(TAG, "loadData: "+mChannel);
         //不可见不加载
         if (homeFragment.currChannel != mChannel){ //!isVisible()无效 ？
 //            return;
@@ -195,7 +210,7 @@ public class HomePagerFragment extends SupportFragment  {
         if (currPage == 1 && mChannel.getId().equals("0")){
             param.put("is_first", 1+"");
 
-            if (mData.size() == 0) NetUtil.showLoading(3000); //加个延时，因为有启动动画
+            if (mData.size() == 0) NetUtil.showLoading(2000); //加个延时，因为有启动动画
 
         }
 
@@ -203,11 +218,14 @@ public class HomePagerFragment extends SupportFragment  {
         OkHttpUtils.getAsyn(url, new JSONCallback() {
             @Override
             public void onError(Call call, Exception e) {
-
+                NetUtil.dismissLoading();
+                ptrClassicFrameLayout.refreshComplete();
             }
 
             @Override
             public void onResponse(JSONObject response) {
+                NetUtil.dismissLoading();
+                ptrClassicFrameLayout.refreshComplete();
                 if (NetUtil.isSuccess(response)){
                     /** 变态的接口设计
                      * 没数据时
@@ -230,7 +248,6 @@ public class HomePagerFragment extends SupportFragment  {
                         mData.clear();
 //                        mData = temp; //不能用这个赋值，adapter会监听不到数据有变化
                         mData.addAll(temp);
-                        ptrClassicFrameLayout.refreshComplete();
                         if (mData.size() > 5)ptrClassicFrameLayout.setLoadMoreEnable(true);
 
                         if(mData.size() > 0 && manuallyRefresh){
@@ -298,7 +315,7 @@ public class HomePagerFragment extends SupportFragment  {
      */
     @Subscribe
     public void onTabSelectedEvent(TabSelectedEvent event) {
-        if (event.position != MainFragment.SECOND) return;
+        if (event.position != MainFragment.HOME) return;
 
         if (mInAtTop) {
 //            mRefreshLayout.setRefreshing(true);

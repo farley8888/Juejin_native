@@ -9,7 +9,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -25,7 +24,6 @@ import com.juejinchain.android.R;
 import com.juejinchain.android.adapter.VideoPagerAdapter;
 import com.juejinchain.android.event.TabSelectedEvent;
 import com.juejinchain.android.eventbus_activity.EventBusActivityScope;
-import com.juejinchain.android.model.NewsModel;
 import com.juejinchain.android.model.UserModel;
 import com.juejinchain.android.model.VideoCategoryModel;
 import com.juejinchain.android.model.VideoModel;
@@ -36,7 +34,6 @@ import com.juejinchain.android.network.callBack.JSONCallback;
 import com.juejinchain.android.tools.L;
 
 import org.greenrobot.eventbus.Subscribe;
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -323,7 +320,7 @@ public class VideoPagerFragment extends SupportFragment  {
      */
     @Subscribe
     public void onTabSelectedEvent(TabSelectedEvent event) {
-        if (event.position != MainFragment.SECOND) return;
+        if (event.position != MainFragment.VIDEO) return;
 
         if (mInAtTop) {
 //            mRefreshLayout.setRefreshing(true);

@@ -12,10 +12,12 @@ import com.juejinchain.android.R;
 import com.juejinchain.android.ui.dialog.HomeTipsAlertDialog;
 
 /**
- * ads
+ * 首页右下角车标按钮
  */
 public class AdsHolderView extends LinearLayout {
     private ImageView icon;
+
+    public boolean isClick;
 
     public AdsHolderView(Context context) {
         this(context, null);
@@ -27,8 +29,19 @@ public class AdsHolderView extends LinearLayout {
         View.inflate(context, R.layout.layout_home_ads, this);
         icon = findViewById(R.id.icon);
         icon.setOnClickListener(v -> {
+            isClick = true;
             new HomeTipsAlertDialog(context).show();
         });
+    }
+
+    @Override
+    public void setVisibility(int visibility) {
+//        if (isClick)
+            super.setVisibility(visibility);
+        //未点击不隐藏
+//        else if (visibility != GONE)
+//            super.setVisibility(visibility);
+
     }
 
     public void setIcon(String url){

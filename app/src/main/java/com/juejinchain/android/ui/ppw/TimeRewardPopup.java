@@ -29,13 +29,15 @@ public class TimeRewardPopup extends BasePopupWindow {
         initView();
     }
     public TimeRewardPopup(Context context, int type) {
-        super(context);
+        this(context);
         mType = type;
     }
 
     public void setView(JSONObject jo){
 //        mTvTitle.setText(jo.getString("user_count"));
 //        mTvJJB.setText(jo.getString("vcoin")+"个掘金宝");
+        if (jo == null) return;
+
         mTvCoin.setText(String.format("+%s金币", jo.getString("coin")));
         if (mType == TYPE_VIDEO){
             mTvTitle.setText("奖励到账啦");
@@ -46,6 +48,12 @@ public class TimeRewardPopup extends BasePopupWindow {
                 mTvAppReward.setText(String.format("用掘金宝App看视频能多赚%s金币！", jo.getString("extra_coin")));
             }
         }
+    }
+
+    @Override
+    public boolean onOutSideTouch() {
+//        return super.onOutSideTouch();
+        return false;  //不消失
     }
 
     void initView(){

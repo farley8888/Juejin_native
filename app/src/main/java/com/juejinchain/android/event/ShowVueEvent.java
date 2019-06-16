@@ -1,9 +1,14 @@
 package com.juejinchain.android.event;
 
+/**
+ * 跳转的vue内页
+ */
 public class ShowVueEvent {
 
-    /** 需要id参数 */
+    /** 文章详情，需要id参数 */
     public static String PAGE_ART_DETAIL = "/ArticleDetails";
+    //网页浏览文章
+    public static String PAGE_BROWSER = "/browser";
     public static String PAGE_LOGIN = "/login";
     /** 查看攻略 */
     public static String PAGE_LOCK_FAN = "/lockfanpage";

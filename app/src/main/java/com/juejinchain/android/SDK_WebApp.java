@@ -184,8 +184,9 @@ class WebappModeListener implements ICoreStatusListener, IOnCreateSplashView {
 		iWebview.evalJS("nativeJump('"+page+"')", new ReceiveJSValue.ReceiveJSValueCallback() {
 			@Override
 			public String callback(JSONArray jsonArray) {
-				L.d(TAG, "SwitchPage.callback: ");
+				L.d(TAG, "SwitchPage.callback: = "+jsonArray);
 				switchOK = true;
+				if(jsCallback != null) jsCallback.callback(jsonArray);
 				return "{}";
 			}
 		});
@@ -234,6 +235,20 @@ class WebappModeListener implements ICoreStatusListener, IOnCreateSplashView {
 			@Override
 			public String callback(JSONArray jsonArray) {
 				L.d(TAG, "saveReadArticle.callback: ");
+				return "{}";
+			}
+		});
+	}
+
+	/**
+	 * 返回vue首页，空白的
+	 */
+	public void backVueIndex(){
+		Log.d(TAG, "backVueIndex: ");
+		iWebview.evalJS("backIndex()", new ReceiveJSValue.ReceiveJSValueCallback() {
+			@Override
+			public String callback(JSONArray jsonArray) {
+				L.d(TAG, "backVueIndex.callback: ");
 				return "{}";
 			}
 		});

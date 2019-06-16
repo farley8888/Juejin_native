@@ -17,7 +17,9 @@ import android.widget.Toast;
 import com.alibaba.fastjson.JSONObject;
 import com.juejinchain.android.MyApplication;
 import com.juejinchain.android.R;
+import com.juejinchain.android.model.UserModel;
 import com.juejinchain.android.network.callBack.JSONCallback;
+import com.juejinchain.android.tools.L;
 import com.juejinchain.android.ui.view.AlertProDialog;
 
 import java.util.HashMap;
@@ -76,12 +78,12 @@ public class NetUtil {
      * @param isProcessError 是否处理异常，false时，非成功响应不通知回调接口
      */
     public static void postRequest(final String api, Map<String, String> param, final OnResponse response, final boolean isProcessError){
-        String url = NetConfig.getUrlByAPI(api);
+        String url = NetConfig.getUrlByParams(param, api);
         OkHttpUtils.postAsyn(url, param, new JSONCallback() {
             @Override
             public void onError(Call call, Exception e) {
                 dismissLoading();
-                Log.e("NetUtil","postRequest.errorApi= "+api );
+                L.e("NetUtil","postRequest.errorApi= "+api );
                 e.printStackTrace();
                 showErrToast("请求异常："+ e.getMessage());
            }
@@ -158,6 +160,9 @@ public class NetUtil {
      */
     private static void processResponse(OnResponse response,  JSONObject json, boolean isProcessError){
         dismissLoading();
+        if (json.getInteger("code") == NetConfig.NR_CODE_LOGIN_TIMEOUT){
+            UserModel.cleanData();
+        }
         if (isProcessError){
             response.onResponse(json);
         }else if (isSuccess(json)){

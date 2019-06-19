@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,12 +14,18 @@ import android.widget.TextView;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.bytedance.sdk.openadsdk.AdSlot;
+import com.bytedance.sdk.openadsdk.TTAdManager;
+import com.bytedance.sdk.openadsdk.TTAdNative;
+import com.bytedance.sdk.openadsdk.TTFeedAd;
 import com.chanven.lib.cptr.PtrClassicFrameLayout;
 import com.chanven.lib.cptr.PtrDefaultHandler;
 import com.chanven.lib.cptr.PtrFrameLayout;
 import com.chanven.lib.cptr.loadmore.OnLoadMoreListener;
 import com.chanven.lib.cptr.recyclerview.RecyclerAdapterWithHF;
 import com.juejinchain.android.R;
+import com.juejinchain.android.adapter.HomePagerAdapter;
+import com.juejinchain.android.config.TTAdManagerHolder;
 import com.juejinchain.android.event.SaveArticleEvent;
 import com.juejinchain.android.event.ShowVueEvent;
 import com.juejinchain.android.event.TabSelectedEvent;
@@ -30,9 +37,9 @@ import com.juejinchain.android.network.NetUtil;
 import com.juejinchain.android.network.OkHttpUtils;
 import com.juejinchain.android.network.callBack.JSONCallback;
 import com.juejinchain.android.tools.L;
-import com.juejinchain.android.ui.activity.ArticleDetailActivity;
 import com.juejinchain.android.util.AnimUtil;
 import com.juejinchain.android.util.StringUtils;
+import com.juejinchain.android.util.TToast;
 
 
 import org.greenrobot.eventbus.EventBus;
@@ -46,6 +53,8 @@ import java.util.Map;
 import me.yokeyword.fragmentation.SupportFragment;
 import okhttp3.Call;
 
+import static io.dcloud.common.util.ReflectUtils.getApplicationContext;
+
 
 /**
  * 首页 pageFragment
@@ -54,18 +63,18 @@ import okhttp3.Call;
  */
 public class HomePagerFragment extends SupportFragment  {
 //    private SwipeRefreshLayout mRefreshLayout;
-    PtrClassicFrameLayout ptrClassicFrameLayout;
+    PtrClassicFrameLayout mPtrFrameLayout;
     private RecyclerView mRecy;
     private ViewGroup noDataView; //空数据提示view
 
-    private PagerAdapter adapter;
+    private HomePagerAdapter adapter;
     RecyclerAdapterWithHF mAdapter;
     final String TAG = HomePagerFragment.class.getSimpleName();
 
     private boolean mInAtTop = true;
     private int mScrollTotal;
     Handler handler = new Handler();
-    private List<NewsModel> mData = new ArrayList<>();
+    private List<Object> mData = new ArrayList<>();
     int currPage = 0;
     int pageSize = 10;
     public ChannelModel mChannel;
@@ -73,8 +82,10 @@ public class HomePagerFragment extends SupportFragment  {
     HomeFragment homeFragment;
 
     private TextView mTvRecommend;
-
     private boolean manuallyRefresh;
+    private TTAdNative mTTAdNative;
+    private boolean mIsVisible;
+
 
     public static HomePagerFragment newInstance(ChannelModel model) {
 
@@ -99,20 +110,26 @@ public class HomePagerFragment extends SupportFragment  {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_tab_pager_first, container, false);
         initView(view);
-        L.d(TAG, "onCreateView: ");
+//        L.d(TAG, "onCreateView: ");
         return view;
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        L.d(TAG, "onActivityCreated: ");
+//        L.d(TAG, "onActivityCreated: ");
         Bundle bundle = getArguments();
         mChannel = JSON.parseObject(bundle.getString("model"), ChannelModel.class);
         currPage = 1;
         homeFragment = (HomeFragment) getParentFragment();
-//        ptrClassicFrameLayout.autoRefresh(true);
         loadData();
+
+        //初始化广告管理对象
+        TTAdManager ttAdManager = TTAdManagerHolder.get();
+        mTTAdNative = ttAdManager.createAdNative(getApplicationContext());
+        //申请部分权限，如read_phone_state,防止获取不了imei时候，下载类广告没有填充的问题。
+//        TTAdManagerHolder.get().requestPermissionIfNecessary(getApplicationContext());
+
     }
 
     @Override
@@ -124,7 +141,20 @@ public class HomePagerFragment extends SupportFragment  {
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
+        mIsVisible = !hidden;
         if (hidden) NetUtil.dismissLoading();
+    }
+
+    @Override
+    public void onSupportVisible() {
+        super.onSupportVisible();
+        mIsVisible = true;
+    }
+
+
+    public void doRefresh(){
+        L.d(TAG, "doRefresh: ");
+        mPtrFrameLayout.autoRefresh(true);
     }
 
     private void initView(View view) {
@@ -133,11 +163,11 @@ public class HomePagerFragment extends SupportFragment  {
         mRecy = view.findViewById(R.id.recy);
 //        mRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.refresh_layout);
 //        mRefreshLayout.setOnRefreshListener(this);
-        ptrClassicFrameLayout = view.findViewById(R.id.test_recycler_view_frame);
+        mPtrFrameLayout = view.findViewById(R.id.ptr_recycler_view_frame);
         noDataView  = view.findViewById(R.id.ly_no_data);
         noDataView.setVisibility(View.GONE);
 
-        adapter = new PagerAdapter(_mActivity, mData);
+        adapter = new HomePagerAdapter(_mActivity, mData);
 
         mRecy.setHasFixedSize(true);
         LinearLayoutManager manager = new LinearLayoutManager(_mActivity);
@@ -153,7 +183,7 @@ public class HomePagerFragment extends SupportFragment  {
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
                 mScrollTotal += dy;
-                if (mScrollTotal <= 0) {
+                if (mScrollTotal <= 1) {
                     mInAtTop = true;
                 } else {
                     mInAtTop = false;
@@ -168,7 +198,7 @@ public class HomePagerFragment extends SupportFragment  {
                 // 通知MainFragment跳转至NewFeatureFragment
                 MainFragment mainFragment = (MainFragment) getParentFragment().getParentFragment();
 //                mainFragment.startBrotherFragment(NewFeatureFragment.newInstance());
-                NewsModel model = mData.get(position);
+                NewsModel model = (NewsModel) mData.get(position);
                 if (!StringUtils.isEmpty(model.redirect_url)){
                     if (model.redirect_url.startsWith("http")){
                         mainFragment.showVue(ShowVueEvent.PAGE_BROWSER, model.id);
@@ -177,8 +207,8 @@ public class HomePagerFragment extends SupportFragment  {
                         mainFragment.showVue(vuePage, model.id);
                     }
                 }else {
-                    mainFragment.showVue(ShowVueEvent.PAGE_ART_DETAIL, mData.get(position).id);
-                    EventBus.getDefault().post(new SaveArticleEvent(mData.get(position)));
+                    mainFragment.showVue(ShowVueEvent.PAGE_ART_DETAIL, model.id);
+                    EventBus.getDefault().post(new SaveArticleEvent(model));
                 }
 
                 /**
@@ -207,6 +237,7 @@ public class HomePagerFragment extends SupportFragment  {
         param.put("per_page", pageSize+"");
 //        if (!mChannel.getName().equals("推荐"))
             param.put("channel_id", mChannel.getId());
+            param.put("columnid", mChannel.getId());
         if (currPage == 1 && mChannel.getId().equals("0")){
             param.put("is_first", 1+"");
 
@@ -219,13 +250,13 @@ public class HomePagerFragment extends SupportFragment  {
             @Override
             public void onError(Call call, Exception e) {
                 NetUtil.dismissLoading();
-                ptrClassicFrameLayout.refreshComplete();
+                mPtrFrameLayout.refreshComplete();
             }
 
             @Override
             public void onResponse(JSONObject response) {
                 NetUtil.dismissLoading();
-                ptrClassicFrameLayout.refreshComplete();
+                mPtrFrameLayout.refreshComplete();
                 if (NetUtil.isSuccess(response)){
                     /** 变态的接口设计
                      * 没数据时
@@ -248,19 +279,56 @@ public class HomePagerFragment extends SupportFragment  {
                         mData.clear();
 //                        mData = temp; //不能用这个赋值，adapter会监听不到数据有变化
                         mData.addAll(temp);
-                        if (mData.size() > 5)ptrClassicFrameLayout.setLoadMoreEnable(true);
+                        if (mData.size() > 5) mPtrFrameLayout.setLoadMoreEnable(true);
 
                         if(mData.size() > 0 && manuallyRefresh){
                             startRecommend(mData.size());
                         }
                     }else {  //更多
                         mData.addAll(temp);
-                        ptrClassicFrameLayout.loadMoreComplete(temp.size()>0);
+                        mPtrFrameLayout.loadMoreComplete(temp.size()>0);
                     }
                     noDataView.setVisibility(mData.size() == 0? View.VISIBLE:View.GONE);
                     mAdapter.notifyDataSetChanged();
                 }else {
 
+                }
+            }
+        });
+    }
+
+    //加载穿山甲信息流广告
+    void loadListAd(){
+        //feed广告请求类型参数
+        AdSlot adSlot = new AdSlot.Builder()
+                .setCodeId("920793469")
+                .setSupportDeepLink(false)
+                .setImageAcceptedSize(640, 320)
+                .setAdCount(3)
+                .build();
+
+        //调用feed广告异步请求接口
+        mTTAdNative.loadFeedAd(adSlot, new TTAdNative.FeedAdListener() {
+            @Override
+            public void onError(int code, String message) {
+                TToast.show(getContext(), "穿山甲异常："+message);
+            }
+
+            @Override
+            public void onFeedAdLoad(List<TTFeedAd> ads) {
+                if (ads == null || ads.isEmpty()) {
+                    TToast.show(getContext(), "on FeedAdLoaded: ad is null!");
+                    return;
+                }
+
+
+//                for (int i = 0; i < LIST_ITEM_COUNT; i++) {
+//                    mData.add(null);
+//                }
+                int count = mData.size();
+                for (TTFeedAd ad : ads) {
+                    int random = (int) (Math.random() * count);
+                    mData.set(random, ad);
                 }
             }
         });
@@ -275,14 +343,14 @@ public class HomePagerFragment extends SupportFragment  {
 
     private void init() {
 
-//        ptrClassicFrameLayout.postDelayed(new Runnable() {
+//        mPtrFrameLayout.postDelayed(new Runnable() {
 //            @Override
 //            public void run() {
-//                ptrClassicFrameLayout.autoRefresh(true);
+//                mPtrFrameLayout.autoRefresh(true);
 //            }
 //        }, 150);
 
-        ptrClassicFrameLayout.setPtrHandler(new PtrDefaultHandler() {
+        mPtrFrameLayout.setPtrHandler(new PtrDefaultHandler() {
 
             @Override
             public void onRefreshBegin(PtrFrameLayout frame) {
@@ -297,13 +365,13 @@ public class HomePagerFragment extends SupportFragment  {
             }
         });
 
-        ptrClassicFrameLayout.setOnLoadMoreListener(new OnLoadMoreListener() {
+        mPtrFrameLayout.setOnLoadMoreListener(new OnLoadMoreListener() {
 
             @Override
             public void loadMore() {
 //                 mData.add(new String("  RecyclerView item  - add " + page+"0"));
 //                mAdapter.notifyDataSetChanged();
-//                ptrClassicFrameLayout.loadMoreComplete(true);
+//                mPtrFrameLayout.loadMoreComplete(true);
                 currPage++;
                 loadData();
             }
@@ -315,13 +383,15 @@ public class HomePagerFragment extends SupportFragment  {
      */
     @Subscribe
     public void onTabSelectedEvent(TabSelectedEvent event) {
-        if (event.position != MainFragment.HOME) return;
+        // mIsVisible 状态不对
 
-        if (mInAtTop) {
-//            mRefreshLayout.setRefreshing(true);
-//            onRefresh();
-        } else {
-            scrollToTop();
+        if (event.position == MainFragment.HOME && event.channelName.equals(mChannel.getName())){
+            L.d(TAG, "onTabSelectedEvent: "+mChannel.getName());
+            if (mInAtTop) {
+                doRefresh();
+            } else {
+                scrollToTop();
+            }
         }
     }
 

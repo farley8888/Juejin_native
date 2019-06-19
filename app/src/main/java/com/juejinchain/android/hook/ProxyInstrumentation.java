@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.util.Log;
 
 /**
- * @author 黄兴伟 (xwd9989@gamil.com)
  * @since 2018/5/9
  */
 public class ProxyInstrumentation extends Instrumentation {

@@ -26,10 +26,16 @@ import com.juejinchain.android.ui.ppw.GiftSuccessPopup;
 import org.greenrobot.eventbus.EventBus;
 
 /**
- * 首页大礼包弹窗提示
- * 每次进入APP都提示且点击外面不消失
+ * 首页大礼包弹窗提示点，击外面不消失
+ * 两种情况
+ * 1、每次进入APP未登录显示，
+ * 1.2、点击领取跳到登录页，不登录回来不消失
+ * 2、登录后未领取的
  */
 public class HomeTipsAlertDialog extends Dialog {
+
+    public boolean isGoLogin;
+
     public HomeTipsAlertDialog(Context context) {
         this(context,0);
         setCanceledOnTouchOutside(false);
@@ -130,7 +136,8 @@ public class HomeTipsAlertDialog extends Dialog {
                     loadGiftApi();
                 }
                 else{
-                    dismiss();
+                    hide(); //去登录不消失
+                    isGoLogin = true;
                     //去登录
                     EventBus.getDefault().post(new ShowVueEvent(ShowVueEvent.PAGE_LOGIN, ""));
 //                    new GiftSuccessPopup(getContext()).showPopupWindow(); //测试领取成功

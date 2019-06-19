@@ -3,6 +3,7 @@ package com.juejinchain.android.model;
 import android.util.Log;
 
 import com.juejinchain.android.event.StopCounterEvent;
+import com.juejinchain.android.util.Constant;
 import com.juejinchain.android.util.SPUtils;
 
 import org.greenrobot.eventbus.EventBus;
@@ -15,6 +16,7 @@ import org.json.JSONObject;
 public class UserModel {
 
     private static final String Key_UserToken = "UKUserToken";
+    private static final String Key_UserID = "UKUserID";
     private static final String Key_NickName = "UKNickName";
     private static final String Key_PHone = "UKPhone";
     //当前登录用户邀请码
@@ -91,6 +93,9 @@ public class UserModel {
         SPUtils.getInstance().put(Key_NickName, "");
         SPUtils.getInstance().remove(Key_Invitation);
         SPUtils.getInstance().remove(Key_PHone);
+
+        SPUtils.getInstance().put(Constant.SKey_IndexLingPopup, 0l);
+
     }
 
 

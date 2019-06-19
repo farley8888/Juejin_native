@@ -9,10 +9,16 @@ import android.widget.LinearLayout;
 
 import com.bumptech.glide.Glide;
 import com.juejinchain.android.R;
+import com.juejinchain.android.event.ShowGiftDialogEvent;
 import com.juejinchain.android.ui.dialog.HomeTipsAlertDialog;
 
+import org.greenrobot.eventbus.EventBus;
+
 /**
- * 首页右下角车标按钮
+ * 首页右下角'车标按钮'
+ * 显示情况
+ * 1、未登录时
+ * 1、登录未领取大礼包
  */
 public class AdsHolderView extends LinearLayout {
     private ImageView icon;
@@ -29,8 +35,8 @@ public class AdsHolderView extends LinearLayout {
         View.inflate(context, R.layout.layout_home_ads, this);
         icon = findViewById(R.id.icon);
         icon.setOnClickListener(v -> {
-            isClick = true;
-            new HomeTipsAlertDialog(context).show();
+//            isClick = true;
+            EventBus.getDefault().post(new ShowGiftDialogEvent());
         });
     }
 

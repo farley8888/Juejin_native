@@ -95,6 +95,12 @@ dependencies {
     implementation 'com.android.support:support-v4:28.0.0'
     implementation 'org.greenrobot:eventbus:3.0.0'
 
+    //穿山甲广告依赖
+//    implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.6'  这个idcloud已经加了
+    implementation "com.android.support:appcompat-v7:27.1.1"
+    implementation "com.android.support:support-annotations:27.1.1"
+    implementation "com.squareup.leakcanary:leakcanary-android-no-op:1.5.4"
+
     implementation project(':fragmentation_core')
     implementation project(':fragmentation')
     implementation project(':fragmentation_swipeback')

@@ -172,6 +172,10 @@ public class BottomBarTab extends FrameLayout {
         mUnreadDot.setVisibility(show? View.VISIBLE:GONE);
     }
 
+    public boolean isShowUnreadDot(){
+        return mUnreadDot.getVisibility() == View.VISIBLE;
+    }
+
     /**
      * 获取当前未读数量
      */

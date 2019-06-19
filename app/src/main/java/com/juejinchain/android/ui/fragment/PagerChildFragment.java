@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.juejinchain.android.R;
+import com.juejinchain.android.adapter.HomePagerAdapter;
 import com.juejinchain.android.base.MySupportFragment;
 
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ public class PagerChildFragment extends MySupportFragment {
     private int mFrom;
 
     private RecyclerView mRecy;
-    private PagerAdapter mAdapter;
+    private HomePagerAdapter mAdapter;
 
     public static PagerChildFragment newInstance(int from) {
         Bundle args = new Bundle();
@@ -54,7 +55,7 @@ public class PagerChildFragment extends MySupportFragment {
     private void initView(View view) {
         mRecy = (RecyclerView) view.findViewById(R.id.recy);
 
-        mAdapter = new PagerAdapter(_mActivity);
+        mAdapter = new HomePagerAdapter(_mActivity);
         LinearLayoutManager manager = new LinearLayoutManager(_mActivity);
         mRecy.setLayoutManager(manager);
         mRecy.setAdapter(mAdapter);

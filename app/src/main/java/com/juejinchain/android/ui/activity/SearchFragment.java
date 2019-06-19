@@ -4,19 +4,22 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -30,11 +33,13 @@ import com.chanven.lib.cptr.PtrDefaultHandler;
 import com.chanven.lib.cptr.PtrFrameLayout;
 import com.chanven.lib.cptr.recyclerview.RecyclerAdapterWithHF;
 import com.juejinchain.android.R;
+import com.juejinchain.android.base.BaseBackFragment;
 import com.juejinchain.android.event.ShowVueEvent;
 import com.juejinchain.android.model.NewsModel;
 import com.juejinchain.android.network.NetConfig;
 import com.juejinchain.android.network.NetUtil;
-import com.juejinchain.android.ui.fragment.PagerAdapter;
+import com.juejinchain.android.adapter.HomePagerAdapter;
+import com.juejinchain.android.ui.fragment.MainFragment;
 import com.juejinchain.android.ui.ppw.SearchingPopup;
 import com.juejinchain.android.util.KeyboardUtil;
 import com.juejinchain.android.util.SPUtils;
@@ -50,7 +55,7 @@ import java.util.Map;
 /**
  * 搜索页面
  */
-public class SearchActivity extends AppCompatActivity implements View.OnClickListener {
+public class SearchFragment extends BaseBackFragment implements View.OnClickListener {
     /**
      * 刷新layout
      */
@@ -99,7 +104,7 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
     /**
      * data
      */
-    private List<NewsModel> mData = new ArrayList<>();
+    private List<Object> mData = new ArrayList<>();
 
     /**
      * adapter
@@ -110,45 +115,50 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
     private List<String> mHistoryFilter = new ArrayList<>();
 
     private RecyclerView.Adapter mHistoryAdapter;
-    private ShowVueEvent mShowVueEvent;
+//    private ShowVueEvent mShowVueEvent;
 
     //分割线
     private RecyclerView.ItemDecoration itemDecoration;
 
     private boolean iffilter=false;
     private SearchingPopup mLoading;
+    private HomePagerAdapter adapter;
+    ImageButton mCleanButton;
 
-
+    @Nullable
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_search);
-        initView();
-        initEvent();
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+
+        View view = inflater.inflate(R.layout.activity_search, container, false);
+        initView(view);
+        initEvent(view);
         initData();
-//        dialog = new More_LoadDialog(this);
+        return view;
     }
 
-    private void initView() {
-        mPtrLayout = findViewById(R.id.ptr_layout);
-        mRecycleView = findViewById(R.id.recy);
-        mEmptyLoadView = findViewById(R.id.ly_no_searchdata);
-        mEditSearch = findViewById(R.id.edt_search);
 
-        mHistoryLayout = findViewById(R.id.history_layout);
-        mHistoryEmpty = findViewById(R.id.search_empty);
-        mHistoryRecycle = findViewById(R.id.history_view);
+    private void initView(View v) {
+        mPtrLayout = v.findViewById(R.id.ptr_layout);
+        mRecycleView = v.findViewById(R.id.recy);
+        mEmptyLoadView = v.findViewById(R.id.ly_no_searchdata);
+        mEditSearch = v.findViewById(R.id.edt_search);
 
-        itemDecoration = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
+        mHistoryLayout = v.findViewById(R.id.history_layout);
+        mHistoryEmpty = v.findViewById(R.id.search_empty);
+        mHistoryRecycle = v.findViewById(R.id.history_view);
+
+        itemDecoration = new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL);
 //默认分割线
         mHistoryRecycle.addItemDecoration(itemDecoration);
-
+        mCleanButton = v.findViewById(R.id.btn_clearKw);
+        mCleanButton.setVisibility(View.INVISIBLE);
     }
 
-    private void initEvent() {
-        findViewById(R.id.btn_back).setOnClickListener(this);
-        findViewById(R.id.btn_search).setOnClickListener(this);
-        findViewById(R.id.btn_clear).setOnClickListener(this);
+    private void initEvent(View v) {
+        v.findViewById(R.id.btn_back).setOnClickListener(this);
+        v.findViewById(R.id.btn_search).setOnClickListener(this);
+        v.findViewById(R.id.btn_clear).setOnClickListener(this);
+        mCleanButton.setOnClickListener(this);
 
         //不用下拉刷新
         mPtrLayout.setPtrHandler(new PtrDefaultHandler() {
@@ -162,65 +172,37 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
             loadData();
         });
         mPtrLayout.setAutoLoadMoreEnable(true);
-
-        mAdapter = new RecyclerAdapterWithHF(new PagerAdapter(this, mData));
+        adapter = new HomePagerAdapter(getContext(), mData);
+        mAdapter = new RecyclerAdapterWithHF(adapter);
         mRecycleView.setHasFixedSize(true);
-        mRecycleView.setLayoutManager(new LinearLayoutManager(this));
+        mRecycleView.setLayoutManager(new LinearLayoutManager(getContext()));
         mRecycleView.setAdapter(mAdapter);
+        setEditListener();
 
         mAdapter.setOnItemClickListener(new RecyclerAdapterWithHF.OnItemClickListener() {
             @Override
             public void onItemClick(RecyclerAdapterWithHF adapter, RecyclerView.ViewHolder vh, int position) {
-//                MainActivity mainActivity = (MainActivity) getParent(); 空的
-                mShowVueEvent = new ShowVueEvent(ShowVueEvent.PAGE_ART_DETAIL, mData.get(position).id);
+
+                MainFragment mainFragment = (MainFragment) getPreFragment();
+                mainFragment.nextFragment = SearchFragment.this;
+                showHideFragment(mainFragment, SearchFragment.this);
+
+                NewsModel model = (NewsModel) mData.get(position);
+                Log.d("search", "onItemClick: "+model.getTitle());
+                mainFragment.showVue(ShowVueEvent.PAGE_ART_DETAIL, model.id);
+
+//                mShowVueEvent = new ShowVueEvent(ShowVueEvent.PAGE_ART_DETAIL, model.id);
 //                EventBus.getDefault().post(mShowVueEvent);
-                finish();
+//                finish();
             }
         });
 
-        mEditSearch.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                mHistoryFilter.clear();
-                if (s.length() > 0) {
-                    iffilter=true;
-                    for (String history : mHistoryList) {
-                        if (history.contains(s)) {
-                            mHistoryFilter.add(history);
-                        }
-                    }
-                    mHistoryAdapter.notifyDataSetChanged();
-                    mHistoryLayout.setVisibility(mHistoryFilter.isEmpty() ? View.GONE : View.VISIBLE);
-
-                    mData.clear();
-                    mAdapter.notifyDataSetChanged();
-                } else if (mHistoryList.isEmpty()) {
-                    iffilter=false;
-                    mHistoryLayout.setVisibility(View.GONE);
-                } else {
-                    mHistoryLayout.setVisibility(View.VISIBLE);
-                    mHistoryEmpty.setVisibility(View.GONE);
-                    mHistoryFilter.addAll(mHistoryList);
-                    mHistoryAdapter.notifyDataSetChanged();
-                }
-                mPtrLayout.setLoadMoreEnable(false);
-            }
-        });
-
-        mHistoryRecycle.setLayoutManager(new LinearLayoutManager(this));
+        mHistoryRecycle.setLayoutManager(new LinearLayoutManager(getContext()));
         mHistoryAdapter = new RecyclerView.Adapter<HistoryViewHolder>() {
             @NonNull
             @Override
             public HistoryViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-                return new HistoryViewHolder(LayoutInflater.from(SearchActivity.this).inflate(R.layout.item_search_history, viewGroup, false));
+                return new HistoryViewHolder(LayoutInflater.from(getContext()).inflate(R.layout.item_search_history, viewGroup, false));
             }
 
             @Override
@@ -281,6 +263,72 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
         mHistoryRecycle.setAdapter(mHistoryAdapter);
     }
 
+    private void setEditListener() {
+        mEditSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                mCleanButton.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                mHistoryFilter.clear();
+                mCleanButton.setVisibility(s.length() > 0 ? View.VISIBLE: View.GONE);
+                if (s.length() > 0) {
+                    iffilter=true;
+                    for (String history : mHistoryList) {
+                        if (history.contains(s)) {
+                            mHistoryFilter.add(history);
+                        }
+                    }
+                    mHistoryAdapter.notifyDataSetChanged();
+                    mHistoryLayout.setVisibility(mHistoryFilter.isEmpty() ? View.GONE : View.VISIBLE);
+
+                    mData.clear();
+                    mAdapter.notifyDataSetChanged();
+                } else if (mHistoryList.isEmpty()) {
+                    iffilter=false;
+                    mHistoryLayout.setVisibility(View.GONE);
+                } else {
+                    mHistoryLayout.setVisibility(View.VISIBLE);
+                    mHistoryEmpty.setVisibility(View.GONE);
+                    mHistoryFilter.addAll(mHistoryList);
+                    mHistoryAdapter.notifyDataSetChanged();
+                }
+                mPtrLayout.setLoadMoreEnable(false);
+            }
+        });
+
+        //监听搜索按钮
+        mEditSearch.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
+                boolean handled = false;
+                if (actionId == EditorInfo.IME_ACTION_SEARCH
+                        || actionId == EditorInfo.IME_ACTION_DONE) {
+                    String content = textView.getText().toString().trim();
+                    if (content.length() < 2){
+                        Toast.makeText(getContext(), "请输入完整", Toast.LENGTH_SHORT).show();
+                        return true;
+                    }else{
+                        saveHistoryadd();
+                        loadData();
+                    }
+                    handled = true;
+                    /*隐藏软键盘*/
+                    hideSoftInput();
+                }
+                return handled;
+//                return false;
+            }
+        });
+    }
+
     private void initData() {
         String histories = SPUtils.getInstance().getString("search_history");
         if (TextUtils.isEmpty(histories)) {
@@ -307,13 +355,14 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
             return;
         }
         if (mCurrpage == 1){
-            if (mLoading == null)mLoading = new SearchingPopup(this);
+            if (mLoading == null)mLoading = new SearchingPopup(getContext());
             mLoading.showPopupWindow();
         }
 
         Map<String, String> params = new HashMap<>(3);
         params.put("kw", keys);
         params.put("page", String.valueOf(mCurrpage));
+        adapter.setSearchKey(keys);
 
         NetUtil.getRequest(NetConfig.API_NewsSearch, params, new NetUtil.OnResponse() {
             @Override
@@ -339,7 +388,7 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
                         mData.addAll(list);
                     }
                     mPtrLayout.setLoadMoreEnable(totalPage > mCurrpage);
-                    if (totalPage == mCurrpage)
+                    if (totalPage == mCurrpage && mData.size() > 0)
                         mPtrLayout.loadMoreComplete(true);
 
                     mAdapter.notifyDataSetChanged();
@@ -356,20 +405,24 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btn_back:
-                finish();
+                onBackPressedSupport();
+                pop();
                 break;
             case R.id.btn_search:
                 if (mEditSearch.getText().toString().trim().length() < 1) {
 
-                    Toast.makeText(this, "请输入完整的搜索内容", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "请输入完整的搜索内容", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
                 saveHistoryadd();
                 loadData();
                 break;
+            case R.id.btn_clearKw:
+                mEditSearch.setText("");
+                break;
             case R.id.btn_clear:
-                new AlertDialog.Builder(this)
+                new AlertDialog.Builder(getContext())
                         .setCancelable(true)
                         .setMessage("确认清空输入记录?")
                         .setPositiveButton("清空", (dialog, which) -> {
@@ -388,7 +441,8 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     private void saveHistoryadd() {
-        KeyboardUtil.hide(this);
+//        KeyboardUtil.hide(getActivity());
+        hideSoftInput();
         String keyword = mEditSearch.getText().toString();
         if (mHistoryList.contains(keyword)) {
             mHistoryList.remove(keyword);
@@ -415,26 +469,14 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
         }
     }
 
-    @Override
-    public boolean dispatchKeyEvent(KeyEvent event) {
-        //这里注意要作判断处理，ActionDown、ActionUp都会回调到这里，不作处理的话就会调用两次
-        if (KeyEvent.KEYCODE_ENTER == event.getKeyCode() && KeyEvent.ACTION_DOWN == event.getAction()) {
-            String name = mEditSearch.getText().toString();
 
-            if (TextUtils.isEmpty(name)) {
-//                    ToastUtil.showInfo(this, "请输入用户名", Toast.LENGTH_LONG);
-                Toast.makeText(this, "请输入关键字", Toast.LENGTH_SHORT).show();
-                return false;
-            }
-            saveHistoryadd();
-            loadData();
-
-            //处理事件
-            return true;
-        }
-        return super.dispatchKeyEvent(event);
+    public boolean onBackPressedSupport() {
+        hideSoftInput();
+        MainFragment mainFragment = (MainFragment) getPreFragment();
+        showHideFragment(mainFragment);
+        mainFragment.showHomeFragment();
+        return super.onBackPressedSupport();
     }
-
 
 
     private class HistoryViewHolder extends RecyclerView.ViewHolder {
@@ -453,10 +495,9 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     @Override
-    protected void onDestroy() {
+    public void onDestroy() {
         super.onDestroy();
-        if (mShowVueEvent != null) {
-            EventBus.getDefault().post(mShowVueEvent);
-        }
+        MainFragment mainFragment = (MainFragment) getPreFragment();
+        mainFragment.nextFragment = null;
     }
 }

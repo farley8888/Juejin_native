@@ -5,7 +5,6 @@ import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -116,7 +115,7 @@ public class VideoPagerFragment extends SupportFragment  {
         mRecy = view.findViewById(R.id.recy);
 //        mRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.refresh_layout);
 //        mRefreshLayout.setOnRefreshListener(this);
-        ptrClassicFrameLayout = view.findViewById(R.id.test_recycler_view_frame);
+        ptrClassicFrameLayout = view.findViewById(R.id.ptr_recycler_view_frame);
         noDataView  = view.findViewById(R.id.ly_no_data);
         noDataView.setVisibility(View.GONE);
 
@@ -258,7 +257,7 @@ public class VideoPagerFragment extends SupportFragment  {
                     }
 //                    if (array.size() == 0) return;  //没有数据时
 
-                    Log.d(TAG, "onResponse:data.arr= "+ array.toJSONString());
+//                    L.d(TAG, "onResponse:data.arr= "+ array.toJSONString());
                     List<VideoModel> temp = JSON.parseArray(array.toJSONString(), VideoModel.class);
 
                     if (currPage == 1){
@@ -282,10 +281,10 @@ public class VideoPagerFragment extends SupportFragment  {
 
     private void init() {
 
-//        ptrClassicFrameLayout.postDelayed(new Runnable() {
+//        mPtrFrameLayout.postDelayed(new Runnable() {
 //            @Override
 //            public void run() {
-//                ptrClassicFrameLayout.autoRefresh(true);
+//                mPtrFrameLayout.autoRefresh(true);
 //            }
 //        }, 150);
 
@@ -308,7 +307,7 @@ public class VideoPagerFragment extends SupportFragment  {
             public void loadMore() {
 //                 mData.add(new String("  RecyclerView item  - add " + page+"0"));
 //                mAdapter.notifyDataSetChanged();
-//                ptrClassicFrameLayout.loadMoreComplete(true);
+//                mPtrFrameLayout.loadMoreComplete(true);
                 currPage++;
                 loadData();
             }

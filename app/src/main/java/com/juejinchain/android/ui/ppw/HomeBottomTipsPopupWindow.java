@@ -11,7 +11,8 @@ import com.juejinchain.android.R;
 import org.w3c.dom.Text;
 
 /**
- * bottom tab ppw
+ * 新用户，没签到提示
+ * 每天只提示一次
  */
 public class HomeBottomTipsPopupWindow extends PopupWindow {
     private Context mContext;

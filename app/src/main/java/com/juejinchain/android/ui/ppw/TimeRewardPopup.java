@@ -17,8 +17,10 @@ public class TimeRewardPopup extends BasePopupWindow {
     private TextView mTvTitle;
     private TextView mTvAppReward;
     private TextView mTvCoin;
+    //首页60分钟
+    public final static int TYPE_INDEX60 = 1;
     //视频
-    public static int TYPE_VIDEO = 2;
+    public final static int TYPE_VIDEO = 2;
 
     private int mType;
     //显示多久自动消失
@@ -39,14 +41,25 @@ public class TimeRewardPopup extends BasePopupWindow {
         if (jo == null) return;
 
         mTvCoin.setText(String.format("+%s金币", jo.getString("coin")));
-        if (mType == TYPE_VIDEO){
-            mTvTitle.setText("奖励到账啦");
+        switch (mType){
+            case TYPE_INDEX60:
+                mTvTitle.setText("奖励到账啦");
 
-            Object extObj = jo.get("extra_coin");
-            if (extObj instanceof Integer && Integer.parseInt(extObj.toString()) != 0){
-                mTvAppReward.setVisibility(View.VISIBLE);
-                mTvAppReward.setText(String.format("用掘金宝App看视频能多赚%s金币！", jo.getString("extra_coin")));
-            }
+                break;
+            case TYPE_VIDEO:
+                mTvTitle.setText("奖励到账啦");
+
+                Object extObj = jo.get("extra_coin");
+                if (extObj instanceof Integer && Integer.parseInt(extObj.toString()) != 0){
+                    mTvAppReward.setVisibility(View.VISIBLE);
+                    mTvCoin.setText(String.format("+%d金币", jo.getInteger("coin")+jo.getInteger("extra_coin") ));
+
+                    mTvAppReward.setText(String.format("用掘金宝App看视频能多赚%s金币！", jo.getString("extra_coin")));
+                }
+                break;
+        }
+        if (mType == TYPE_VIDEO){
+
         }
     }
 

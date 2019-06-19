@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,12 +20,15 @@ import com.dmcbig.mediapicker.utils.ScreenUtils;
 import com.juejinchain.android.H5Plugin.MyPlugin;
 import com.juejinchain.android.R;
 import com.juejinchain.android.WebAppFragment;
+import com.juejinchain.android.base.BaseBackFragment;
 import com.juejinchain.android.base.BaseMainFragment;
 import com.juejinchain.android.event.HideShowGiftCarButtonEvent;
 import com.juejinchain.android.event.ShowTabPopupWindowEvent;
 import com.juejinchain.android.event.ShowVueEvent;
 import com.juejinchain.android.event.TabSelectEvent;
+import com.juejinchain.android.event.TabSelectedEvent;
 import com.juejinchain.android.event.VideoDetailEvent;
+import com.juejinchain.android.eventbus_activity.EventBusActivityScope;
 import com.juejinchain.android.listener.OnItemClickListener;
 import com.juejinchain.android.model.UnreadModel;
 import com.juejinchain.android.model.UserModel;
@@ -38,6 +42,8 @@ import com.juejinchain.android.ui.ppw.HomeBottomTipsPopupWindow;
 import com.juejinchain.android.ui.view.AdsHolderView;
 import com.juejinchain.android.ui.view.BottomBar;
 import com.juejinchain.android.ui.view.BottomBarTab;
+import com.juejinchain.android.util.Constant;
+import com.juejinchain.android.util.SPUtils;
 import com.juejinchain.android.util.StringUtils;
 
 import org.greenrobot.eventbus.EventBus;
@@ -80,7 +86,11 @@ public class MainFragment extends BaseMainFragment {
     String[] vuePages;
     //是否从原始跳转到vue页面
     public boolean showVuePageFromNative;
-    public VideoDetailFragment videoDetailFragment;
+    /**
+     * 子页fragment,记录用于和mainFragment切换
+     * 即子页fragment 要调用mainFragment加载的vueFragment
+     */
+    public BaseBackFragment nextFragment;
     public WebAppFragment webAppFragment;
     public BottomBarTab mBottomBarTask;
     private BottomBarTab mBottomBarMine;
@@ -213,7 +223,23 @@ public class MainFragment extends BaseMainFragment {
                     webFragmentVue.showPage(vuePages[position - 1], new ReceiveJSValue.ReceiveJSValueCallback() {
                         @Override
                         public String callback(org.json.JSONArray jsonArray) {
-
+                            if (UserModel.isLogin()){
+                                if (currShowPosition == TASK && mBottomBarTask.isShowUnreadDot()){
+                                    mBottomBarTask.postDelayed(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            mBottomBarTask.showUnreadDot(false);
+                                        }
+                                    }, 500);
+                                }else if (currShowPosition == MINE && mBottomBarMine.isShowUnreadDot()){
+                                    mBottomBarMine.postDelayed(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            mBottomBarMine.showUnreadDot(false);
+                                        }
+                                    }, 500);
+                                }
+                            }
                             return null;
                         }
                     });
@@ -233,14 +259,11 @@ public class MainFragment extends BaseMainFragment {
                 }
 
 
-                if (mFragments[prePosition] == mFragments[position] ){
-                    return;
-                }
+//                fragmentManager = getActivity().getSupportFragmentManager();
+//                FragmentTransaction transaction = fragmentManager.beginTransaction();
+//                Fragment frg = fragmentManager.findFragmentByTag(String.valueOf(position));
+//                L.d(TAG, "onTabSelected: "+position + ", frag ="+frg);
 
-                fragmentManager = getActivity().getSupportFragmentManager();
-                FragmentTransaction transaction = fragmentManager.beginTransaction();
-                Fragment frg = fragmentManager.findFragmentByTag(String.valueOf(position));
-                L.d(TAG, "onTabSelected: "+position + ", frag ="+frg);
                 //只有两个fragment ,size 会不止2 时间长了frg会为空！
 //                if (frg == null && fragmentManager.getFragments().size() < 2)
 //                    transaction.add(R.id.fl_tab_container, mFragments[position], String.valueOf(position));
@@ -260,13 +283,18 @@ public class MainFragment extends BaseMainFragment {
 
             @Override
             public void onTabReselected(int position) {
-                L.d("baseMainFrg", "onTabSelected: ");
-                if (position == 0 && videoDetailFragment != null){
-//                    showVue(ShowVueEvent.PAGE_LOCK_FAN, "");
+                L.d("baseMainFrg", "onTabReselected: "+position);
+                if (position == 0){
+                    HomeFragment homeFragment = (HomeFragment) mFragments[0];
+//                    Log.d(TAG, "onTabReselected: "+ homeFragment.currFragment);
+                    if (homeFragment.currChannel == null) return;
+                    EventBusActivityScope.getDefault(_mActivity).post(new TabSelectedEvent(position,homeFragment.currChannel.getName() ));
                 }
+
                 // 在FirstPagerFragment,FirstHomeFragment中接收, 因为是嵌套的Fragment
                 // 主要为了交互: 重选tab 如果列表不在顶部则移动到顶部,如果已经在顶部,则刷新
 //                EventBusActivityScope.getDefault(_mActivity).post(new TabSelectedEvent(position));
+//                EventBus.getDefault().post(new TabSelectedEvent(position));
             }
         });
     }
@@ -301,7 +329,7 @@ public class MainFragment extends BaseMainFragment {
         if (mUnreadAlerter == null) mUnreadAlerter = Alerter.create(getActivity());
 
         UnreadModel item = list.get(0); //vue是3秒显示一个。其实没必要，因为跳转过去会自动全部阅读
-
+        mBottomBarMine.showUnreadDot(true);
         mUnreadAlerter
                 .setTitle(StringUtils.filterHTMLTag(item.title))
                 .setText(StringUtils.filterHTMLTag(item.content))
@@ -330,9 +358,10 @@ public class MainFragment extends BaseMainFragment {
      */
     public void showVue(String page, String params){
         showVuePageFromNative = true;
-        currShowPosition = 1;
+//        currShowPosition = 1; 这个会影响 reselected，从文章详情回来后
+
         WebAppFragment webVueFragment = (WebAppFragment) mFragments[1];
-//        showHideFragment(webVueFragment, mFragments[0]);
+
         webVueFragment.showPage(page+ ( params.length() > 0 ? "/"+params : ""), jsonArray -> {
             showHideFragment(webVueFragment, mFragments[0]);
             return null;
@@ -342,9 +371,8 @@ public class MainFragment extends BaseMainFragment {
 
     public void showHomeFragment(){
         showVuePageFromNative = false;
-        currShowPosition = 0;
         showHideFragment(mFragments[0], mFragments[1]); //这样按钮状态未能修改
-        mBottomBar.getItem(0).performClick();
+        if (currShowPosition != 0)mBottomBar.getItem(0).performClick();
         changeBottomTabBar(true);
 
     }
@@ -359,8 +387,6 @@ public class MainFragment extends BaseMainFragment {
         if (isShow && showVuePageFromNative){
             showVuePageFromNative = false;
             showHideFragment(mFragments[0], mFragments[1]);
-            //返回vue的首页，即空白页
-//            webAppFragment.callBackIndex(new CallVueBackIndexEvent());
         }
         mBottomBar.setVisibility(isShow ? View.VISIBLE : View.GONE);
         mBottomLineImg.setVisibility(isShow ? View.VISIBLE : View.GONE);
@@ -461,14 +487,14 @@ public class MainFragment extends BaseMainFragment {
         }
     }
 
-    public void switchToVideoDetailFragment(){
-        showHideFragment(videoDetailFragment,MainFragment.this);
+    public void switchToNextFragment(){
+        showHideFragment(nextFragment,MainFragment.this);
     }
     
     @Subscribe()
     public void resetVideoDetailEvent(VideoDetailEvent event){
         L.d(TAG, "resetVideoDetail: ");
-        videoDetailFragment = null;
+        nextFragment = null;
     }
 
     @Subscribe()
@@ -479,16 +505,13 @@ public class MainFragment extends BaseMainFragment {
     @Subscribe()
     public void switchTabEvent(TabSelectEvent event){
         L.d(TAG, "switchTabEvent: ");
-        if (event.position == MINE){
-            if (UserModel.hasGetGiftBag()){
-                mAdsHolderView.setVisibility(View.GONE);
-            }
-        }
+
         mBottomBar.getItem(event.position).performClick();
     }
 
     @Subscribe()
     public void onBottomTabPopShowEvent(ShowTabPopupWindowEvent event){
+
         int[] location = new int[2];
         int position = 2;
         int delta = position == 1 ? 35 : 25;
@@ -501,10 +524,13 @@ public class MainFragment extends BaseMainFragment {
                     location[1] - ScreenUtils.dp2px(getActivity(), delta));
 
             if (UserModel.isNew()){
-                mBottomPopupWindow.textView.setText("连续签到7天得3680金币");
+                mBottomPopupWindow.textView.setText("连续签到7天得"+event.count+"金币");
             }else{
                 mBottomPopupWindow.textView.setText("今日奖励可领取");
             }
+            SPUtils.getInstance().put(Constant.SKey_BottomPopupTime, System.currentTimeMillis());
+            mBottomBarTask.showUnreadDot(true);
+
             mBottomPopupWindow.mContentView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {

@@ -1,10 +1,13 @@
 package com.juejinchain.android.model;
 
+import com.juejinchain.android.util.StringUtils;
+import com.juejinchain.android.util.TimeUtils;
+
 public class NewsModel {
 
     public String id;
     public String mid;
-    public String title;
+    private String title;
     public String comments;
 
     /**
@@ -23,6 +26,14 @@ public class NewsModel {
      * 可能和read_mark同时显示，用空格隔开
      */
     public int comment_mark;
+
+    public void setTitle(String title) {
+        this.title = StringUtils.filterHTMLTag(title);
+    }
+
+    public String getTitle() {
+        return title;
+    }
 
     public String getIs_top() {
         if (is_top == 0) {
@@ -81,8 +92,9 @@ public class NewsModel {
     public String redirect_url;
 
     public String getPublish_time() {
-        if (publish_time_date == null || publish_time_date.length() < 8) return "";
-        return publish_time_date.substring(5,publish_time_date.length()-3);
+//        if (publish_time_date == null || publish_time_date.length() < 8) return "";
+//        return publish_time_date.substring(5,publish_time_date.length()-3);
+        return TimeUtils.getTimeLine(publish_time);
     }
 
     public String getRead_num() {

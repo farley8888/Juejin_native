@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
 import android.view.Gravity;
@@ -23,8 +24,10 @@ import com.juejinchain.android.adapter.HomePagerFragmentAdapter;
 import com.juejinchain.android.base.BaseMainFragment;
 import com.juejinchain.android.event.CallVueBackIndexEvent;
 import com.juejinchain.android.event.HideShowGiftCarButtonEvent;
+import com.juejinchain.android.event.LoginEvent;
 import com.juejinchain.android.event.ShareCallbackEvent;
 import com.juejinchain.android.event.ShareEvent;
+import com.juejinchain.android.event.ShowGiftDialogEvent;
 import com.juejinchain.android.event.ShowTabPopupWindowEvent;
 import com.juejinchain.android.event.StopCounterEvent;
 import com.juejinchain.android.event.UpdateChannelEvent;
@@ -36,10 +39,11 @@ import com.juejinchain.android.tools.L;
 import com.juejinchain.android.ui.dialog.HomeTipsAlertDialog;
 import com.juejinchain.android.ui.ppw.HomeTipsPopupWindow;
 import com.juejinchain.android.ui.activity.CategoryExpandActivity;
-import com.juejinchain.android.ui.activity.SearchActivity;
+import com.juejinchain.android.ui.activity.SearchFragment;
 import com.juejinchain.android.ui.dialog.ShareDialog;
 import com.juejinchain.android.ui.ppw.TimeRewardPopup;
 import com.juejinchain.android.ui.view.PagerSlidingTabStrip;
+import com.juejinchain.android.util.Constant;
 import com.juejinchain.android.util.SPUtils;
 
 import org.greenrobot.eventbus.EventBus;
@@ -51,6 +55,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.juejinchain.android.util.Constant.CHANNEL_CHCHE;
+import static com.juejinchain.android.util.Constant.SKey_READ60;
 
 
 /**
@@ -84,6 +89,9 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
 
     private List<ChannelModel> mChannelCacheList = new ArrayList<>();
     private boolean hasShowGiftDialog;
+    private HomeTipsAlertDialog mHomeGiftDialog;
+    private HomePagerFragmentAdapter mAdapter;
+    public Fragment currFragment;
 
     public static HomeFragment newInstance() {
 
@@ -126,7 +134,8 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
             @Override
             public void onPageSelected(int i) {
                 currChannel = mChannelList.get(i);
-//                Log.d(TAG, "onPageSelected: "+currChannel.getName());
+                L.d(TAG, "onPageSelected: "+currChannel.getName());
+                currFragment = mAdapter.getFragmentItem(i); //一直为null
             }
 
             @Override
@@ -134,7 +143,6 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
             }
         });
 //        mToolbar.setTitle("发现");
-//        mTab.addTab(mTab.newTab());
 //        mTab.addTab(mTab.newTab());
         setOnClickListener();
 
@@ -182,11 +190,30 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
 
     }
 
+    void requestRead60Min(){
+        //超过10s请求一次
+        if (System.currentTimeMillis() - SPUtils.getInstance().getLong(SKey_READ60, 0l) > 10*1000){
+            return;
+        }
+        NetUtil.getRequest(NetConfig.API_Read60Min, null, new NetUtil.OnResponse() {
+            @Override
+            public void onResponse(JSONObject response) {
+                if (NetUtil.isSuccess(response)){
+                    JSONObject jo = response.getJSONObject("data");
+                    TimeRewardPopup popup = new TimeRewardPopup(getContext(), TimeRewardPopup.TYPE_INDEX60);
+                    popup.setView(jo);
+                    popup.showPopupWindow();
+                }
+                SPUtils.getInstance().put(SKey_READ60, System.currentTimeMillis());
+            }
+        }, true);
+    }
 
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
         mIsVisible = !hidden;
+//        Log.d(TAG, "onHiddenChanged: "+hidden); 从子fragment回来不触发
         if (hidden){
             if (mPopupWindow != null && mPopupWindow.isShowing()) mPopupWindow.dismiss();
             EventBus.getDefault().post(new HideShowGiftCarButtonEvent(false));
@@ -194,11 +221,13 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
             //返回vue的首页，即空白页
             MainFragment mainFragment = (MainFragment) getParentFragment();
             mainFragment.webAppFragment.callBackIndex(new CallVueBackIndexEvent());
-            if(!mainFragment.mAdsHolderView.isClick){
+
+            if(!UserModel.isLogin() || !UserModel.hasGetGiftBag()){
                 mainFragment.mAdsHolderView.setVisibility(View.VISIBLE);
+            }else{
+                mainFragment.mAdsHolderView.setVisibility(View.GONE);
             }
         }
-
     }
 
     @Override
@@ -213,25 +242,64 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
 
     }
 
+    @Subscribe()
+    public void reloginEvent(LoginEvent event){ //登录后
+        hasShowGiftDialog = UserModel.hasGetGiftBag();
+
+        //未领取大礼包的，调用下接口
+        if (!UserModel.hasGetGiftBag()){
+
+        }
+    }
+
+    //点击'领取宝马'按钮提示
+    @Subscribe()
+    public void showGiftDialogEvent(ShowGiftDialogEvent event){
+        if(mHomeGiftDialog == null){
+            mHomeGiftDialog = new HomeTipsAlertDialog(getContext());
+        }
+        mHomeGiftDialog.show();
+    }
+
+    //首页提示
     public void showHomeGiftDialog(){
-        hasShowGiftDialog = true;
-        new HomeTipsAlertDialog(getContext()).show();
+        if (hasShowGiftDialog) return;
+        /**
+         * 显示情况
+         * 1、未登录每次进入显示
+         * 2、登录用户未领取的
+         */
+        if (!UserModel.isLogin() || !UserModel.hasGetGiftBag()) {
+            showGiftDialogEvent(new ShowGiftDialogEvent());
+            hasShowGiftDialog = true;
+        }
     }
 
     @Override
     public void onSupportVisible() {
         super.onSupportVisible();
+        requestRead60Min();
 
         if (UserModel.isLogin()){
             if (!UserModel.hasGetGiftBag()){ //未领取
                 mAddBtn.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        showLingRewardPop();
+
                     }
                 }, 1000); //等全局大礼包dialog提示完才能加载pop
             }
-            if (!UserModel.isNew()){
+
+            tvCoin.postDelayed(new Runnable() {
+                   @Override
+                   public void run() {
+                       showLingRewardPop();
+                   }
+               }, 1000);
+
+            //每天提示一次
+            if (UserModel.isNew()
+                    && (System.currentTimeMillis() - SPUtils.getInstance().getLong(Constant.SKey_BottomPopupTime) < 20*60*60*1000)){
                 mAddBtn.postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -240,22 +308,31 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
                 }, 500); //
             }
         }
+
         if (mChannelList.size() ==0){
             loadChannel();
         }
-        if (!hasShowGiftDialog) showHomeGiftDialog();
+
+        if (mHomeGiftDialog != null && mHomeGiftDialog.isGoLogin){
+            mHomeGiftDialog.isGoLogin = false;
+            mHomeGiftDialog.show();
+        }else
+            showHomeGiftDialog();
+
         loadLingTimeApi();
     }
 
 
-    //非新用户调用，没签到的提示
+    //新用户调用，没签到的提示
     void loadMessageHint(){
         NetUtil.getRequest(NetConfig.API_MessageHint, null, new NetUtil.OnResponse() {
             @Override
             public void onResponse(JSONObject response) {
                 if (NetUtil.isSuccess(response)){
-                    if (response.getJSONObject("data").getInteger("unsigned") == 1){
-                        EventBus.getDefault().post(new ShowTabPopupWindowEvent());
+                    response = response.getJSONObject("data");
+                    if (response.getInteger("unsigned") == 1){
+                        int count = response.getInteger("reward_coefficient")*368;
+                        EventBus.getDefault().post(new ShowTabPopupWindowEvent(count));
                     }
                 }
             }
@@ -335,24 +412,36 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
 
     @Subscribe()
     public void stopCounterEvent(StopCounterEvent event){
-        if (mCountDownTimer != null) mCountDownTimer.cancel();
+        if (mCountDownTimer != null){
+            mCountDownTimer.cancel();
+            mCountDownTimer.onFinish();
+        }
     }
 
-    //显示领取奖励popup
+    /**
+     * 显示领取奖励popup
+     * 登录用户每天提示一次
+     * 非登录不提示
+     */
     private void showLingRewardPop(){
 //                mPromptPopup = new PromptGetPopup(getContext());
 //                //外面可点,会影响显示位置
 //                mPromptPopup.setOutSideTouchable(true);
 //                mPromptPopup.setBackground(null);  //背景透明
+        if (System.currentTimeMillis() - SPUtils.getInstance().getLong(Constant.SKey_IndexLingPopup) < 12*60*60*1000){ //先写12小时
+            return;
+        }
         int[] location = new int[2];
         tvCoin.getLocationOnScreen(location);
         if(mPopupWindow == null || !mPopupWindow.isShowing()){
             mPopupWindow = new HomeTipsPopupWindow(getActivity());
-            if (mIsVisible)
+            //加个visible状态，否则在切换时由于延时会再其它页面显示出来
+            if (mIsVisible){
                 mPopupWindow.showAtLocation(tvCoin, Gravity.NO_GRAVITY, location[0] - ScreenUtils.dp2px(getActivity(), 70),
-                    location[1] + ScreenUtils.dp2px(getActivity(), 25));
-        }else if(mPopupWindow != null){
-//                EventBus.getDefault().post(new ShowTabPopupWindowEvent());
+                        location[1] + ScreenUtils.dp2px(getActivity(), 25));
+                SPUtils.getInstance().put(Constant.SKey_IndexLingPopup, System.currentTimeMillis());
+            }
+
         }
 
         mPopupWindow.setOnClickListener(new View.OnClickListener() {
@@ -360,7 +449,7 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
             public void onClick(View view) {
                 doLingApi();
                 if (UserModel.isNew())
-                    EventBus.getDefault().post(new ShowTabPopupWindowEvent());
+                    loadMessageHint();
             }
         });
     }
@@ -424,7 +513,9 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
 //        for (int i = 0 ; i < mChannelList.size(); i++)
 //            array[i] = mChannelList.get(i).getName();
         L.d(TAG, "setTabsPage: ");
-        mViewPager.setAdapter(new HomePagerFragmentAdapter(getChildFragmentManager(), mChannelList));
+        mAdapter = new HomePagerFragmentAdapter(getChildFragmentManager(), mChannelList);
+        mViewPager.setAdapter(mAdapter);
+        currChannel = mChannelList.get(0);
 
         mTabs.setViewPager(mViewPager);
         setTabsValue();
@@ -478,7 +569,9 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
                 startActivity(new Intent(getActivity(), CategoryExpandActivity.class));
                 break;
             case R.id.button2:  //搜索
-                startActivity(new Intent(getActivity(), SearchActivity.class));
+//                startActivity(new Intent(getActivity(), SearchFragment.class));
+                MainFragment mainFragment = (MainFragment) getParentFragment();
+                mainFragment.start(new SearchFragment());
                 break;
             case R.id.button4:  //分享
                 if (UserModel.isLogin()){

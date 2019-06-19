@@ -33,7 +33,7 @@ import cn.jzvd.JzvdStd;
 /**
  * Created by YoKeyword on 16/6/30.
  * RecyclerAdapterWithHF
- * RecyclerView.Adapter<PagerAdapter.MyViewHolder>
+ * RecyclerView.Adapter<HomePagerAdapter.MyViewHolder>
  *     RecyclerView.Adapter<RecyclerView.ViewHolder>
  */
 public class VideoPagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {

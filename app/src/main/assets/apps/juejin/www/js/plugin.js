@@ -22,7 +22,13 @@ document.addEventListener("plusready", function () {
       callbackID = B.callbackId(success, fail);
 
       return B.exec(_BARCODE, "authorLogin", [callbackID, way]);
-    }, //分享到钉钉、、、
+    },
+    /**
+     *
+     * @param {String} way 方法 dingding qzone
+     * @param {Object} param param.
+     * @param {Function} callback 分享回调
+     */
     shareTo: function (way, param, callback) {
       var success = typeof callback !== 'function' ? null : function (args) {
           callback(args);
@@ -33,6 +39,9 @@ document.addEventListener("plusready", function () {
       return B.exec(_BARCODE, "shareTo", [callbackID, way, param]);
     },//登录结果
     loginResult: function (action, result, successCallback, errorCallback) {
+      result = JSON.stringify(result)
+      successCallback = successCallback ? successCallback : null
+      errorCallback = errorCallback ? errorCallback : null
       var success = typeof successCallback !== 'function' ? null : function (args) {
           successCallback(args);
         },
@@ -67,7 +76,7 @@ document.addEventListener("plusready", function () {
       var success = null,
         fail = null;
       callbackID = B.callbackId(success, fail);
-      return B.exec(_BARCODE, "vueJumpto", [callbackID, [fromVue, toNative]]);
+      return B.exec(_BARCODE, "vueJumpto", [callbackID, fromVue, toNative]);
     }, //登出
     loginOut: function (userName) {
       var success = null,
@@ -80,6 +89,12 @@ document.addEventListener("plusready", function () {
         fail = null;
       callbackID = B.callbackId(success, fail);
       return B.exec(_BARCODE, "cleanCache", [callbackID, userName]);
+    }, //显示隐藏底部tabBar 1显示 0隐藏
+    showHideTabBar: function (show) {
+      var success = null,
+        fail = null;
+      callbackID = B.callbackId(success, fail);
+      return B.exec(_BARCODE, "showHideTabBar", [callbackID, show]);
     }
   };
   window.plus.myplugin = myPlugin;

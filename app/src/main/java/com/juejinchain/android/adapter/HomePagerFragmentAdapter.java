@@ -8,6 +8,7 @@ import com.juejinchain.android.model.ChannelModel;
 import com.juejinchain.android.ui.fragment.HomePagerFragment;
 import com.juejinchain.android.ui.fragment.VideoFragment;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -16,19 +17,28 @@ import java.util.List;
  */
 public class HomePagerFragmentAdapter extends FragmentPagerAdapter {
     private List<ChannelModel> mChannels;
+    private Fragment[] mFragments;
 
     public HomePagerFragmentAdapter(FragmentManager fm, List<ChannelModel> channels) {
         super(fm);
         mChannels = channels;
+        mFragments = new Fragment[channels.size()];
+    }
+
+    public Fragment getFragmentItem(int position){
+        return mFragments[position];
     }
 
     @Override
     public Fragment getItem(int position) {
+        if (mFragments[position] != null) return mFragments[position];
+
         if (mChannels.get(position).getName().equals("视频")) {
-            return VideoFragment.newInstance("");
+            mFragments[position] = VideoFragment.newInstance("");
         } else {
-            return HomePagerFragment.newInstance(mChannels.get(position));
+            mFragments[position] = HomePagerFragment.newInstance(mChannels.get(position));
         }
+        return mFragments[position];
     }
 
     @Override

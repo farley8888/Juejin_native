@@ -2,7 +2,6 @@ package com.juejinchain.android.ui.fragment;
 
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.inputmethodservice.Keyboard;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -45,9 +44,9 @@ import com.juejinchain.android.network.NetUtil;
 import com.juejinchain.android.tools.L;
 import com.juejinchain.android.tools.WebViewUtil;
 import com.juejinchain.android.ui.dialog.ShareDialog;
+import com.juejinchain.android.ui.ppw.ReplyCommentPopup;
 import com.juejinchain.android.ui.ppw.TimeRewardPopup;
 import com.juejinchain.android.ui.view.DividerDecoration;
-import com.juejinchain.android.util.KeyboardUtil;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -88,6 +87,7 @@ public class VideoDetailFragment extends BaseBackFragment {
     ReplyCommentPopup mCommentPopup;
     private EditText mEditView;
     ShareDialog mShareDialog;
+    private String starttime; //开始阅读时间
 
     Handler mHandler = new Handler(){
         @Override
@@ -97,7 +97,8 @@ public class VideoDetailFragment extends BaseBackFragment {
         }
     };
     private final int READ_What = 122;
-    private int readTimes       = 5*1000; //阅读30秒才请求奖励接口
+    private int readTimes       = 30*1000; //阅读30秒才请求奖励接口
+    private boolean alReaded;  //已读30s
 
 
     public static VideoDetailFragment newInstance(VideoModel model) {
@@ -123,6 +124,9 @@ public class VideoDetailFragment extends BaseBackFragment {
         initView(view);
         parseWebView = new WebView(getContext());
         setViewData();
+
+        loadDetail();
+
         return attachToSwipeBack(view);
     }
 
@@ -141,8 +145,8 @@ public class VideoDetailFragment extends BaseBackFragment {
                     popup.showPopupWindow();
                 }
             }
-        }, false);
-
+        }, true);
+        alReaded = true;
     }
 
 
@@ -186,7 +190,9 @@ public class VideoDetailFragment extends BaseBackFragment {
         NetUtil.getRequest(NetConfig.API_VideoDetail, param, new NetUtil.OnResponse() {
             @Override
             public void onResponse(JSONObject response) {
-                L.d(TAG, "onResponseDetail: "+response.toJSONString());
+//                L.d(TAG, "onResponseDetail: "+response.toJSONString());
+                starttime = response.getString("time");
+//                L.d(TAG, "onResponseDetail:time= "+ starttime);
             }
         },false);
     }
@@ -232,7 +238,7 @@ public class VideoDetailFragment extends BaseBackFragment {
                         pop();
                     }else {
                         MainFragment mainFragment = (MainFragment)temp ;
-                        mainFragment.videoDetailFragment = VideoDetailFragment.this;
+                        mainFragment.nextFragment = VideoDetailFragment.this;
 
                         //mainFragment.webAppFragment 显示frag unable sub of parent
                         showHideFragment(mainFragment, VideoDetailFragment.this);
@@ -253,7 +259,7 @@ public class VideoDetailFragment extends BaseBackFragment {
             pop();
         }else {
             MainFragment mainFragment = (MainFragment) temp;
-            mainFragment.videoDetailFragment = VideoDetailFragment.this;
+            mainFragment.nextFragment = VideoDetailFragment.this;
 
             //mainFragment.webAppFragment 显示frag can't used sub of parent
             showHideFragment(mainFragment, VideoDetailFragment.this);
@@ -560,6 +566,22 @@ public class VideoDetailFragment extends BaseBackFragment {
 //        ((MainFragment)getPreFragment()).showVue(ShowVueEvent.PAGE_LOCK_FAN, "");
     }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (alReaded){
+            Map<String, String> params = new HashMap<>();
+            params.put("aid", model.id);
+            params.put("type", "video");
+            params.put("starttime", starttime);
+            NetUtil.getRequest(NetConfig.API_LeaveReaded, params, new NetUtil.OnResponse() {
+                @Override
+                public void onResponse(JSONObject response) {
+//                    L.d(TAG, "onResponse:离开观看视频请求= "+response);
+                }
+            }, true);
+        }
+    }
 
     @Override
     public void onDestroy() {

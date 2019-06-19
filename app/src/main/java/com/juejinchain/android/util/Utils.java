@@ -6,6 +6,7 @@ import android.app.ActivityManager;
 import android.app.Application;
 import android.app.Application.ActivityLifecycleCallbacks;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.content.FileProvider;
 import android.view.View;
@@ -37,6 +38,7 @@ public final class Utils {
 
     @SuppressLint("StaticFieldLeak")
     private static Application sApplication;
+    private static String VERSION;
 
     private Utils() {
         throw new UnsupportedOperationException("u can't instantiate me...");
@@ -129,6 +131,17 @@ public final class Utils {
         } else {
             return Utils.getApp();
         }
+    }
+
+    public static String getVersion(){
+        if (VERSION != null) return VERSION;
+        Context ctx =  getApp();
+        try {
+            VERSION = ctx.getPackageManager().getPackageInfo(ctx.getPackageName(), 0).versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return VERSION;
     }
 
     static boolean isAppForeground() {

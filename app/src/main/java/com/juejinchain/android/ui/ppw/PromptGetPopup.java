@@ -1,4 +1,4 @@
-package com.juejinchain.android.ui.fragment;
+package com.juejinchain.android.ui.ppw;
 
 import android.content.Context;
 import android.util.Log;

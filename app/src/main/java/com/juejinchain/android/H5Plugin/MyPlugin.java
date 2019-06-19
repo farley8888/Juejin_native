@@ -2,7 +2,6 @@ package com.juejinchain.android.H5Plugin;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 
@@ -18,7 +17,6 @@ import com.juejinchain.android.MainActivity;
 import com.juejinchain.android.ddshare.DDShareActivity;
 import com.juejinchain.android.ddshare.DDShareUtil;
 import com.juejinchain.android.event.ShareCallbackEvent;
-import com.juejinchain.android.event.ShowVueEvent;
 import com.juejinchain.android.model.UserModel;
 import com.juejinchain.android.tools.L;
 import com.juejinchain.android.ui.fragment.MainFragment;
@@ -279,17 +277,15 @@ public class MyPlugin extends StandardFeature {
         L.d(TAG, "vueJumpto: to = "+to); //
 
         MainFragment mainFrag = ((MainActivity) pWebview.getActivity()).mainFragment;
-//        if (from.equals(ShowVueEvent.PAGE_LOCK_FAN)){
-            if (mainFrag.videoDetailFragment != null){
-                mainFrag.switchToVideoDetailFragment();
-                return;
-            }
-//        }
+        if (mainFrag.nextFragment != null){  //如是跳回下一fragment
+            mainFrag.switchToNextFragment();
+            return;
+        }
 
         if (!TAB_PAGES_OF_VUE.contains(to)){  //如果不是vue页就为原生首页
-            showNativeFragment(pWebview);
+            mainFrag.showHomeFragment();
         }else{
-            ((MainActivity) pWebview.getActivity()).mainFragment.changeBottomTabBar(true);
+            mainFrag.changeBottomTabBar(true);
         }
     }
 
@@ -323,8 +319,8 @@ public class MyPlugin extends StandardFeature {
 
         MainFragment mainFrag = ((MainActivity) pWebview.getActivity()).mainFragment;
 //        if (from.equals(ShowVueEvent.PAGE_LOCK_FAN)){
-        if (mainFrag.videoDetailFragment != null){
-            mainFrag.switchToVideoDetailFragment();
+        if (mainFrag.nextFragment != null){
+            mainFrag.switchToNextFragment();
             return;
         }
 
@@ -356,6 +352,17 @@ public class MyPlugin extends StandardFeature {
         L.d(TAG, "cleanCache: "+array.toString());
 
         SPUtils.getInstance().put(Constant.CHANNEL_CHCHE, "");
+
+    }
+
+    //显示隐藏tabBar
+    public void showHideTabBar(IWebview pWebview, JSONArray array){
+        L.d(TAG, "showHideTabBar: "+array.toString());
+
+        boolean isShow = array.optInt(1) == 1;
+        MainFragment mainFrag = ((MainActivity) pWebview.getActivity()).mainFragment;
+//        mainFrag.mBottomBar.setVisibility(isShow ? View.VISIBLE:View.GONE);
+        mainFrag.changeBottomTabBar(isShow);
     }
 
 }

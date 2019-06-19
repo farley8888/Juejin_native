@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.juejinchain.android.model.UserModel;
 import com.juejinchain.android.tools.L;
+import com.juejinchain.android.util.Utils;
 
 import java.util.Map;
 
@@ -37,7 +38,7 @@ public class NetConfig {
     /**
      * 渠道号
      */
-    public static final String CHANNEL = "baidu";
+    public static final String CHANNEL = "normal";
 
     //接口前缀
     public static final String API_Prefix = "v1/";
@@ -117,6 +118,12 @@ public class NetConfig {
      * aid=132323, type: arc|video 成功提示一下
      */
     public static final String API_NewsReading  = "article/reading_article";
+    /**
+     * 离开阅读调用下，否则奖励无法到账
+     * aid=132323, type: arc|video
+     * starttime=1560823526 秒 获取文章详情的时间
+     */
+    public static final String API_LeaveReaded  = "article/leave";
 
     //视频内容列表；category=video,subv_movie
     public static final String API_VideoList        = "video/lists";
@@ -163,24 +170,28 @@ public class NetConfig {
         }
 
         getUrl += getCommonParams();
-        Log.d("NetConfig", "getUrlByParams: "+getUrl);
+        L.d("NetConfig", "getUrlByParams: "+getUrl);
         return getUrl;
     }
 
     public static String getUrlByAPI(String api) {
         String getUrl = BaseUrl + "/" + API_Prefix + api +"?" + getCommonParams();
-        Log.d("NetConfig", "getUrlByAPI: "+getUrl);
+        L.d("NetConfig", "getUrlByAPI: "+getUrl);
         return getUrl;
     }
 
     //公共参数
     private static String getCommonParams(){
-        String commParam = "source_style=" + DEVICE_TYPE;
+        String commParam = "source_style=" + DEVICE_TYPE ;
         String ut = UserModel.getUserToken();
         L.d("NetConfig", "getCommonParams: ut="+ut);
         if (ut != null){
             commParam += "&"+PK_UserToken+"="+ut;
+            commParam += "&"+"uid=" + "0"; //写死现在用得是user_token,要传因为老接口可能用到
         }
+        commParam += "&"+"channel=" + CHANNEL;
+        commParam += "&"+"version=" + Utils.getVersion();
+
         return commParam;
     }
 

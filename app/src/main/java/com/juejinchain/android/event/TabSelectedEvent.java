@@ -6,8 +6,10 @@ package com.juejinchain.android.event;
  */
 public class TabSelectedEvent {
     public int position;
+    public String channelName;
 
-    public TabSelectedEvent(int position) {
+    public TabSelectedEvent(int position, String name) {
         this.position = position;
+        this.channelName = name;
     }
 }

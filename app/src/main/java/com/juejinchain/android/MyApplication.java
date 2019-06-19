@@ -1,18 +1,22 @@
 package com.juejinchain.android;
 
 import android.app.Activity;
+import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.juejinchain.android.config.TTAdManagerHolder;
 import com.juejinchain.android.hook.ADOpenActivity;
 import com.juejinchain.android.hook.HookActivityHelper;
 import com.juejinchain.android.listener.AppFrontBackHelper;
 import com.juejinchain.android.listener.HomeListener;
 import com.juejinchain.android.listener.PowerListener;
 import com.juejinchain.android.network.SpUtils;
+import com.squareup.leakcanary.LeakCanary;
+import com.squareup.leakcanary.RefWatcher;
 
 import java.lang.reflect.Method;
 
@@ -23,12 +27,15 @@ import io.dcloud.common.adapter.util.UEH;
 import io.dcloud.common.util.BaseInfo;
 import io.dcloud.common.util.PdrUtil;
 
-//不能用 Application，因为用的是arr打包
-public class MyApplication extends DCloudApplication {
+/**
+ *
+ * 如用的是原arr打包，要继承 DCloudApplication
+ */
+public class MyApplication extends Application {
 
-    private static final String a = MyApplication.class.getSimpleName();
-    public boolean isQihooTrafficFreeValidate = true;
-    private static MyApplication b;
+    private static final String TAG = MyApplication.class.getSimpleName();
+//    public boolean isQihooTrafficFreeValidate = true;
+    private static MyApplication application;
     private static Context c = null;
     public static Activity currentAct;
 
@@ -37,6 +44,8 @@ public class MyApplication extends DCloudApplication {
     //只有home和电源键回来的才会显示开屏广告
     private boolean backHome;
 
+    public static RefWatcher sRefWatcher = null;
+//    public static String PROCESS_NAME_XXXX = "process_name_xxxx";
 
     public MyApplication() {
     }
@@ -49,11 +58,10 @@ public class MyApplication extends DCloudApplication {
         if (c == null) {
             c = var0;
         }
-
     }
 
     public static MyApplication self() {
-        return b;
+        return application;
     }
 
     public void onCreate() {
@@ -72,13 +80,15 @@ public class MyApplication extends DCloudApplication {
         setActivityListener();
         addHomeListener();
 
+        initWangMeng();
+
         Object obj = this;
         if (obj instanceof DCloudApplication){
 
             PdrUtil.closeAndroidPDialog();
             BaseInfo.initWeex(this);
             io.dcloud.a.a(this);
-            b = this;
+            application = this;
             BaseInfo.sAppIsTests.init(this.getBaseContext());
             setInstance(this.getApplicationContext());
             UEH.catchUncaughtException(this.getApplicationContext());
@@ -86,19 +96,34 @@ public class MyApplication extends DCloudApplication {
 
     }
 
-    protected void attachBaseContext(Context var1) {
-        super.attachBaseContext(var1);
-        if (Build.VERSION.SDK_INT < 21) {
-            this.a();
+    //初始化穿山甲信息流广告
+    private void initWangMeng(){
+        if (!LeakCanary.isInAnalyzerProcess(this)) {
+            sRefWatcher = LeakCanary.install(this);
         }
+
+        //强烈建议在应用对应的Application#onCreate()方法中调用，避免出现content为null的异常
+        TTAdManagerHolder.init(this);
+
+        //如果明确某个进程不会使用到广告SDK，可以只针对特定进程初始化广告SDK的content
+        //if (PROCESS_NAME_XXXX.equals(processName)) {
+        //   TTAdManagerHolder.init(this)
+        //}
     }
+
+//    protected void attachBaseContext(Context var1) {
+//        super.attachBaseContext(var1);
+//        if (Build.VERSION.SDK_INT < 21) {
+//            this.a();
+//        }
+//    }
 
     void addHomeListener(){
         mHomeListen = new HomeListener(c);
         mHomeListen.setInterface(new HomeListener.KeyFun() {
             @Override
             public void home() {
-                Log.d(a, "home: ");
+                Log.d(TAG, "home: ");
                 backHome = true;
             }
 
@@ -165,24 +190,24 @@ public class MyApplication extends DCloudApplication {
 
     }
 
-    public void onLowMemory() {
-        super.onLowMemory();
-        Logger.e(a, "onLowMemory" + Runtime.getRuntime().maxMemory());
-    }
-
-    public void onTrimMemory(int var1) {
-        super.onTrimMemory(var1);
-        Logger.e(a, "onTrimMemory");
-    }
-
-    protected void a() {
-        try {
-            Class var1 = Class.forName("android.support.multidex.MultiDex");
-            Method var2 = var1.getMethod("install", Context.class);
-            var2.invoke((Object)null, this);
-        } catch (Exception var3) {
-            var3.printStackTrace();
-        }
-
-    }
+//    public void onLowMemory() {
+//        super.onLowMemory();
+//        Logger.e(a, "onLowMemory" + Runtime.getRuntime().maxMemory());
+//    }
+//
+//    public void onTrimMemory(int var1) {
+//        super.onTrimMemory(var1);
+//        Logger.e(a, "onTrimMemory");
+//    }
+//
+//    protected void a() {
+//        try {
+//            Class var1 = Class.forName("android.support.multidex.MultiDex");
+//            Method var2 = var1.getMethod("install", Context.class);
+//            var2.invoke((Object)null, this);
+//        } catch (Exception var3) {
+//            var3.printStackTrace();
+//        }
+//
+//    }
 }

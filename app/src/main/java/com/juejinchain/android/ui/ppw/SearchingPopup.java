@@ -9,6 +9,9 @@ import com.juejinchain.android.R;
 
 import razerdp.basepopup.BasePopupWindow;
 
+/**
+ * 搜索中loading
+ */
 public class SearchingPopup extends BasePopupWindow {
 
     public SearchingPopup(Context context) {

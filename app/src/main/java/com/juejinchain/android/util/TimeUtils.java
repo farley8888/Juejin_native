@@ -89,15 +89,16 @@ public class TimeUtils {
             }else {
                 long a1 = a/1000;
                 if(a1<60){
-                    timeline = a1+"秒前";
+//                    timeline = a1+"秒前";
+                    timeline = "刚刚";
                 } else{
                     long b = a1/60;
                     if(b<60){
-                        if(b>30){
-                            timeline = "半小时前";
-                        }else{
+//                        if(b>30){
+//                            timeline = "半小时前";
+//                        }else{
                             timeline = b+"分钟前";
-                        }
+//                        }
                     }else{
                         long c = b/60;
                         if(c<24){
@@ -105,18 +106,20 @@ public class TimeUtils {
                         }else {
                             long d = c/24;
                             if(d<30){
-                                if(d>7){
-                                    timeline = (d/7)+"周前";
-                                }else{
-                                    timeline = d+"天前";
-                                }
+//                                if(d>7){
+//                                    timeline = (d/7)+"周前";
+//                                }else{
+//                                    timeline = d+"天前";
+//                                }
+                                if (d == 1) timeline = "昨天";
+                                else timeline = getTime(date, "yy/MM/dd");
                             } else{
-                                long e = d/30;
-                                if(e<12){
-                                    timeline = e+"月前";
-                                } else{
+//                                long e = d/30;
+//                                if(e<12){
+//                                    timeline = e+"月前";
+//                                } else{
                                     timeline = getTime(date, "yy/MM/dd");
-                                }
+//                                }
                             }
                         }
                     }

@@ -110,11 +110,11 @@ public class BottomBarTab extends FrameLayout {
     private void addUnReadDot(Context context){
         mUnreadDot = new TextView(context);
         mUnreadDot.setBackgroundResource(R.drawable.bg_msg_bubble);
-        int min = dip2px(context, 10);
+        int min = dip2px(context, 12); //点大小
         int padding = dip2px(context, 5);
-        mUnreadDot.setPadding(padding, 0, padding, 0);
+        mUnreadDot.setPadding(padding, -5, padding, 0);
         mUnreadDot.setGravity(Gravity.CENTER);
-        LayoutParams tvUnReadParams = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, min);
+        LayoutParams tvUnReadParams = new LayoutParams(min, min);
         tvUnReadParams.gravity = Gravity.CENTER;
         tvUnReadParams.leftMargin = dip2px(context, 17);
         tvUnReadParams.bottomMargin = dip2px(context, 14);

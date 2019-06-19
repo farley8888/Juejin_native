@@ -94,16 +94,6 @@
         android:largeHeap="true"
         android:supportsRtl="true"
         android:usesCleartextTraffic="true">
-        <activity android:name=".Main2Activity"
-            android:configChanges="orientation|keyboardHidden|screenSize|keyboard|navigation|mcc|mnc|fontScale"
-            android:hardwareAccelerated="true"
-            android:screenOrientation="user"
-            android:theme="@style/AppTheme.Splash">
-            <!--<intent-filter>-->
-                <!--<action android:name="android.intent.action.MAIN" />-->
-                <!--<category android:name="android.intent.category.LAUNCHER" />-->
-            <!--</intent-filter>-->
-        </activity>
         <!--
         android:supportsRtl="true"
         android:allowClearUserData="true"

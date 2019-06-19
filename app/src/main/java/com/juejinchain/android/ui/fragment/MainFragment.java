@@ -23,6 +23,7 @@ import com.juejinchain.android.WebAppFragment;
 import com.juejinchain.android.base.BaseBackFragment;
 import com.juejinchain.android.base.BaseMainFragment;
 import com.juejinchain.android.event.HideShowGiftCarButtonEvent;
+import com.juejinchain.android.event.RequestUnreadApiEvent;
 import com.juejinchain.android.event.ShowTabPopupWindowEvent;
 import com.juejinchain.android.event.ShowVueEvent;
 import com.juejinchain.android.event.TabSelectEvent;
@@ -99,6 +100,7 @@ public class MainFragment extends BaseMainFragment {
     Alerter mUnreadAlerter; //未读信息提示
     private BackExitDialog mBackDialog;
     private int currShowPosition; //当前显示的
+    private List<UnreadModel> unreadModels;
 
     public static MainFragment newInstance() {
 
@@ -235,9 +237,9 @@ public class MainFragment extends BaseMainFragment {
                                     mBottomBarMine.postDelayed(new Runnable() {
                                         @Override
                                         public void run() {
-                                            mBottomBarMine.showUnreadDot(false);
+                                            requestUnreadHintEvent(null);
                                         }
-                                    }, 500);
+                                    }, 2000);
                                 }
                             }
                             return null;
@@ -278,7 +280,8 @@ public class MainFragment extends BaseMainFragment {
 
             @Override
             public void onTabUnselected(int position) {
-
+//                Log.d(TAG, "onTabUnselected: "+position);
+                if (position == MINE && mBottomBarMine.isShowUnreadDot()) requestUnreadHintEvent(null);
             }
 
             @Override
@@ -304,24 +307,35 @@ public class MainFragment extends BaseMainFragment {
         super.onResume();
         if (UserModel.isLogin()){
             //vue是20s 请求一次
-            if (System.currentTimeMillis() - (long)SpUtils.get(getContext(), "unreadKey", 0l) > 10*1000 ){
+            if (System.currentTimeMillis() - (long)SpUtils.get(getContext(), "unreadKey", 0l) < 10*1000 ){
                 return;
             }
-            NetUtil.getRequest(NetConfig.API_UnreadMsg, null, new NetUtil.OnResponse() {
-                @Override
-                public void onResponse(JSONObject response) {
-                    if (NetUtil.isSuccess(response)){
-                        SpUtils.put(getContext(), "unreadKey", System.currentTimeMillis());
-
-                        JSONArray array = response.getJSONArray("data");
-                        List<UnreadModel> unreadModels = JSON.parseArray(array.toJSONString(), UnreadModel.class);
-
-                        if (unreadModels.size() > 0) showUnreadAlert(unreadModels);
-                    }
-
-                }
-            }, true);
+            requestUnreadHintEvent(new RequestUnreadApiEvent());
         }
+    }
+
+    @Subscribe()
+    public void requestUnreadHintEvent(RequestUnreadApiEvent event){
+        NetUtil.getRequest(NetConfig.API_UnreadMsg, null, new NetUtil.OnResponse() {
+            @Override
+            public void onResponse(JSONObject response) {
+                if (NetUtil.isSuccess(response)){
+                    SpUtils.put(getContext(), "unreadKey", System.currentTimeMillis());
+
+                    JSONArray array = response.getJSONArray("data");
+                    List<UnreadModel> temp = JSON.parseArray(array.toJSONString(), UnreadModel.class);
+                    //只弹框显示一次
+                    if (unreadModels == null && temp.size() > 0){
+                        if (currShowPosition == 0){
+                            unreadModels = temp;
+                            showUnreadAlert(unreadModels);
+                        }
+                    }
+                    mBottomBarMine.showUnreadDot(unreadModels != null && unreadModels.size()>0);
+                }
+
+            }
+        }, true);
     }
 
     /** 显示未读消息alert */

@@ -6,14 +6,10 @@ import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.FrameLayout;
@@ -25,9 +21,8 @@ import com.bytedance.sdk.openadsdk.TTAdNative;
 import com.bytedance.sdk.openadsdk.TTFeedAd;
 import com.juejinchain.android.config.TTAdManagerHolder;
 import com.juejinchain.android.tools.L;
-import com.juejinchain.android.ui.dialog.HomeTipsAlertDialog;
 import com.juejinchain.android.ui.fragment.MainFragment;
-import com.juejinchain.android.util.TToast;
+import com.juejinchain.android.tools.TToast;
 
 import java.util.List;
 
@@ -38,8 +33,6 @@ import io.dcloud.common.DHInterface.ISysEventListener;
 import io.dcloud.common.DHInterface.IWebview;
 import io.dcloud.feature.internal.reflect.BroadcastReceiver;
 import me.yokeyword.fragmentation.SupportActivity;
-
-import static io.dcloud.common.util.ReflectUtils.getApplicationContext;
 
 /**
  *
@@ -74,6 +67,7 @@ public class MainActivity extends SupportActivity implements IActivityHandler {
         //初始化广告管理对象
         TTAdManager ttAdManager = TTAdManagerHolder.get();
         mTTAdNative = ttAdManager.createAdNative(getApplicationContext());
+
         //申请部分权限，如read_phone_state,防止获取不了imei时候，下载类广告没有填充的问题。
         TTAdManagerHolder.get().requestPermissionIfNecessary(this);
 //        loadListAd();

@@ -31,7 +31,7 @@ import io.dcloud.common.util.PdrUtil;
  *
  * 如用的是原arr打包，要继承 DCloudApplication
  */
-public class MyApplication extends Application {
+public class MyApplication extends DCloudApplication {
 
     private static final String TAG = MyApplication.class.getSimpleName();
 //    public boolean isQihooTrafficFreeValidate = true;
@@ -111,12 +111,12 @@ public class MyApplication extends Application {
         //}
     }
 
-//    protected void attachBaseContext(Context var1) {
-//        super.attachBaseContext(var1);
-//        if (Build.VERSION.SDK_INT < 21) {
-//            this.a();
-//        }
-//    }
+    protected void attachBaseContext(Context var1) {
+        super.attachBaseContext(var1);
+        if (Build.VERSION.SDK_INT < 21) {
+            this.a();
+        }
+    }
 
     void addHomeListener(){
         mHomeListen = new HomeListener(c);
@@ -190,24 +190,24 @@ public class MyApplication extends Application {
 
     }
 
-//    public void onLowMemory() {
-//        super.onLowMemory();
-//        Logger.e(a, "onLowMemory" + Runtime.getRuntime().maxMemory());
-//    }
-//
-//    public void onTrimMemory(int var1) {
-//        super.onTrimMemory(var1);
-//        Logger.e(a, "onTrimMemory");
-//    }
-//
-//    protected void a() {
-//        try {
-//            Class var1 = Class.forName("android.support.multidex.MultiDex");
-//            Method var2 = var1.getMethod("install", Context.class);
-//            var2.invoke((Object)null, this);
-//        } catch (Exception var3) {
-//            var3.printStackTrace();
-//        }
-//
-//    }
+    public void onLowMemory() {
+        super.onLowMemory();
+        Logger.e(TAG, "onLowMemory" + Runtime.getRuntime().maxMemory());
+    }
+
+    public void onTrimMemory(int var1) {
+        super.onTrimMemory(var1);
+        Logger.e(TAG, "onTrimMemory");
+    }
+
+    protected void a() {
+        try {
+            Class var1 = Class.forName("android.support.multidex.MultiDex");
+            Method var2 = var1.getMethod("install", Context.class);
+            var2.invoke((Object)null, this);
+        } catch (Exception var3) {
+            var3.printStackTrace();
+        }
+
+    }
 }

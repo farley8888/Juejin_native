@@ -25,6 +25,7 @@ import com.juejinchain.android.base.BaseMainFragment;
 import com.juejinchain.android.event.CallVueBackIndexEvent;
 import com.juejinchain.android.event.HideShowGiftCarButtonEvent;
 import com.juejinchain.android.event.LoginEvent;
+import com.juejinchain.android.event.RequestUnreadApiEvent;
 import com.juejinchain.android.event.ShareCallbackEvent;
 import com.juejinchain.android.event.ShareEvent;
 import com.juejinchain.android.event.ShowGiftDialogEvent;
@@ -245,7 +246,7 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
     @Subscribe()
     public void reloginEvent(LoginEvent event){ //登录后
         hasShowGiftDialog = UserModel.hasGetGiftBag();
-
+        EventBus.getDefault().post(new RequestUnreadApiEvent());
         //未领取大礼包的，调用下接口
         if (!UserModel.hasGetGiftBag()){
 

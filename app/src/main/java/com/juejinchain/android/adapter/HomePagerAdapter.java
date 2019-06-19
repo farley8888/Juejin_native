@@ -12,7 +12,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.androidquery.callback.AQuery2;
 import com.androidquery.callback.ImageOptions;
 import com.bumptech.glide.Glide;
 import com.bytedance.sdk.openadsdk.TTAdConstant;
@@ -22,7 +21,7 @@ import com.bytedance.sdk.openadsdk.TTNativeAd;
 import com.juejinchain.android.R;
 import com.juejinchain.android.model.NewsModel;
 import com.juejinchain.android.ui.fragment.OnItemClickListener;
-import com.juejinchain.android.util.TToast;
+import com.juejinchain.android.tools.TToast;
 import com.juejinchain.android.util.XSpanUtils;
 
 import java.util.ArrayList;
@@ -51,14 +50,14 @@ public class HomePagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     private OnItemClickListener mClickListener;
     private Context mContext;
 
-    private AQuery2 mAQuery;//AQuery2可以播放gif。 也可以使用自己的图片框架来加载图片。
+//    private AQuery2 mAQuery;//AQuery2可以播放gif。有问题，改用glide
 
     public HomePagerAdapter(Context context, List<Object> data) {
         super();
         mInflater = LayoutInflater.from(context);
         mContext = context;
         mItems = data;
-        mAQuery = new AQuery2(context);
+//        mAQuery = new AQuery2(context);
         //加圆角 centerCrop() 属性会影响 GlideRoundTransform 对象属性
 //        glideRoundTransform = new GlideRoundTransform(mInflater.getContext(), 5);
     }
@@ -103,7 +102,10 @@ public class HomePagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             case ITEM_VIEW_TYPE_VIDEO:
 //                return new VideoAdViewHolder(LayoutInflater.from(mContext).inflate(R.layout.listitem_ad_large_video, parent, false));
             default:
-                return null;
+                View defaultView = mInflater.inflate(R.layout.item_other, parent, false);
+                return new RecyclerView.ViewHolder(defaultView) {
+
+                };
         }
 
     }
@@ -157,7 +159,8 @@ public class HomePagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             if (ttFeedAd.getImageList() != null && !ttFeedAd.getImageList().isEmpty()) {
                 TTImage image = ttFeedAd.getImageList().get(0);
                 if (image != null && image.isValid()) {
-                    mAQuery.id(smallAdViewHolder.mSmallImage).image(image.getImageUrl());
+//                    mAQuery.id(smallAdViewHolder.mSmallImage).image(image.getImageUrl());
+                    Glide.with(mContext).load(image.getImageUrl()).into(smallAdViewHolder.mSmallImage);
                 }
             }
 
@@ -167,7 +170,8 @@ public class HomePagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             if (ttFeedAd.getImageList() != null && !ttFeedAd.getImageList().isEmpty()) {
                 TTImage image = ttFeedAd.getImageList().get(0);
                 if (image != null && image.isValid()) {
-                    mAQuery.id(largeAdViewHolder.mLargeImage).image(image.getImageUrl());
+//                    mAQuery.id(largeAdViewHolder.mLargeImage).image(image.getImageUrl());
+                    Glide.with(mContext).load(image.getImageUrl()).into(largeAdViewHolder.mLargeImage);
                 }
             }
 
@@ -179,13 +183,16 @@ public class HomePagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 TTImage image2 = ttFeedAd.getImageList().get(1);
                 TTImage image3 = ttFeedAd.getImageList().get(2);
                 if (image1 != null && image1.isValid()) {
-                    mAQuery.id(groupAdViewHolder.mGroupImage1).image(image1.getImageUrl());
+//                    mAQuery.id(groupAdViewHolder.mGroupImage1).image(image1.getImageUrl());
+                    Glide.with(mContext).load(image1.getImageUrl()).into(groupAdViewHolder.mGroupImage1);
                 }
                 if (image2 != null && image2.isValid()) {
-                    mAQuery.id(groupAdViewHolder.mGroupImage2).image(image2.getImageUrl());
+//                    mAQuery.id(groupAdViewHolder.mGroupImage2).image(image2.getImageUrl());
+                    Glide.with(mContext).load(image2.getImageUrl()).into(groupAdViewHolder.mGroupImage2);
                 }
                 if (image3 != null && image3.isValid()) {
-                    mAQuery.id(groupAdViewHolder.mGroupImage3).image(image3.getImageUrl());
+//                    mAQuery.id(groupAdViewHolder.mGroupImage3).image(image3.getImageUrl());
+                    Glide.with(mContext).load(image3.getImageUrl()).into(groupAdViewHolder.mGroupImage3);
                 }
             }
         }
@@ -224,7 +231,7 @@ public class HomePagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             @Override
             public void onAdShow(TTNativeAd ad) {
                 if (ad != null) {
-                    TToast.show(mContext, "广告" + ad.getTitle() + "展示");
+//                    TToast.show(mContext, "广告" + ad.getTitle() + "展示");
                 }
             }
         });
@@ -234,7 +241,8 @@ public class HomePagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         TTImage icon = ad.getIcon();
         if (icon != null && icon.isValid()) {
             ImageOptions options = new ImageOptions();
-            mAQuery.id(adViewHolder.mIcon).image(icon.getImageUrl(), options);
+//            mAQuery.id(adViewHolder.mIcon).image(icon.getImageUrl(), options);
+            Glide.with(mContext).load(icon.getImageUrl()).into(adViewHolder.mIcon);
         }
         Button adCreativeButton = adViewHolder.mCreativeButton;
         switch (ad.getInteractionType()) {

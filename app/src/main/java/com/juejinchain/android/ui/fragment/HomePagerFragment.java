@@ -39,7 +39,7 @@ import com.juejinchain.android.network.callBack.JSONCallback;
 import com.juejinchain.android.tools.L;
 import com.juejinchain.android.util.AnimUtil;
 import com.juejinchain.android.util.StringUtils;
-import com.juejinchain.android.util.TToast;
+import com.juejinchain.android.tools.TToast;
 
 
 import org.greenrobot.eventbus.EventBus;
@@ -122,7 +122,6 @@ public class HomePagerFragment extends SupportFragment  {
         mChannel = JSON.parseObject(bundle.getString("model"), ChannelModel.class);
         currPage = 1;
         homeFragment = (HomeFragment) getParentFragment();
-        loadData();
 
         //初始化广告管理对象
         TTAdManager ttAdManager = TTAdManagerHolder.get();
@@ -130,6 +129,7 @@ public class HomePagerFragment extends SupportFragment  {
         //申请部分权限，如read_phone_state,防止获取不了imei时候，下载类广告没有填充的问题。
 //        TTAdManagerHolder.get().requestPermissionIfNecessary(getApplicationContext());
 
+        loadData();
     }
 
     @Override
@@ -210,16 +210,8 @@ public class HomePagerFragment extends SupportFragment  {
                     mainFragment.showVue(ShowVueEvent.PAGE_ART_DETAIL, model.id);
                     EventBus.getDefault().post(new SaveArticleEvent(model));
                 }
-
-                /**
-                 * 用切换隐藏tab的方式，这样重new等待时间太长
-                 */
-//                mainFragment.removeWebAppFragment();
-//                mainFragment.start(WebAppFragment.instance("login"));
-//                startActivity(new Intent(getContext(), ArticleDetailActivity.class));
             }
         });
-
 
         mTvRecommend = view.findViewById(R.id.tvRecommend);
         init();
@@ -242,7 +234,9 @@ public class HomePagerFragment extends SupportFragment  {
             param.put("is_first", 1+"");
 
             if (mData.size() == 0) NetUtil.showLoading(2000); //加个延时，因为有启动动画
-
+        }
+        if (currPage <= 2){
+            loadListAd();
         }
 
         String url = NetConfig.getUrlByParams(param, mAPI);
@@ -276,13 +270,15 @@ public class HomePagerFragment extends SupportFragment  {
                     List<NewsModel> temp = JSON.parseArray(array.toJSONString(), NewsModel.class);
 
                     if (currPage == 1){
+                        boolean isNewest = compareRefresh(temp, mData);
+
                         mData.clear();
 //                        mData = temp; //不能用这个赋值，adapter会监听不到数据有变化
                         mData.addAll(temp);
                         if (mData.size() > 5) mPtrFrameLayout.setLoadMoreEnable(true);
 
                         if(mData.size() > 0 && manuallyRefresh){
-                            startRecommend(mData.size());
+                            startRecommend(mData.size(), isNewest);
                         }
                     }else {  //更多
                         mData.addAll(temp);
@@ -295,6 +291,23 @@ public class HomePagerFragment extends SupportFragment  {
                 }
             }
         });
+    }
+
+    //是否最新推荐的
+    boolean compareRefresh(List<NewsModel> temp, List<Object> origin){
+        int orgSize = origin.size();
+        if (orgSize == 0) return false;
+
+        for (int i = 0; i<temp.size(); i++){
+            Object obj = origin.get(i%orgSize);
+            if (!(obj instanceof NewsModel)) return true;
+
+            NewsModel model = (NewsModel) obj;
+            if (!temp.get(i).id.equals(model.id)){
+                return true;
+            }
+        }
+        return false;
     }
 
     //加载穿山甲信息流广告
@@ -320,7 +333,7 @@ public class HomePagerFragment extends SupportFragment  {
                     TToast.show(getContext(), "on FeedAdLoaded: ad is null!");
                     return;
                 }
-
+                Log.d(TAG, "onFeedAdLoad: "+ads);
 
 //                for (int i = 0; i < LIST_ITEM_COUNT; i++) {
 //                    mData.add(null);
@@ -334,8 +347,12 @@ public class HomePagerFragment extends SupportFragment  {
         });
     }
 
-    private void startRecommend(int count){
-        mTvRecommend.setText(new StringBuilder("为您推荐").append(count).append("条更新"));
+    private void startRecommend(int count, boolean newest){
+        if (newest)
+            mTvRecommend.setText(new StringBuilder("为您推荐").append(count).append("条更新"));
+        else
+            mTvRecommend.setText("暂无更新，请休息会再来~");
+
         AnimUtil.animHeightToView(getActivity(), mTvRecommend, true, 500);
 
         manuallyRefresh = false;

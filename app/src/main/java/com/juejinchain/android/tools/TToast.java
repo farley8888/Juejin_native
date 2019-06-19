@@ -1,4 +1,4 @@
-package com.juejinchain.android.util;
+package com.juejinchain.android.tools;
 
 import android.annotation.SuppressLint;
 import android.content.Context;

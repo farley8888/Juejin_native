@@ -13,6 +13,7 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:gravity="center"
+            android:visibility="gone"
             android:orientation="vertical">
 
             <TextView
@@ -35,21 +36,21 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginRight="10dp"
-            android:layout_toLeftOf="@+id/ptr_classic_header_rotate_view_header_text">
+            android:layout_centerInParent="true">
 
             <ImageView
                 android:id="@+id/ptr_classic_header_rotate_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:src="@drawable/ptr_rotate_arrow" />
+                android:src="@drawable/icon_bc" />
 
             <ProgressBar
                 android:id="@+id/ptr_classic_header_rotate_view_progressbar"
                 style="?android:attr/progressBarStyleSmallInverse"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:visibility="gone"
                 android:layout_gravity="center" />
         </FrameLayout>
     </RelativeLayout>

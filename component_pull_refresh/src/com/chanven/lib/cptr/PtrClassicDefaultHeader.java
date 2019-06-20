@@ -5,17 +5,21 @@ import android.content.SharedPreferences;
 import android.content.res.TypedArray;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.chanven.lib.cptr.indicator.PtrIndicator;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Random;
 
 public class PtrClassicDefaultHeader extends FrameLayout implements PtrUIHandler {
 
@@ -24,13 +28,28 @@ public class PtrClassicDefaultHeader extends FrameLayout implements PtrUIHandler
     private int mRotateAniTime = 150;
     private RotateAnimation mFlipAnimation;
     private RotateAnimation mReverseFlipAnimation;
+
+    /**
+     * 旋转动画
+     */
+    private RotateAnimation mRotateAnimation;
     private TextView mTitleTextView;
-    private View mRotateView;
+    private ImageView mRotateView;
     private View mProgressBar;
     private long mLastUpdateTime = -1;
     private TextView mLastUpdateTextView;
     private String mLastUpdateTimeKey;
     private boolean mShouldShowLastUpdate;
+
+    private static final int[] IMG_RES = {
+            R.drawable.icon_bc,
+            R.drawable.icon_bk,
+            R.drawable.icon_bm,
+            R.drawable.icon_bsj,
+            R.drawable.icon_bt,
+            R.drawable.icon_byd,
+            R.drawable.icon_dz
+    };
 
     private LastUpdateTimeUpdater mLastUpdateTimeUpdater = new LastUpdateTimeUpdater();
 
@@ -61,7 +80,7 @@ public class PtrClassicDefaultHeader extends FrameLayout implements PtrUIHandler
 
         mTitleTextView = (TextView) header.findViewById(com.chanven.lib.cptr.R.id.ptr_classic_header_rotate_view_header_title);
         mLastUpdateTextView = (TextView) header.findViewById(com.chanven.lib.cptr.R.id.ptr_classic_header_rotate_view_header_last_update);
-        mProgressBar = header.findViewById(com.chanven.lib.cptr.R.id.ptr_classic_header_rotate_view_progressbar);
+//        mProgressBar = header.findViewById(com.chanven.lib.cptr.R.id.ptr_classic_header_rotate_view_progressbar);
 
         resetView();
     }
@@ -105,16 +124,25 @@ public class PtrClassicDefaultHeader extends FrameLayout implements PtrUIHandler
         mReverseFlipAnimation.setInterpolator(new LinearInterpolator());
         mReverseFlipAnimation.setDuration(mRotateAniTime);
         mReverseFlipAnimation.setFillAfter(true);
+
+        mRotateAnimation = new RotateAnimation(0, 360f, RotateAnimation.RELATIVE_TO_SELF, 0.5f, RotateAnimation.RELATIVE_TO_SELF, 0.5f);
+        mRotateAnimation.setRepeatCount(Animation.INFINITE);
+        mRotateAnimation.setInterpolator(new LinearInterpolator());
+        mRotateAnimation.setDuration(mRotateAniTime);
+        mRotateAnimation.setFillAfter(true);
     }
 
     private void resetView() {
         hideRotateView();
-        mProgressBar.setVisibility(INVISIBLE);
+//        mProgressBar.setVisibility(INVISIBLE);
+
+        int i = new Random().nextInt(IMG_RES.length);
+        mRotateView.setImageResource(IMG_RES[i]);
     }
 
     private void hideRotateView() {
         mRotateView.clearAnimation();
-        mRotateView.setVisibility(INVISIBLE);
+//        mRotateView.setVisibility(INVISIBLE);
     }
 
     @Override
@@ -131,7 +159,7 @@ public class PtrClassicDefaultHeader extends FrameLayout implements PtrUIHandler
         tryUpdateLastUpdateTime();
         mLastUpdateTimeUpdater.start();
 
-        mProgressBar.setVisibility(INVISIBLE);
+//        mProgressBar.setVisibility(INVISIBLE);
 
         mRotateView.setVisibility(VISIBLE);
         mTitleTextView.setVisibility(VISIBLE);
@@ -145,20 +173,22 @@ public class PtrClassicDefaultHeader extends FrameLayout implements PtrUIHandler
     @Override
     public void onUIRefreshBegin(PtrFrameLayout frame) {
         mShouldShowLastUpdate = false;
-        hideRotateView();
-        mProgressBar.setVisibility(VISIBLE);
+//        hideRotateView();
+//        mProgressBar.setVisibility(VISIBLE);
         mTitleTextView.setVisibility(VISIBLE);
         mTitleTextView.setText(com.chanven.lib.cptr.R.string.cube_ptr_refreshing);
 
         tryUpdateLastUpdateTime();
         mLastUpdateTimeUpdater.stop();
+
+        mRotateView.clearAnimation();
+        mRotateView.startAnimation(mRotateAnimation);
     }
 
     @Override
     public void onUIRefreshComplete(PtrFrameLayout frame) {
-
         hideRotateView();
-        mProgressBar.setVisibility(INVISIBLE);
+//        mProgressBar.setVisibility(INVISIBLE);
 
         mTitleTextView.setVisibility(VISIBLE);
         mTitleTextView.setText(getResources().getString(com.chanven.lib.cptr.R.string.cube_ptr_refresh_complete));
@@ -227,28 +257,36 @@ public class PtrClassicDefaultHeader extends FrameLayout implements PtrUIHandler
     @Override
     public void onUIPositionChange(PtrFrameLayout frame, boolean isUnderTouch, byte status, PtrIndicator ptrIndicator) {
 
+
         final int mOffsetToRefresh = frame.getOffsetToRefresh();
         final int currentPos = ptrIndicator.getCurrentPosY();
         final int lastPos = ptrIndicator.getLastPosY();
 
-        if (currentPos < mOffsetToRefresh && lastPos >= mOffsetToRefresh) {
-            if (isUnderTouch && status == PtrFrameLayout.PTR_STATUS_PREPARE) {
-                crossRotateLineFromBottomUnderTouch(frame);
-                if (mRotateView != null) {
-                    mRotateView.clearAnimation();
-                    mRotateView.startAnimation(mReverseFlipAnimation);
-                }
-            }
-        } else if (currentPos > mOffsetToRefresh && lastPos <= mOffsetToRefresh) {
-            if (isUnderTouch && status == PtrFrameLayout.PTR_STATUS_PREPARE) {
-                crossRotateLineFromTopUnderTouch(frame);
-                if (mRotateView != null) {
-                    mRotateView.clearAnimation();
-                    mRotateView.startAnimation(mFlipAnimation);
-                }
-            }
-        }
+        Log.d(TAG, "onUIPositionChange: " + mOffsetToRefresh + "   " + currentPos + "  " + lastPos + "  " + isUnderTouch);
+
+//        if (currentPos < mOffsetToRefresh && lastPos >= mOffsetToRefresh) {
+//            if (isUnderTouch && status == PtrFrameLayout.PTR_STATUS_PREPARE) {
+//                crossRotateLineFromBottomUnderTouch(frame);
+//                if (mRotateView != null) {
+//                    mRotateView.clearAnimation();
+//                    mRotateView.startAnimation(mReverseFlipAnimation);
+//                }
+//            }
+//        } else if (currentPos > mOffsetToRefresh && lastPos <= mOffsetToRefresh) {
+//            if (isUnderTouch && status == PtrFrameLayout.PTR_STATUS_PREPARE) {
+//                crossRotateLineFromTopUnderTouch(frame);
+//                if (mRotateView != null) {
+//                    mRotateView.clearAnimation();
+//                    mRotateView.startAnimation(mFlipAnimation);
+//                }
+//            }
+//        }
+
+            int degree = (int) (360 * 1.0 / mOffsetToRefresh * currentPos);
+            mRotateView.setRotation(degree);
     }
+
+    private static final String TAG = "PtrClassicDefaultHeader";
 
     private void crossRotateLineFromTopUnderTouch(PtrFrameLayout frame) {
         if (!frame.isPullToRefresh()) {

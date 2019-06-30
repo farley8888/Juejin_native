@@ -159,6 +159,13 @@ public class NetConfig {
      */
     public static final String API_VideoFabulous    = "video/fabulous";
 
+    /**
+     * 分享按钮埋点
+     * typesign=WAY [统计按钮标识]
+     * @see com.juejinchain.android.model.ShareModel
+     */
+    public static final String API_ShareCount       = "misc/share_click_count";
+
 
     public static String getUrlByParams(Map<String, String> param, String api) {
         String getUrl = BaseUrl + "/" + API_Prefix + api + "?";
@@ -184,7 +191,6 @@ public class NetConfig {
     private static String getCommonParams(){
         String commParam = "source_style=" + DEVICE_TYPE ;
         String ut = UserModel.getUserToken();
-        L.d("NetConfig", "getCommonParams: ut="+ut);
         if (ut != null){
             commParam += "&"+PK_UserToken+"="+ut;
             commParam += "&"+"uid=" + "0"; //写死现在用得是user_token,要传因为老接口可能用到

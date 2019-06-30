@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     style="@style/JJ.WrapContent"
-    android:layout_gravity="center_horizontal"
-    android:background="@drawable/bg_home_alert">
+    android:layout_gravity="center"
+    android:orientation="vertical"
+    >
 
     <LinearLayout
         style="@style/JJ.WrapContent.Vertical"
-        android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginBottom="60dp"
+        android:background="@drawable/bg_home_alert"
         android:gravity="center_horizontal">
 
         <LinearLayout
             style="@style/JJ.WrapContent.Horizontal"
+            android:layout_marginTop="120dp"
             android:gravity="center_vertical">
 
             <ImageView
@@ -55,10 +56,9 @@
         <!-- pl.droidsonroids.gif.GifImageView 用不了bug-->
         <ImageView
             android:id="@+id/img_get"
-            android:layout_width="80dp"
-            android:layout_height="40dp"
+            android:layout_width="85dp"
+            android:layout_height="45dp"
             android:layout_marginTop="25dp"
-
             />
 
         <TextView
@@ -73,7 +73,9 @@
         android:id="@+id/cancel"
         android:layout_width="300dp"
         android:layout_height="40dp"
-        android:focusableInTouchMode="true"
+        android:textSize="12sp"
+        android:textColor="@color/white"
+        android:text="先去逛逛"
         android:background="@null"
-        android:layout_gravity="bottom" />
-</FrameLayout>
+         />
+</LinearLayout>

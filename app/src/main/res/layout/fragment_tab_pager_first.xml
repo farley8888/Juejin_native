@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical">
 
     <!--<android.support.v4.widget.SwipeRefreshLayout-->
@@ -49,25 +50,12 @@
 
     <include layout="@layout/no_data_view" />
 
-    <!--<LinearLayout-->
-    <!--android:id="@+id/ly_no_data"-->
-    <!--android:layout_width="wrap_content"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--android:layout_gravity="center"-->
-    <!--android:gravity="center"-->
-    <!--android:orientation="vertical">-->
-
-
-    <!--<ImageView-->
-    <!--android:layout_width="wrap_content"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--app:srcCompat="@drawable/no_media_list" />-->
-
-    <!--<TextView-->
-    <!--android:layout_width="wrap_content"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--android:layout_marginTop="5dp"-->
-    <!--android:text="暂无数据~" />-->
-    <!--</LinearLayout>-->
+    <ImageView
+        android:id="@+id/img_loading_bg"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scaleType="fitXY"
+        tools:visibility="gone"
+        android:src="@drawable/bg_recycle" />
 
 </FrameLayout>

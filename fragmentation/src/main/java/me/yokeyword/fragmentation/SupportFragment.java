@@ -21,6 +21,8 @@ public class SupportFragment extends Fragment implements ISupportFragment {
     final SupportFragmentDelegate mDelegate = new SupportFragmentDelegate(this);
     protected FragmentActivity _mActivity;
 
+    protected boolean isFirst;
+
     @Override
     public SupportFragmentDelegate getSupportDelegate() {
         return mDelegate;

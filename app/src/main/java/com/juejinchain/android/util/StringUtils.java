@@ -206,10 +206,30 @@ public class StringUtils {
         return sb.toString();
     }
 
+    /**
+     * listView的用这个方法, 正则太耗时间了，20条要1.5秒左右
+     * @param htmlStr
+     * @return
+     */
+    public static String filterHtmlList(String htmlStr) {
+
+        String regEx_html = "<[^>]+>|\\&[a-zA-Z]{1,10};"; //定义HTML标签的正则表达式
+        // 定义一些特殊字符的正则表达式 如：&nbsp;&nbsp;
+//        String regEx_special = "\\&[a-zA-Z]{1,10};";
+
+        Pattern p_html = Pattern.compile(regEx_html, Pattern.CASE_INSENSITIVE);
+        Matcher m_html = p_html.matcher(htmlStr);
+        htmlStr = m_html.replaceAll(""); //过滤html标签
+
+        return htmlStr.trim(); //返回文本字符串
+    }
+
     public static String filterHTMLTag(String htmlStr) {
         String regEx_script = "<script[^>]*?>[\\s\\S]*?<\\/script>"; //定义script的正则表达式
         String regEx_style = "<style[^>]*?>[\\s\\S]*?<\\/style>"; //定义style的正则表达式
         String regEx_html = "<[^>]+>"; //定义HTML标签的正则表达式
+        // 定义一些特殊字符的正则表达式 如：&nbsp;&nbsp;
+        String regEx_special = "\\&[a-zA-Z]{1,10};";
 
         Pattern p_script = Pattern.compile(regEx_script, Pattern.CASE_INSENSITIVE);
         Matcher m_script = p_script.matcher(htmlStr);
@@ -223,7 +243,28 @@ public class StringUtils {
         Matcher m_html = p_html.matcher(htmlStr);
         htmlStr = m_html.replaceAll(""); //过滤html标签
 
+        Pattern p_htmlSpec = Pattern.compile(regEx_special, Pattern.CASE_INSENSITIVE);
+        Matcher m_htmlSpec = p_htmlSpec.matcher(htmlStr);
+        htmlStr = m_htmlSpec.replaceAll(""); //过滤html转义符号
+        // 去除字符串中的空格 回车 换行符 制表符 等
+//        htmlStr = htmlStr.replaceAll("\\s*|\t|\r|\n", "");
+
         return htmlStr.trim(); //返回文本字符串
+    }
+
+    /**
+     * 设置阿里云图片清晰度直接替换最后面的高度
+     * @param {String} imgUrl 阿里云图片地址
+     * @param {Number} h 图片高度
+     */
+    public static String getImgUrlHeight(String imgUrl, int h){
+        //http://jjlmobile.oss-cn-shenzhen.aliyuncs.com/goods_car/gid_34567/pic_list_h/f4ec1b5d4e7c6f10bd062fbe0d175050.jpg?x-oss-process=image/resize,h_50
+        int has = imgUrl.indexOf("h_");
+
+        if (has != -1 && has+5 > imgUrl.length()){
+            imgUrl = imgUrl.substring(0, has+2) + h+"00";
+        }
+        return imgUrl;
     }
 
 }

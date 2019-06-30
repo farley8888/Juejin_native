@@ -6,6 +6,7 @@ import com.bytedance.sdk.openadsdk.TTAdConfig;
 import com.bytedance.sdk.openadsdk.TTAdConstant;
 import com.bytedance.sdk.openadsdk.TTAdManager;
 import com.bytedance.sdk.openadsdk.TTAdSdk;
+import com.juejinchain.android.util.StringUtils;
 
 /**
  * 穿山甲
@@ -14,6 +15,12 @@ import com.bytedance.sdk.openadsdk.TTAdSdk;
 public class TTAdManagerHolder {
 
     private static boolean sInit;
+    /** 应用名称/ID */
+    public final static String AppID = "5020793";
+    /**
+     * 代码位名称/ID
+     */
+    public final static String POS_ID = "920793973";
 
     public static TTAdManager get() {
         if (!sInit) {
@@ -36,14 +43,14 @@ public class TTAdManagerHolder {
 
     private static TTAdConfig buildConfig(Context context) {
         return new TTAdConfig.Builder()
-                .appId("5020793")
+                .appId(AppID)
                 .useTextureView(true) //使用TextureView控件播放视频,默认为SurfaceView,当有SurfaceView冲突的场景，可以使用TextureView
-                .appName("掘金宝安卓APP")
-                .titleBarTheme(TTAdConstant.TITLE_BAR_THEME_DARK)
+                .appName("掘金宝")
+                .titleBarTheme(TTAdConstant.TITLE_BAR_THEME_NO_TITLE_BAR)
                 .allowShowNotify(true) //是否允许sdk展示通知栏提示
                 .allowShowPageWhenScreenLock(true) //是否在锁屏场景支持展示广告落地页
-                .debug(true) //测试阶段打开，可以通过日志排查问题，上线时去除该调用
-                .directDownloadNetworkType(TTAdConstant.NETWORK_STATE_WIFI, TTAdConstant.NETWORK_STATE_3G) //允许直接下载的网络状态集合
+                .debug(false) //测试阶段打开，可以通过日志排查问题，上线时去除该调用
+                .directDownloadNetworkType(TTAdConstant.NETWORK_STATE_WIFI) //允许直接下载的网络状态集合
                 .supportMultiProcess(false)
                 .build();
     }

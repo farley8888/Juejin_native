@@ -4,26 +4,30 @@ import java.util.Objects;
 
 public class ChannelModel {
 
-    /**
-     * 频道id, 推荐为0，热门1，其它用接口的
-     */
-    private String id;
+    //推荐
+    public static final int ID_RECOMMEND = 0;
+    //热门
+    public static final int ID_HOT = 1;
+    /** 掘金宝频道id */
+    public static final int ID_JJB = 101;
+
+    private int id;
     private String name;
 
     public ChannelModel(){
 
     }
 
-    public ChannelModel(String id, String name) {
+    public ChannelModel(int id, String name) {
         this.id = id;
         this.name = name;
     }
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 

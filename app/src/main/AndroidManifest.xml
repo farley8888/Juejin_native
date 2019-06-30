@@ -94,6 +94,10 @@
         android:largeHeap="true"
         android:supportsRtl="true"
         android:usesCleartextTraffic="true">
+
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false" />
         <!--
         android:supportsRtl="true"
         android:allowClearUserData="true"

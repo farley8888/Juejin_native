@@ -1,109 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@color/white"
     tools:ignore="HardcodedText">
 
     <TextView
-        android:id="@+id/tv_listitem_ad_title"
+        android:id="@+id/tv_listitem_ad_desc"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
-        android:singleLine="false"
-        android:textSize="14sp" />
+        android:textColor="@color/ad_title_color"
+        android:textSize="16sp" />
 
     <ImageView
         android:id="@+id/iv_listitem_image"
         android:layout_width="match_parent"
         android:layout_height="200dp"
-        android:layout_below="@id/tv_listitem_ad_title"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:layout_marginBottom="5dp"
         android:scaleType="centerCrop" />
 
-    <ImageView
-        android:id="@+id/iv_listitem_icon"
-        android:layout_width="15dp"
-        android:layout_height="15dp"
-        android:layout_below="@id/iv_listitem_image"
-        android:layout_marginStart="3dp"
-        android:layout_marginLeft="3dp" />
+    <!--<ImageView-->
+        <!--android:id="@+id/iv_listitem_icon"-->
+        <!--android:layout_width="15dp"-->
+        <!--android:layout_height="15dp"-->
+        <!--android:layout_below="@id/iv_listitem_image"-->
+        <!--android:layout_marginStart="3dp"-->
+        <!--android:layout_marginLeft="3dp" />-->
 
     <LinearLayout
         android:id="@+id/tv_source_desc_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/iv_listitem_image"
-        android:layout_toEndOf="@id/iv_listitem_icon"
-        android:layout_toRightOf="@id/iv_listitem_icon"
-        android:orientation="vertical">
+        android:paddingVertical="10dp"
+        android:layout_marginHorizontal="@dimen/listView_side_margin"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/tv_listitem_ad_desc"
-            android:layout_width="100dp"
+            android:id="@+id/tt_ad_tv"
+            style="@style/JJ.Label.Light.Little"
+            android:textColor="@color/ccc"
+            android:paddingHorizontal="2dp"
+            android:textSize="8sp"
+            android:background="@drawable/shape_ad_radius"
+            android:text="广告" />
+
+        <TextView
+            android:id="@+id/tv_listitem_ad_title"
+            android:layout_width="wrap_content"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:layout_marginStart="5dp"
             android:layout_marginLeft="5dp"
-            android:layout_marginTop="15dp"
-            android:layout_marginBottom="10dp"
-            android:ellipsize="end"
             android:singleLine="true"
+            android:textColor="@color/text_666666"
+            android:text="爱上……"
             android:textSize="14sp" />
 
-        <TextView
-            android:id="@+id/tv_listitem_ad_source"
-            android:layout_width="100dp"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:ellipsize="end"
+        <!--tv_listitem_ad_source tv_listitem_ad_desc-->
+        <Button
+            android:id="@+id/btn_download"
+            android:layout_width="48dp"
+            android:layout_height="25dp"
+            android:text="立即下载"
+            android:textColor="@color/white"
+            android:background="@drawable/shape_blun_radius"
             android:singleLine="true"
+            android:layout_marginHorizontal="10dp"
             android:textSize="10sp" />
 
         <!--==== 测试下载状态控制功能 begin ========-->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+        <ImageButton
+            android:id="@+id/btn_listitem_dislike"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:background="@null"
+            android:src="@drawable/dislike_icon" />
 
-            <Button
-                android:id="@+id/btn_listitem_stop"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="暂停"
-                android:visibility="gone" />
-
-            <Button
-                android:id="@+id/btn_listitem_remove"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="删除"
-                android:visibility="gone" />
-        </LinearLayout>
         <!--==== 测试下载状态控制功能 end ========-->
     </LinearLayout>
 
-    <Button
-        android:id="@+id/btn_listitem_creative"
-        android:layout_width="90dp"
-        android:layout_height="40dp"
-        android:layout_alignTop="@+id/tv_source_desc_layout"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginEnd="14dp"
-        android:layout_marginRight="14dp"
-        android:textSize="10sp" />
-
-    <ImageView
-        android:id="@+id/iv_listitem_dislike"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginTop="10dp"
-        android:layout_marginRight="10dp"
-        android:clickable="true"
-        android:src="@drawable/dislike_icon" />
-
-</RelativeLayout>
+</LinearLayout>

@@ -12,6 +12,7 @@ public class NewsModel {
 
     /**
      * 1为小图，2三图，3为大图,4为无图
+     * 100 为本平台广告
      */
     public int type;
 
@@ -28,11 +29,11 @@ public class NewsModel {
     public int comment_mark;
 
     public void setTitle(String title) {
-        this.title = StringUtils.filterHTMLTag(title);
+        this.title = StringUtils.filterHtmlList(title);
     }
 
     public String getTitle() {
-        return title;
+        return  title;
     }
 
     public String getIs_top() {
@@ -71,7 +72,7 @@ public class NewsModel {
 
     public boolean is_follow;
 
-    public long publish_time;
+    public long publish_time; //s
 
     public String publish_time_date; //2019-03-18 10:35:07
 
@@ -91,13 +92,13 @@ public class NewsModel {
      */
     public String redirect_url;
 
-    public String getPublish_time() {
+    public String getPublish_timeStr() {
 //        if (publish_time_date == null || publish_time_date.length() < 8) return "";
 //        return publish_time_date.substring(5,publish_time_date.length()-3);
-        return TimeUtils.getTimeLine(publish_time);
+        return TimeUtils.getTimeLine(publish_time*1000);
     }
 
-    public String getRead_num() {
+    public String getRead_numStr() {
         if (read_num > 10000){
             return String.format("阅读 %.2fw", read_num/10000.0);
         }else {

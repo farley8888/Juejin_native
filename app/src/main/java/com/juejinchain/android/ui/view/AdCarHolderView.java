@@ -10,7 +10,6 @@ import android.widget.LinearLayout;
 import com.bumptech.glide.Glide;
 import com.juejinchain.android.R;
 import com.juejinchain.android.event.ShowGiftDialogEvent;
-import com.juejinchain.android.ui.dialog.HomeTipsAlertDialog;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -20,16 +19,16 @@ import org.greenrobot.eventbus.EventBus;
  * 1、未登录时
  * 1、登录未领取大礼包
  */
-public class AdsHolderView extends LinearLayout {
+public class AdCarHolderView extends LinearLayout {
     private ImageView icon;
 
     public boolean isClick;
 
-    public AdsHolderView(Context context) {
+    public AdCarHolderView(Context context) {
         this(context, null);
     }
 
-    public AdsHolderView(Context context, AttributeSet attrs) {
+    public AdCarHolderView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
         View.inflate(context, R.layout.layout_home_ads, this);

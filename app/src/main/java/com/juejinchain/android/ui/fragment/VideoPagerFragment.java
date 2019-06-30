@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +32,7 @@ import com.juejinchain.android.network.NetUtil;
 import com.juejinchain.android.network.OkHttpUtils;
 import com.juejinchain.android.network.callBack.JSONCallback;
 import com.juejinchain.android.tools.L;
+import com.juejinchain.android.util.SPUtils;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -63,12 +65,24 @@ public class VideoPagerFragment extends SupportFragment  {
     private int mScrollTotal;
     Handler handler = new Handler();
     private List<VideoModel> mData = new ArrayList<>();
-    int currPage = 0;
+    //刷新不是从第一页开始, 而是+1, 然后缓存下来给下次用
+    int currPage = 1;
     int pageSize = 10;
     public VideoCategoryModel mCategory;
     public String mAPI;
     VideoFragment homeFragment;
     TextView tvFabulous; //点赞
+
+    /**
+     * 视频频道页码缓存key前缀
+     */
+    public final String VC_PRE_KEY = "VC_KEY_";
+    //保存的时间，超过4小时清空
+    public final String VC_PRE_KEY_T = "VC_KEY_T_";
+    private int mLastPage;
+    private int mPerPage;
+    private boolean isRefresh;
+    private ImageView mImagLoadingBg;
 
     public static VideoPagerFragment newInstance(VideoCategoryModel model) {
 
@@ -93,7 +107,7 @@ public class VideoPagerFragment extends SupportFragment  {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        currPage = 1;
+        currPage = getLoadPage();
         homeFragment = (VideoFragment) getParentFragment();
         ptrClassicFrameLayout.autoRefresh(true);
     }
@@ -118,6 +132,7 @@ public class VideoPagerFragment extends SupportFragment  {
         ptrClassicFrameLayout = view.findViewById(R.id.ptr_recycler_view_frame);
         noDataView  = view.findViewById(R.id.ly_no_data);
         noDataView.setVisibility(View.GONE);
+        mImagLoadingBg = view.findViewById(R.id.img_loading_bg);
 
         adapter = new VideoPagerAdapter(_mActivity, mData);
 
@@ -236,11 +251,14 @@ public class VideoPagerFragment extends SupportFragment  {
         OkHttpUtils.getAsyn(url, new JSONCallback() {
             @Override
             public void onError(Call call, Exception e) {
-
+                ptrClassicFrameLayout.refreshComplete();
             }
 
             @Override
             public void onResponse(JSONObject response) {
+                ptrClassicFrameLayout.refreshComplete();
+                mImagLoadingBg.setVisibility(View.GONE);
+
                 if (NetUtil.isSuccess(response)){
                     /** 变态的接口设计
                      * 没数据时
@@ -253,30 +271,63 @@ public class VideoPagerFragment extends SupportFragment  {
                     if (response.get("data") instanceof JSONArray){
                         array = response.getJSONArray("data");
                     }else {
+                        //有数据
                         array = response.getJSONObject("data").getJSONArray("data");
+                        mLastPage = response.getJSONObject("data").getInteger("last_page");
                     }
-//                    if (array.size() == 0) return;  //没有数据时
 
 //                    L.d(TAG, "onResponse:data.arr= "+ array.toJSONString());
                     List<VideoModel> temp = JSON.parseArray(array.toJSONString(), VideoModel.class);
 
-                    if (currPage == 1){
+                    List<VideoModel> remove = new ArrayList<>();
+                    for (VideoModel model:temp) {
+                        //去除本地广告
+                        if (model.getType() == 100)remove.add(model);
+                    }
+                    if (remove.size() > 0)temp.removeAll(remove);
+
+                    if (isRefresh){
+                        isRefresh = false;
                         mData.clear();
 //                        mData = temp; //不能用这个赋值，adapter会监听不到数据有变化
                         mData.addAll(temp);
-                        ptrClassicFrameLayout.refreshComplete();
+
                         if (mData.size() > 5)ptrClassicFrameLayout.setLoadMoreEnable(true);
                     }else {  //更多
                         mData.addAll(temp);
                         ptrClassicFrameLayout.loadMoreComplete(temp.size()>0);
                     }
+                    if (currPage >= mLastPage ) currPage = 1;
+                    saveLoadPage();
+
                     noDataView.setVisibility(mData.size() == 0? View.VISIBLE:View.GONE);
                     mAdapter.notifyDataSetChanged();
+
                 }else {
 
                 }
             }
         });
+    }
+
+    void saveLoadPage(){
+        SPUtils.getInstance().put(VC_PRE_KEY+mCategory.en, currPage );
+        //记录时间
+        SPUtils.getInstance().put(VC_PRE_KEY_T+mCategory.en, System.currentTimeMillis() );
+    }
+
+    /**
+     * 获取之前加载的页码
+     * @return
+     */
+    int getLoadPage(){
+        long lastSaveTime = SPUtils.getInstance().getLong(VC_PRE_KEY_T + mCategory.en);
+        if (System.currentTimeMillis() - lastSaveTime > 1000*60*60*4)
+            return 1;
+
+        //上次加载的页数
+        int lastLoadedPage = SPUtils.getInstance().getInt(VC_PRE_KEY+mCategory.en );
+        return lastLoadedPage == 0 ? 1:lastLoadedPage;
     }
 
     private void init() {
@@ -292,12 +343,12 @@ public class VideoPagerFragment extends SupportFragment  {
 
             @Override
             public void onRefreshBegin(PtrFrameLayout frame) {
-                currPage = 1;
-//                mData.clear();
-//                     for (int i = 0; i < 17; i++)  mData.add(new String("  RecyclerView item  -" + i));
-                if (noDataView.getVisibility() == View.VISIBLE) noDataView.setVisibility(View.GONE);
-                loadData();
 
+                if (noDataView.getVisibility() == View.VISIBLE)
+                    noDataView.setVisibility(View.GONE);
+
+                isRefresh = true;
+                loadOrRefresh();
             }
         });
 
@@ -308,10 +359,16 @@ public class VideoPagerFragment extends SupportFragment  {
 //                 mData.add(new String("  RecyclerView item  - add " + page+"0"));
 //                mAdapter.notifyDataSetChanged();
 //                mPtrFrameLayout.loadMoreComplete(true);
-                currPage++;
-                loadData();
+                loadOrRefresh();
             }
         });
+    }
+
+    //刷新和加载更多页码都是加一，因为视频页内容固定了
+    private void loadOrRefresh() {
+        currPage++;
+        if (mLastPage > 0 && currPage > mLastPage) currPage = 1;
+        loadData();
     }
 
     /**

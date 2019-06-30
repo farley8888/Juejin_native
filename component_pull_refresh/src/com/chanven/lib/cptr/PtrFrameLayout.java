@@ -1146,11 +1146,13 @@ public class PtrFrameLayout extends ViewGroup {
         mOnLoadMoreListener.loadMore();
     }
 
+    //MoreEnable 调用此方法才生效，即第二页
     public void loadMoreComplete(boolean hasMore) {
         isLoadingMore = false;
         isLoadMoreEnable = hasMore;
+        if (mLoadMoreView == null) return; //有bug 第一页没加载完为null
         if (hasMore) {
-            if (mLoadMoreView != null)mLoadMoreView.showNormal();
+            mLoadMoreView.showNormal();
         } else {
             setNoMoreData();
         }

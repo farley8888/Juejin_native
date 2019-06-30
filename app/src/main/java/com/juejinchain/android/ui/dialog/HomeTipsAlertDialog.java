@@ -3,6 +3,7 @@ package com.juejinchain.android.ui.dialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -20,6 +21,7 @@ import com.juejinchain.android.event.TabSelectEvent;
 import com.juejinchain.android.model.UserModel;
 import com.juejinchain.android.network.NetConfig;
 import com.juejinchain.android.network.NetUtil;
+import com.juejinchain.android.ui.fragment.HomeFragment;
 import com.juejinchain.android.ui.fragment.MainFragment;
 import com.juejinchain.android.ui.ppw.GiftSuccessPopup;
 
@@ -35,9 +37,12 @@ import org.greenrobot.eventbus.EventBus;
 public class HomeTipsAlertDialog extends Dialog {
 
     public boolean isGoLogin;
+    private JSONObject mJo;
+    private HomeFragment mHomeFragment;
 
-    public HomeTipsAlertDialog(Context context) {
+    public HomeTipsAlertDialog(Context context, HomeFragment homeFragment) {
         this(context,0);
+        mHomeFragment = homeFragment;
         setCanceledOnTouchOutside(false);
     }
 
@@ -64,6 +69,56 @@ public class HomeTipsAlertDialog extends Dialog {
 
     }
 
+    void setTouch(boolean isfirst){
+        if (!isfirst){
+            findViewById(R.id.img_get).setOnTouchListener(null);
+            findViewById(R.id.cancel).setOnTouchListener(null);
+            return;
+        }
+        findViewById(R.id.img_get).setOnTouchListener(new View.OnTouchListener() { //不能用tou事件
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if (UserModel.isLogin()){
+                    loadGiftApi();
+                }
+                else{
+                    dismiss(); //去登录不消失
+                    isGoLogin = true;
+                    //去登录
+                    EventBus.getDefault().post(new ShowVueEvent(ShowVueEvent.PAGE_LOGIN, ""));
+//                    new GiftSuccessPopup(getContext()).showPopupWindow(); //测试领取成功
+                }
+                return true;
+            }
+        });
+
+        findViewById(R.id.cancel).setOnTouchListener(new View.OnTouchListener() { //不能用tou事件
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                dismiss();
+                EventBus.getDefault().post(new HideShowGiftCarButtonEvent(true));
+                return false;
+            }
+        });
+
+    }
+
+    @Override
+    public void show() {
+
+        setTouch(mJo == null);
+
+        if (!isShowing() && mJo != null){
+            loadData();
+        }
+    }
+//
+    public void myShow(){
+        if (!mHomeFragment.isVisible()) return;
+
+        super.show();
+    }
+
     void loadData(){
 
         NetUtil.getRequest(NetConfig.API_GiftImage, null, new NetUtil.OnResponse() {
@@ -78,6 +133,8 @@ public class HomeTipsAlertDialog extends Dialog {
     }
 
     void fillView(JSONObject jo) {
+        mJo = jo ;
+        myShow();
         ((TextView) findViewById(R.id.tv_gftCar_shortName)).setText(jo.getString("shortname"));
         ((TextView) findViewById(R.id.tv_gftCar_fullName)).setText(jo.getString("fullname"));
         ImageView logo = findViewById(R.id.img_gftLogo);
@@ -136,7 +193,7 @@ public class HomeTipsAlertDialog extends Dialog {
                     loadGiftApi();
                 }
                 else{
-                    hide(); //去登录不消失
+                    dismiss(); //去登录不消失
                     isGoLogin = true;
                     //去登录
                     EventBus.getDefault().post(new ShowVueEvent(ShowVueEvent.PAGE_LOGIN, ""));
@@ -144,9 +201,22 @@ public class HomeTipsAlertDialog extends Dialog {
                 }
             }
         });
-        findViewById(R.id.cancel).setOnClickListener(v -> {
-            dismiss();
-            EventBus.getDefault().post(new HideShowGiftCarButtonEvent(true));
+
+//        gifImage.setOnTouchListener(new View.OnTouchListener() {
+//            @Override
+//            public boolean onTouch(View view, MotionEvent motionEvent) {
+//
+//                return true;
+//            }
+//        });
+
+
+        findViewById(R.id.cancel).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dismiss();
+                EventBus.getDefault().post(new HideShowGiftCarButtonEvent(true));
+            }
         });
     }
 }

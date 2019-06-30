@@ -1,5 +1,6 @@
 package com.juejinchain.android;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -42,7 +43,7 @@ public class MainActivity extends SupportActivity implements IActivityHandler {
     private final String TAG = MainActivity.class.getSimpleName();
     public MainFragment mainFragment;
     ImageView launchImg;
-    private TTAdNative mTTAdNative;
+    public static TTAdNative mTTAdNative;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,6 +128,7 @@ public class MainActivity extends SupportActivity implements IActivityHandler {
 //
 //    }
 
+    @SuppressLint("WrongConstant")
     public void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         Log.d(TAG, "onNewIntent: ");
@@ -177,41 +179,6 @@ public class MainActivity extends SupportActivity implements IActivityHandler {
 //        // 设置横向(和安卓4.x动画相同)
 //        return new DefaultHorizontalAnimator();
 //    }
-
-
-    //加载穿山甲信息流广告
-    void loadListAd(){
-        //feed广告请求类型参数
-        AdSlot adSlot = new AdSlot.Builder()
-                .setCodeId("920793469")
-                .setSupportDeepLink(true)
-                .setImageAcceptedSize(640, 320)
-                .setAdCount(3)
-                .build();
-
-        //调用feed广告异步请求接口
-        mTTAdNative.loadFeedAd(adSlot, new TTAdNative.FeedAdListener() {
-            @Override
-            public void onError(int code, String message) {
-                TToast.show(getContext(), "穿山甲异常："+message);
-            }
-
-            @Override
-            public void onFeedAdLoad(List<TTFeedAd> ads) {
-                if (ads == null || ads.isEmpty()) {
-                    TToast.show(getContext(), "on FeedAdLoaded: ad is null!");
-                    return;
-                }
-
-                Log.d(TAG, "onFeedAdLoad: "+ads);
-//                int count = mData.size();
-//                for (TTFeedAd ad : ads) {
-//                    int random = (int) (Math.random() * count);
-//                    mData.set(random, ad);
-//                }
-            }
-        });
-    }
 
 
     //解决vue视频播放全屏问题 implement IActivityHandler

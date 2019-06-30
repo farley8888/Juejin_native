@@ -47,6 +47,7 @@ import com.juejinchain.android.ui.dialog.ShareDialog;
 import com.juejinchain.android.ui.ppw.ReplyCommentPopup;
 import com.juejinchain.android.ui.ppw.TimeRewardPopup;
 import com.juejinchain.android.ui.view.DividerDecoration;
+import com.juejinchain.android.util.SPUtils;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -132,13 +133,19 @@ public class VideoDetailFragment extends BaseBackFragment {
 
     //请求奖励接口
     private void questReadRewardApi(){
+        if (SPUtils.getInstance().getBoolean("KVhasReward"+model.id)){
+            L.d(TAG, "questReadRewardApi: 此视频已经奖励了 ="+model.title);
+            return;
+        }
         Map<String, String> param = new HashMap<>();
-        param.put("aid", model.id);
+        param.put("aid", model.id);  //看过的不给奖励
+//        param.put("vid", model.id);
         param.put("type", "video");
         NetUtil.postRequest(NetConfig.API_NewsReading, param, new NetUtil.OnResponse() {
             @Override
             public void onResponse(JSONObject response) {
                 if (NetUtil.isSuccess(response)){
+                    SPUtils.getInstance().put("KVhasReward"+model.id , true);
                     JSONObject jo = response.getJSONObject("data");
                     TimeRewardPopup popup = new TimeRewardPopup(getContext(), TimeRewardPopup.TYPE_VIDEO);
                     popup.setView(jo);
@@ -549,11 +556,23 @@ public class VideoDetailFragment extends BaseBackFragment {
 
 
     public boolean onBackPressedSupport() {
-        Log.d(TAG, "onBackPressedSupport: ");
+        if (Jzvd.CURRENT_JZVD != null && Jzvd.CURRENT_JZVD.state == Jzvd.STATE_PLAYING){
+            if (Jzvd.CURRENT_JZVD.screen == Jzvd.SCREEN_FULLSCREEN){
+                Jzvd.backPress();
+                showHomeFragment();
+                return true;
+            }
+            else{
+                Jzvd.resetAllVideos();
+            }
+        }
+        return super.onBackPressedSupport();
+    }
+
+    void showHomeFragment(){
         MainFragment mainFragment = (MainFragment) getPreFragment();
         showHideFragment(mainFragment);
         mainFragment.showHomeFragment();
-        return super.onBackPressedSupport();
     }
 
 

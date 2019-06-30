@@ -118,6 +118,7 @@
         android:orientation="horizontal">
 
         <TextView
+            android:layout_marginRight="5dp"
             android:id="@+id/tv_hot"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -127,10 +128,10 @@
             android:visibility="visible" />
 
         <TextView
+            android:layout_marginRight="5dp"
             android:id="@+id/tv_from"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="5dp"
             android:text="来源"
             android:textColor="@color/text_666666"
             android:textSize="12sp" />
@@ -138,7 +139,6 @@
             android:id="@+id/tv_readTimes"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="5dp"
             android:text="阅读 10W"
             android:textColor="@color/text_666666"
             android:textSize="12sp" />
@@ -154,9 +154,9 @@
 
     </LinearLayout>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="0.2dp"
-        android:background="#DBDBDB"/>
+    <!--<View-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="0.2dp"-->
+        <!--android:background="#DBDBDB"/>-->
 
 </LinearLayout>

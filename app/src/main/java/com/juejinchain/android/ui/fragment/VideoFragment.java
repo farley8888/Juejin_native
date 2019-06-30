@@ -31,14 +31,13 @@ import okhttp3.Call;
 
 /**
  * 视频主fragment
- *
  */
 public class VideoFragment extends SupportFragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private ViewPager mViewPager;
     private PagerSlidingTabStrip mTabs;
-//    public VideoCategoryModel currCategory;
+    //    public VideoCategoryModel currCategory;
     private String TAG = VideoFragment.class.getSimpleName();
 
     public List<VideoCategoryModel> mCategoryList = new ArrayList<>();
@@ -83,13 +82,51 @@ public class VideoFragment extends SupportFragment {
         mTabs = view.findViewById(R.id.tabs_video);
         mViewPager = view.findViewById(R.id.viewPager_video);
         // 设置最大缩放,是正常状态的0.3倍
-        mTabs.setZoomMax(0.1F);
-//设置Tab文字的左右间距,传入的是dp
+//        mTabs.setZoomMax(0.1F);
+        setTabStyle();
+        //设置Tab文字的左右间距,传入的是dp
         mTabs.setTabPaddingLeftRight(15);
         loadCategory();
     }
 
-    private void loadCategory(){
+    private void setTabStyle() {
+        // 设置Tab是自动填充满屏幕的，true不扩展填充！！
+//        mTabs.setShouldExpand(true);
+
+        // 设置Tab的分割线的颜色
+        mTabs.setDividerColor(getResources().getColor(R.color.colorTranslucent));
+        // 设置分割线的上下的间距,传入的是dp
+        mTabs.setDividerPaddingTopBottom(10);
+
+        // 设置Tab底部线的高度,传入的是dp
+        mTabs.setUnderlineHeight(0);
+        //设置Tab底部线的颜色
+//        mTabs.setUnderlineColor(getResources().getColor(R.color.color_1A000000));
+
+        // 设置Tab 指示器Indicator的高度,传入的是dp
+        mTabs.setIndicatorHeight(0);
+        // 设置Tab Indicator的颜色
+//        mTabs.setIndicatorColor(getResources().getColor(R.color.color_45c01a));
+
+        // 设置Tab标题文字的大小,传入的是dp
+        mTabs.setTextSize(13);
+        // 设置选中Tab文字的颜色
+        mTabs.setSelectedTextColor(getResources().getColor(R.color.white));
+        //设置正常Tab文字的颜色
+//        mTabs.setTextColor(getResources().getColor(R.color.black));
+
+        mTabs.setTabBackground(R.drawable.bg_video_tab);
+
+
+        //是否支持动画渐变(颜色渐变和文字大小渐变)
+        mTabs.setFadeEnabled(false);
+        // 设置最大缩放,是正常状态的0.3倍
+        mTabs.setZoomMax(0F);
+        //设置Tab文字的左右间距,传入的是dp
+        mTabs.setTabPaddingLeftRight(20);
+    }
+
+    private void loadCategory() {
 
         String url = NetConfig.getUrlByAPI(NetConfig.API_VideoTypeList);
         OkHttpUtils.getAsyn(url, new JSONCallback() {
@@ -100,7 +137,7 @@ public class VideoFragment extends SupportFragment {
 
             @Override
             public void onResponse(JSONObject response) {
-                if (NetUtil.isSuccess(response)){
+                if (NetUtil.isSuccess(response)) {
                     mCategoryList = JSON.parseArray(response.getString("data"), VideoCategoryModel.class);
 //                    Log.d("hhhh", "onResponse: "+mChannelList.get(0).getName());
                     setTabsAndPage();
@@ -109,9 +146,13 @@ public class VideoFragment extends SupportFragment {
         });
     }
 
-    void setTabsAndPage(){
+    void setTabsAndPage() {
 
         mViewPager.setAdapter(new VideoPagerFragmentAdapter(getChildFragmentManager(), mCategoryList));
+
+        //重写了adapter的destroyItem, 就不要设置了，否则后面的可能加载不出来
+//        mViewPager.setOffscreenPageLimit(2);
+
         mTabs.setViewPager(mViewPager);
 //        setTabsValue();
     }
@@ -122,6 +163,7 @@ public class VideoFragment extends SupportFragment {
             mListener.onFragmentInteraction(uri);
         }
     }
+
     public boolean onBackPressedSupport() {
         if (Jzvd.backPress()) {
 //            return;

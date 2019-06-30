@@ -22,6 +22,7 @@ import com.juejinchain.android.tools.L;
 import com.juejinchain.android.ui.fragment.MainFragment;
 import com.juejinchain.android.util.Constant;
 import com.juejinchain.android.util.SPUtils;
+import com.juejinchain.android.util.StringUtils;
 
 import org.greenrobot.eventbus.EventBus;
 import org.json.JSONArray;
@@ -287,6 +288,7 @@ public class MyPlugin extends StandardFeature {
         }else{
             mainFrag.changeBottomTabBar(true);
         }
+        delayCheckHomeIsVisible(pWebview, to);
     }
 
     public void vueGoNext(IWebview pWebview, JSONArray array){
@@ -305,8 +307,9 @@ public class MyPlugin extends StandardFeature {
 
         if (CurrVuePage.equals("登录")){ //如果跳到登录页面，说明vue登录失效了
             UserModel.cleanData();
-            mainFragment.mAdsHolderView.setVisibility(View.GONE);
+            mainFragment.mAdCarView.setVisibility(View.GONE);
         }
+        delayCheckHomeIsVisible(pWebview, CurrVuePage);
     }
 
     public void vueGoBack(IWebview pWebview, JSONArray array){
@@ -330,6 +333,8 @@ public class MyPlugin extends StandardFeature {
             //如果通过首页或视频详情等native跳转过来的，则不用执行显示vue的任务页面
             if (to.equals(VP_TASK) && !mainFrag.showVuePageFromNative){  //!from.equals(ShowVueEvent.PAGE_LOCK_FAN)
                 mainFrag.mBottomBarTask.performClick();
+            }else if (to.equals(VP_MakeMoney)){
+                mainFrag.mBottomBar.getItem(MainFragment.Make_Money).performClick();
             }
 
             mainFrag.changeBottomTabBar(true);
@@ -338,6 +343,27 @@ public class MyPlugin extends StandardFeature {
 //            L.d(TAG, "vueGoBack: showNativeFragment");
             showNativeFragment(pWebview);
         }
+    }
+
+    /**
+     * 有时vue未切换成功，就显示tabBar。（部分手机切换操作过快时会导致）
+     * 目前只能通过延时处理，因为调用切换方法已经成功回调了，只是页面没切换成功
+     * @param pWebview
+     */
+    private void delayCheckHomeIsVisible(IWebview pWebview, String toVue){
+        if ("home".equals(toVue)) return;
+
+        MainFragment mainFrag = ((MainActivity) pWebview.getActivity()).mainFragment;
+        mainFrag.mBottomBar.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (mainFrag.homeFragment.isVisible()){
+                    L.w(TAG, "delayCheckHomeIsVisible:切换到："+toVue);
+                    L.w(TAG, "delayCheckHomeIsVisible: home还在显示");
+                    mainFrag.changeBottomTabBar(true);
+                }
+            }
+        }, 1000);
     }
 
     //登出

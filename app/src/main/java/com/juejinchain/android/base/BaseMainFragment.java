@@ -15,6 +15,8 @@ public abstract class BaseMainFragment extends SupportFragment {
     private static final long WAIT_TIME = 2000L;
     private long TOUCH_TIME = 0;
 
+    protected boolean isFirst;
+
     /**
      * 处理回退事件
      *

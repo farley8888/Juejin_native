@@ -123,7 +123,7 @@ public class SearchFragment extends BaseBackFragment implements View.OnClickList
     private boolean iffilter=false;
     private SearchingPopup mLoading;
     private HomePagerAdapter adapter;
-    ImageButton mCleanButton;
+    ImageView mCleanButton;
 
     @Nullable
     @Override

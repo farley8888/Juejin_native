@@ -78,7 +78,7 @@ public class TimeUtils {
      * @return
      */
     public static String getTimeLine(Date date){
-        long now = new Date().getTime()/1000;
+        long now = new Date().getTime();
         long da1 = date.getTime();
 //        System.out.println("now="+now + ", da1="+da1);
         String timeline = "";

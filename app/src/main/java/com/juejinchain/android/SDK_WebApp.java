@@ -1,7 +1,6 @@
 package com.juejinchain.android;
 
 import io.dcloud.EntryProxy;
-import io.dcloud.RInformation;
 import io.dcloud.common.DHInterface.IApp;
 import io.dcloud.common.DHInterface.IApp.IAppStatusListener;
 import io.dcloud.common.DHInterface.ICore;
@@ -22,6 +21,8 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -31,10 +32,8 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.FrameLayout;
 
-import com.alibaba.fastjson.JSONObject;
 import com.juejinchain.android.H5Plugin.MyPlugin;
 import com.juejinchain.android.tools.L;
-import com.juejinchain.android.ui.fragment.MainFragment;
 
 import org.json.JSONArray;
 
@@ -163,46 +162,41 @@ class WebappModeListener implements ICoreStatusListener, IOnCreateSplashView {
 	ViewGroup rootView;
 	IApp app = null;
 	ProgressDialog pd = null;
-	String name =null;
+//	String name =null;
 	IWebview iWebview;
-	boolean switchOK ; //是否切换完成
-	int switchTimes;
+
+//	boolean switchOK ; //是否切换完成
+//	int switchTimes;
+	private String mCurrPage;
+	private String mWaitPage;  //未完成启动要跳转的页面
+
 
 	public WebappModeListener(Activity activity, ViewGroup rootView, String name) {
 		this.activity = activity;
 		this.rootView = rootView;
-		this.name = name;
+//		this.name = name;
 	}
 
 	public void switchPage(final String page, @Nullable ReceiveJSValue.ReceiveJSValueCallback jsCallback){
 //        iWebview.evalJS("nativeJump('"+page+"')");
 		L.d(TAG, "switchPage: "+page);
+		mCurrPage = page;
+
 		if (!vueLaunchFinish){
+			mWaitPage = page;
 			L.w(TAG, "switchPage: vue还未启动完");
 			return;
 		}
+
 		iWebview.evalJS("nativeJump('"+page+"')", new ReceiveJSValue.ReceiveJSValueCallback() {
 			@Override
 			public String callback(JSONArray jsonArray) {
 				L.d(TAG, "SwitchPage.callback: = "+jsonArray);
-				switchOK = true;
+//				switchOK = true;
 				if(jsCallback != null) jsCallback.callback(jsonArray);
 				return "{}";
 			}
 		});
-
-//		rootView.postDelayed(new Runnable() {
-//			@Override
-//			public void run() {
-//				if (!switchOK && switchTimes<2){
-//					switchTimes++;
-//					switchPage(page);
-//				}else{
-//					switchOK = false;
-//					switchTimes = 0;
-//				}
-//			}
-//		}, 1500);
 	}
 
 	/**
@@ -284,7 +278,7 @@ class WebappModeListener implements ICoreStatusListener, IOnCreateSplashView {
 	 * */
 	@Override
 	public void onCoreInitEnd(ICore coreHandler) {
-		L.d("webAppListener."+name, "onCoreInitEnd: ");
+//		L.d("webAppListener."+name, "onCoreInitEnd: ");
 		// 表示Webapp的路径在 file:///android_asset/apps/HelloH5
 //		String appBasePath = "/apps/HelloH5";
 		String appBasePath = "/apps/juejin";
@@ -306,7 +300,7 @@ class WebappModeListener implements ICoreStatusListener, IOnCreateSplashView {
 						View view = iWebview.obtainApp().obtainWebAppRootView().obtainMainView();
 						view.setVisibility(View.INVISIBLE);
 
-						L.d("webAppListener."+name, "ON_WEBVIEW_READY: ");
+//						L.d("webAppListener."+name, "ON_WEBVIEW_READY: ");
 						if(view.getParent() != null){
 							((ViewGroup)view.getParent()).removeView(view);
 						}
@@ -324,9 +318,11 @@ class WebappModeListener implements ICoreStatusListener, IOnCreateSplashView {
 						break;
 					case IWebviewStateListener.ON_PAGE_FINISHED:
 						// WebApp首页面加载完成事件
-//					iWebview.evalJS("nativeJump('"+name+"')");
 						vueLaunchFinish = true;
-						L.d("webAppListener."+name, "ON_PAGE_FINISHED: ");
+						if (mWaitPage != null && mWaitPage == mCurrPage){
+							switchPage(mWaitPage, null);
+						}
+//						L.d("webAppListener."+name, "ON_PAGE_FINISHED: ");
 						if (pd != null) {
 							pd.dismiss();
 							pd = null;
@@ -398,7 +394,7 @@ class WebappModeListener implements ICoreStatusListener, IOnCreateSplashView {
 	@Override
 	public Object onCreateSplash(Context pContextWrapper) {
 		splashView = new FrameLayout(activity);
-		splashView.setBackgroundResource(R.drawable.splash);
+//		splashView.setBackgroundResource(R.drawable.splash);
 		rootView.addView(splashView);
 		return null;
 	}

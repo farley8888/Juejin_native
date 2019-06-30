@@ -48,11 +48,9 @@ public class WebAppFragment extends BaseMainFragment {
     private String TAG = WebAppFragment.class.getSimpleName();
 
     public static WebAppFragment mFragment;
-    public String currPage ;
+//    public String currPage ;
     private WebappModeListener webModeListener;
 
-//    private WebAppFragment(){
-//    }
 
     public static WebAppFragment instance(String name){
         if (mFragment == null)  mFragment = new WebAppFragment();
@@ -60,7 +58,8 @@ public class WebAppFragment extends BaseMainFragment {
         Bundle args = new Bundle();
         args.putString(FNAME, name);
         mFragment.setArguments(args);
-        mFragment.currPage = name;
+
+//        mFragment.currPage = name;
         return mFragment;
     }
 
@@ -96,7 +95,7 @@ public class WebAppFragment extends BaseMainFragment {
             createVue(savedInstanceState);
         }else {
             // 创建5+内核运行事件监听
-            webModeListener = new WebappModeListener((Activity) context, webFrame, currPage);
+            webModeListener = new WebappModeListener((Activity) context, webFrame, "");
             // 初始化5+内核
             mEntryProxy = new MyEntryProxy().init((Activity) context, webModeListener);
             // 启动5+内核
@@ -126,7 +125,6 @@ public class WebAppFragment extends BaseMainFragment {
             BaseInfo.mDeStatusBarBackground =  ((Activity) context).getWindow().getStatusBarColor();
         }
         mEntryProxy.onResume((Activity) context);
-        showPage(currPage, null);
 
     }
 

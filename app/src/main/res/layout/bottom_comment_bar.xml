@@ -43,7 +43,7 @@
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:background="@color/default_bg"
-        android:src="@drawable/nav_share_icon"
+        android:src="@drawable/share_detail_icon"
         android:layout_marginLeft="5dp"
         android:textSize="15sp"
         />

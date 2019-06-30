@@ -6,7 +6,7 @@
     android:layout_width="250dp"
     android:layout_height="wrap_content"
     android:gravity="center_horizontal"
-    android:layout_gravity="center_horizontal"
+    android:layout_gravity="center"
     android:background="@drawable/shape_white_radius"
     android:orientation="vertical">
 

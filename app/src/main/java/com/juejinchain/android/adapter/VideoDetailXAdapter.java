@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -58,13 +59,16 @@ public class VideoDetailXAdapter extends XRecyclerViewAdapter<Object> {
         if (position == 0){
             VideoModel model = (VideoModel) data;
             findTv(v, R.id.tv_vdoTitle).setText(model.title);
-            findTv(v, R.id.tv_vdoAbstract).setText(model.abstract2);
+            findTv(v, R.id.tv_from).setText(model.author);
             findTv(v, R.id.button1).setText(model.comment_count+"");
             findTv(v, R.id.tv_vdoPlayTimes).setText(model.getPlayTimesStr());
 
             TextView zan = findTv(v, R.id.buttonZan);
             zan.setText(model.video_like_count+"");
             zan.setEnabled(!model.is_fabulous);
+
+            ImageView img_author = v.findViewById(R.id.img_author);
+            Glide.with(getContext()).load(model.author_logo).into(img_author);
 
             zan.setOnClickListener(listener);
             findTv(v, R.id.button1).setOnClickListener(listener);

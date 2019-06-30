@@ -1,6 +1,8 @@
 package com.juejinchain.android.ui.fragment;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -40,7 +42,7 @@ import com.juejinchain.android.tools.L;
 import com.juejinchain.android.ui.alerter.Alerter;
 import com.juejinchain.android.ui.dialog.BackExitDialog;
 import com.juejinchain.android.ui.ppw.HomeBottomTipsPopupWindow;
-import com.juejinchain.android.ui.view.AdsHolderView;
+import com.juejinchain.android.ui.view.AdCarHolderView;
 import com.juejinchain.android.ui.view.BottomBar;
 import com.juejinchain.android.ui.view.BottomBarTab;
 import com.juejinchain.android.util.Constant;
@@ -50,8 +52,10 @@ import com.juejinchain.android.util.StringUtils;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import java.util.Calendar;
 import java.util.List;
 
+import cn.jzvd.Jzvd;
 import io.dcloud.common.adapter.ui.ReceiveJSValue;
 import me.yokeyword.fragmentation.SupportFragment;
 
@@ -79,7 +83,7 @@ public class MainFragment extends BaseMainFragment {
     /**
      * 登录并没领取大礼包显示
      */
-    public AdsHolderView mAdsHolderView;
+    public AdCarHolderView mAdCarView;
     private BottomBarTab mBottomBarMovie;
     private ImageView mBottomLineImg;
     private FrameLayout mFrameLayout;
@@ -92,15 +96,24 @@ public class MainFragment extends BaseMainFragment {
      * 即子页fragment 要调用mainFragment加载的vueFragment
      */
     public BaseBackFragment nextFragment;
+    public HomeFragment homeFragment;
     public WebAppFragment webAppFragment;
+
     public BottomBarTab mBottomBarTask;
     private BottomBarTab mBottomBarMine;
 
     public HomeBottomTipsPopupWindow mBottomPopupWindow;
     Alerter mUnreadAlerter; //未读信息提示
     private BackExitDialog mBackDialog;
-    private int currShowPosition; //当前显示的
     private List<UnreadModel> unreadModels;
+    private ShowTabPopupWindowEvent showTabPopupEvent;
+
+    public static final int MIN_CLICK_DELAY_TIME = 1500;
+    private long lastClickTime = 0;
+    private boolean mSwitchOK = true;
+
+    private int mCurrPosition; //当前显示的
+    private int mPrePosition;
 
     public static MainFragment newInstance() {
 
@@ -138,12 +151,13 @@ public class MainFragment extends BaseMainFragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         //DiscoverFragment
-        HomeFragment firstFragment = findChildFragment(HomeFragment.class);
+        homeFragment = findChildFragment(HomeFragment.class);
 
-        if (firstFragment == null) {
+        if (homeFragment == null) {
 
 //            mFragments[HOME] = new DiscoverFragment();
-            mFragments[HOME] = HomeFragment.newInstance();
+            homeFragment = HomeFragment.newInstance();
+            mFragments[HOME] = homeFragment;
 
             /*
              * WebViewFragment 不能同时加两个，
@@ -164,7 +178,7 @@ public class MainFragment extends BaseMainFragment {
             // 这里库已经做了Fragment恢复,所有不需要额外的处理了, 不会出现重叠问题
 
             // 这里我们需要拿到mFragments的引用
-            mFragments[HOME] = firstFragment;
+            mFragments[HOME] = homeFragment;
 
             mFragments[VIDEO] = findChildFragment(WebAppFragment.class);
 
@@ -189,8 +203,56 @@ public class MainFragment extends BaseMainFragment {
         transaction.commitNow();
     }
 
+    //执行切换
+    private void doSwitchTab(int position, int prePosition){
+        if (position > 0){
+            if (vuePages == null){
+                vuePages = new String[]{MyPlugin.VP_MOVIE, MyPlugin.VP_MakeMoney, MyPlugin.VP_TASK, MyPlugin.VP_MINE};
+            }
+            WebAppFragment webFragmentVue = (WebAppFragment) mFragments[position];
+            // vue内部切换处理
+            webFragmentVue.showPage(vuePages[position - 1], new ReceiveJSValue.ReceiveJSValueCallback() {
+                @Override
+                public String callback(org.json.JSONArray jsonArray) {
+                    if (UserModel.isLogin()){
+                        if (mCurrPosition == TASK && mBottomBarTask.isShowUnreadDot()){
+                            mBottomBarTask.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mBottomBarTask.showUnreadDot(false);
+                                }
+                            }, 500);
+                        }else if (mCurrPosition == MINE && mBottomBarMine.isShowUnreadDot()){
+                            mBottomBarMine.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    requestUnreadHintEvent(null);
+                                }
+                            }, 2000);
+                        }
+                    }
+                    return null;
+                }
+            });
+        }
+
+        if (prePosition == 0){
+            //从首页native切换到vue时加个延时, 太早切换显示会有个白屏的过程
+            mBottomBar.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    showHideFragment(mFragments[position], mFragments[prePosition]);
+                }
+            }, 300);
+        }else if (position == 0){
+            //从vue切回首页native
+            showHideFragment(mFragments[position], mFragments[prePosition]);
+        }
+    }
+
+
     private void initView(View view) {
-        mAdsHolderView = view.findViewById(R.id.adsView);
+        mAdCarView = view.findViewById(R.id.adsView);
         mBottomLineImg = view.findViewById(R.id.img_bottomLine);
         mFrameLayout = view.findViewById(R.id.fl_tab_container);
 
@@ -206,6 +268,8 @@ public class MainFragment extends BaseMainFragment {
                 .addItem(new BottomBarTab(_mActivity, R.drawable.ic_car_and_money, null))
                 .addItem(mBottomBarTask)
                 .addItem(mBottomBarMine);
+//        mBottomBar.updateItem(mBottomBarTask,0);
+
 
         // 模拟未读消息，提示点
 //        mBottomBarMine.setUnreadCount(3);
@@ -214,51 +278,21 @@ public class MainFragment extends BaseMainFragment {
 
             @Override
             public void onTabSelected(int position, int prePosition) {
-                currShowPosition = position;
 
-                if (position > 0){
-                    if (vuePages == null){
-                        vuePages = new String[]{MyPlugin.VP_MOVIE, MyPlugin.VP_MakeMoney, MyPlugin.VP_TASK, MyPlugin.VP_MINE};
+                mCurrPosition = position;
+                mPrePosition = prePosition;
+                if (!mSwitchOK){
+                    return;
+                }
+                mSwitchOK = false;
+
+                mBottomBar.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mSwitchOK = true;
+                        doSwitchTab(mCurrPosition, mPrePosition); //延时切换，否则快速点击会有问题
                     }
-                    WebAppFragment webFragmentVue = (WebAppFragment) mFragments[position];
-                    // vue内部切换处理
-                    webFragmentVue.showPage(vuePages[position - 1], new ReceiveJSValue.ReceiveJSValueCallback() {
-                        @Override
-                        public String callback(org.json.JSONArray jsonArray) {
-                            if (UserModel.isLogin()){
-                                if (currShowPosition == TASK && mBottomBarTask.isShowUnreadDot()){
-                                    mBottomBarTask.postDelayed(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            mBottomBarTask.showUnreadDot(false);
-                                        }
-                                    }, 500);
-                                }else if (currShowPosition == MINE && mBottomBarMine.isShowUnreadDot()){
-                                    mBottomBarMine.postDelayed(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            requestUnreadHintEvent(null);
-                                        }
-                                    }, 2000);
-                                }
-                            }
-                            return null;
-                        }
-                    });
-                }
-
-                if (prePosition == 0){
-                    //从首页native切换到vue时加个延时, 太早切换显示会有个白屏的过程
-                    mBottomBar.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            showHideFragment(mFragments[position], mFragments[prePosition]);
-                        }
-                    }, 300);
-                }else if (position == 0){
-                    //从vue切回首页native
-                    showHideFragment(mFragments[position], mFragments[prePosition]);
-                }
+                }, 200);
 
 
 //                fragmentManager = getActivity().getSupportFragmentManager();
@@ -287,11 +321,22 @@ public class MainFragment extends BaseMainFragment {
             @Override
             public void onTabReselected(int position) {
                 L.d("baseMainFrg", "onTabReselected: "+position);
-                if (position == 0){
-                    HomeFragment homeFragment = (HomeFragment) mFragments[0];
+                if (position == HOME){
+
+                    long currentTime = Calendar.getInstance().getTimeInMillis();
+                    Log.i("zzz", "onTabReselected: " + (currentTime - lastClickTime));
+                    if (currentTime - lastClickTime > MIN_CLICK_DELAY_TIME) {
+                        lastClickTime = currentTime;
+                        HomeFragment homeFragment = (HomeFragment) mFragments[0];
 //                    Log.d(TAG, "onTabReselected: "+ homeFragment.currFragment);
-                    if (homeFragment.currChannel == null) return;
-                    EventBusActivityScope.getDefault(_mActivity).post(new TabSelectedEvent(position,homeFragment.currChannel.getName() ));
+                        if (homeFragment.currChannel == null) return;
+                        EventBusActivityScope.getDefault(_mActivity).post(new TabSelectedEvent(position,homeFragment.currChannel.getName() ));
+                        mBottomBar.getItem(0).showLoadingByPos(R.drawable.refresh, 0);
+                    }else {
+                        Log.w(TAG,"点击过快");
+                    }
+                }else if (position == TASK){
+                    if (UserModel.isLogin()) mBottomBarTask.showUnreadDot(false);
                 }
 
                 // 在FirstPagerFragment,FirstHomeFragment中接收, 因为是嵌套的Fragment
@@ -326,12 +371,12 @@ public class MainFragment extends BaseMainFragment {
                     List<UnreadModel> temp = JSON.parseArray(array.toJSONString(), UnreadModel.class);
                     //只弹框显示一次
                     if (unreadModels == null && temp.size() > 0){
-                        if (currShowPosition == 0){
+                        if (mCurrPosition == 0){
                             unreadModels = temp;
                             showUnreadAlert(unreadModels);
                         }
                     }
-                    mBottomBarMine.showUnreadDot(unreadModels != null && unreadModels.size()>0);
+                    mBottomBarMine.showUnreadDot(temp != null && temp.size()>0);
                 }
 
             }
@@ -352,6 +397,7 @@ public class MainFragment extends BaseMainFragment {
                     public void onClick(View view) {
                         Alerter.hide();
                         showVue(ShowVueEvent.PAGE_MESSAGE_LIST, "");
+                        mBottomBarMine.showUnreadDot(false);
                     }
                 }).setDuration(3000).show();
         mUnreadAlerter.enableSwipeToDismiss();
@@ -372,7 +418,7 @@ public class MainFragment extends BaseMainFragment {
      */
     public void showVue(String page, String params){
         showVuePageFromNative = true;
-//        currShowPosition = 1; 这个会影响 reselected，从文章详情回来后
+//        mCurrPosition = 1; 这个会影响 reselected，从文章详情回来后
 
         WebAppFragment webVueFragment = (WebAppFragment) mFragments[1];
 
@@ -386,7 +432,7 @@ public class MainFragment extends BaseMainFragment {
     public void showHomeFragment(){
         showVuePageFromNative = false;
         showHideFragment(mFragments[0], mFragments[1]); //这样按钮状态未能修改
-        if (currShowPosition != 0)mBottomBar.getItem(0).performClick();
+        if (mCurrPosition != 0)mBottomBar.getItem(0).performClick();
         changeBottomTabBar(true);
 
     }
@@ -445,9 +491,9 @@ public class MainFragment extends BaseMainFragment {
 
     private void changeBottomPopup(boolean isShow) {
         if (isShow){
-            if(mBottomPopupWindow != null) onBottomTabPopShowEvent(null);
+            if(mBottomPopupWindow != null && showTabPopupEvent!= null) onBottomTabPopShowEvent(showTabPopupEvent);
         }else {
-            if(mBottomPopupWindow != null && mBottomPopupWindow.isShowing()){
+            if(mBottomPopupWindow != null ){
                 mBottomPopupWindow.dismiss();
             }
         }
@@ -456,10 +502,17 @@ public class MainFragment extends BaseMainFragment {
     @Override
     public boolean onBackPressedSupport() {
 //        L.d(TAG, "onBackPressedSupport: ");
-        if (currShowPosition != 0){
+        if (mCurrPosition != 0){
             showHomeFragment();
         }else{
-            showExitDialog();
+            if (Jzvd.CURRENT_JZVD != null && Jzvd.CURRENT_JZVD.state == Jzvd.STATE_PLAYING){
+                if (Jzvd.CURRENT_JZVD.screen == Jzvd.SCREEN_FULLSCREEN)
+                    Jzvd.backPress();
+                else{
+                    Jzvd.resetAllVideos();
+                }
+            }else
+                showExitDialog();
         }
 //        return super.onBackPressedSupport(); 此行再按一次退出
         return true;
@@ -513,7 +566,7 @@ public class MainFragment extends BaseMainFragment {
 
     @Subscribe()
     public void hideShowAdsEvent(HideShowGiftCarButtonEvent event){
-        mAdsHolderView.setVisibility(event.isShow?View.VISIBLE: View.GONE);
+        mAdCarView.setVisibility(event.isShow?View.VISIBLE: View.GONE);
     }
 
     @Subscribe()
@@ -525,7 +578,12 @@ public class MainFragment extends BaseMainFragment {
 
     @Subscribe()
     public void onBottomTabPopShowEvent(ShowTabPopupWindowEvent event){
-
+        showTabPopupEvent = event;
+        //非首页只提示点，不显示popup
+        if (mCurrPosition != HOME){
+            mBottomBarTask.showUnreadDot(true);
+            return;
+        }
         int[] location = new int[2];
         int position = 2;
         int delta = position == 1 ? 35 : 25;

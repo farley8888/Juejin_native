@@ -11,7 +11,8 @@
     <FrameLayout
         android:id="@+id/flAlertBackground"
         style="@style/AlertStyle"
-        android:background="#95000000"
+        android:background="#85000000"
+
         android:clickable="true"
         android:foreground="?attr/selectableItemBackground"
         tools:visibility="visible">

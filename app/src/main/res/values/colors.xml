@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="colorTranslucent">#00000000</color>
     <color name="colorPrimaryDark">#D32F2F</color>
     <!-- tab文字色 -->
     <color name="colorPrimary">#FFAA00</color>
@@ -7,10 +8,16 @@
     <color name="colorAccent">#FFAA00</color>
     <!-- tab未选中色 -->
     <color name="tab_unselect">#c9c9c9</color>
+    <!--listView分割线-->
+    <color name="list_div_color">#DBDBDB</color>
 
     <color name="tab_selected_color">#666666</color>
 
+    <!--广告item title color-->
+    <color name="ad_title_color">#2B2B2B</color>
+
     <color name="bg_app">#F1F1F1</color>
+    <color name="bg_popup">#99666666</color>
     <color name="video_tabText">#666666</color>
 
     <color name="bg_yellow">#FFAA00</color>
@@ -41,5 +48,9 @@
     <color name="gift_txtColor">#F6A00A</color>
 
     <color name="ccc">#ccc</color>
+
+    <color name="line_color">#DBDBDB</color>
+
+
 
 </resources>

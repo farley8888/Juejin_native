@@ -14,7 +14,7 @@
     </style>
 
     <style name="AppTheme.Splash" parent="AppTheme">
-        <item name="android:windowBackground">@drawable/splash</item>
+        <item name="android:windowBackground">@drawable/splash_launch</item>
     </style>
 
     <style name="AlertTextAppearance">
@@ -90,5 +90,10 @@
         <item name="android:background">@color/line_bg</item>
         <item name="android:layout_margin">2dp</item>
     </style>
-
+    <!--tab样式-->
+    <style name="Base.Widget.Design.TabLayout" parent="android:Widget">
+        <item name="tabBackground">@drawable/tab_background</item>
+        <item name="tabIndicatorColor">#ff00ff</item>
+        <item name="tabIndicatorHeight">2dp</item>
+    </style>
 </resources>

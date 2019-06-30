@@ -7,18 +7,20 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.dmcbig.mediapicker.utils.ScreenUtils;
+import com.example.H5PlusPlugin.FeedRecyclerActivity;
 import com.juejinchain.android.R;
 import com.juejinchain.android.adapter.HomePagerFragmentAdapter;
 import com.juejinchain.android.base.BaseMainFragment;
@@ -66,7 +68,7 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
 
 //    private Toolbar mToolbar;
     private ViewPager mViewPager;
-    private Button mAddBtn;
+    private ImageView mAddBtn;
     //可领取金币
     private TextView tvCoin;
     private PagerSlidingTabStrip mTabs;
@@ -82,7 +84,7 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
     private ImageButton mShareView;
     private CountDownTimer mCountDownTimer;
     private TextView tvCountTime;
-    private boolean mIsVisible;
+    public boolean mIsVisible;
     ShareDialog mShareDialog;
     //领取奖励
     private LinearLayout mLyLing;
@@ -93,6 +95,7 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
     private HomeTipsAlertDialog mHomeGiftDialog;
     private HomePagerFragmentAdapter mAdapter;
     public Fragment currFragment;
+    private MainFragment mMainFragment;
 
     public static HomeFragment newInstance() {
 
@@ -109,7 +112,8 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
         View view = inflater.inflate(R.layout.fragment_home, container, false);
         initView(view);
         EventBus.getDefault().register(this);
-        L.d(TAG, "onCreateView: ");
+        L.d(TAG, " onCreateView: ");
+        isFirst = true;
         return view;
     }
 
@@ -159,6 +163,12 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
 //                mLyLing.performClick();
 //            }
 //        });
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        mMainFragment = (MainFragment) getParentFragment();
     }
 
     private void setOnClickListener() {
@@ -214,21 +224,27 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
         mIsVisible = !hidden;
-//        Log.d(TAG, "onHiddenChanged: "+hidden); 从子fragment回来不触发
+//        L.d(TAG, "Home.onHiddenChanged: "+hidden); //从子fragment回来不触发
         if (hidden){
-            if (mPopupWindow != null && mPopupWindow.isShowing()) mPopupWindow.dismiss();
+            hidePopup();
             EventBus.getDefault().post(new HideShowGiftCarButtonEvent(false));
         }else{
             //返回vue的首页，即空白页
-            MainFragment mainFragment = (MainFragment) getParentFragment();
-            mainFragment.webAppFragment.callBackIndex(new CallVueBackIndexEvent());
+
+            mMainFragment.webAppFragment.callBackIndex(new CallVueBackIndexEvent());
 
             if(!UserModel.isLogin() || !UserModel.hasGetGiftBag()){
-                mainFragment.mAdsHolderView.setVisibility(View.VISIBLE);
+                mMainFragment.mAdCarView.setVisibility(View.VISIBLE);
             }else{
-                mainFragment.mAdsHolderView.setVisibility(View.GONE);
+                mMainFragment.mAdCarView.setVisibility(View.GONE);
             }
         }
+    }
+
+    private void hidePopup() {
+        if (mPopupWindow != null && mPopupWindow.isShowing()) mPopupWindow.dismiss();
+        MainFragment mainFragment = (MainFragment) getParentFragment();
+        if (mainFragment.mBottomPopupWindow != null) mainFragment.mBottomPopupWindow.dismiss();
     }
 
     @Override
@@ -247,17 +263,19 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
     public void reloginEvent(LoginEvent event){ //登录后
         hasShowGiftDialog = UserModel.hasGetGiftBag();
         EventBus.getDefault().post(new RequestUnreadApiEvent());
+        loadMessageHint();
         //未领取大礼包的，调用下接口
         if (!UserModel.hasGetGiftBag()){
 
         }
     }
 
-    //点击'领取宝马'按钮提示
+    //显示首页大礼包
     @Subscribe()
     public void showGiftDialogEvent(ShowGiftDialogEvent event){
+//        Log.d(TAG, "showGiftDialogEvent: ");
         if(mHomeGiftDialog == null){
-            mHomeGiftDialog = new HomeTipsAlertDialog(getContext());
+            mHomeGiftDialog = new HomeTipsAlertDialog(getContext(), this);
         }
         mHomeGiftDialog.show();
     }
@@ -266,13 +284,13 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
     public void showHomeGiftDialog(){
         if (hasShowGiftDialog) return;
         /**
-         * 显示情况
-         * 1、未登录每次进入显示
+         * 显示情况 显示一次
+         * 1、未登录每次进入
          * 2、登录用户未领取的
          */
         if (!UserModel.isLogin() || !UserModel.hasGetGiftBag()) {
-            showGiftDialogEvent(new ShowGiftDialogEvent());
             hasShowGiftDialog = true;
+            showGiftDialogEvent(new ShowGiftDialogEvent());
         }
     }
 
@@ -310,21 +328,25 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
             }
         }
 
-        if (mChannelList.size() ==0){
+        if (mChannelList.size() ==0 && !isFirst){
             loadChannel();
         }
+        isFirst = false;
 
-        if (mHomeGiftDialog != null && mHomeGiftDialog.isGoLogin){
-            mHomeGiftDialog.isGoLogin = false;
-            mHomeGiftDialog.show();
-        }else
-            showHomeGiftDialog();
+        if (mIsVisible){ //mMainFragment.mBottomBar.isVisible()
+            if (mHomeGiftDialog != null && mHomeGiftDialog.isGoLogin && !UserModel.hasGetGiftBag()){
+//                Log.d(TAG, "showGiftDialogEvent 22: ");
+                mHomeGiftDialog.isGoLogin = false;
+                mHomeGiftDialog.show();
+            }else
+                showHomeGiftDialog();
+        }
 
         loadLingTimeApi();
     }
 
 
-    //新用户调用，没签到的提示
+    //登录调用，没签到的提示
     void loadMessageHint(){
         NetUtil.getRequest(NetConfig.API_MessageHint, null, new NetUtil.OnResponse() {
             @Override
@@ -479,7 +501,7 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
                     if (tempList.size() == mChannelCacheList.size()){
                         for (int i = 0; i< tempList.size(); i++){
                             //如果ID不一样
-                            if (tempList.get(i).getId().equals(mChannelCacheList.get(i).getId())){
+                            if (tempList.get(i).getId() == (mChannelCacheList.get(i).getId())){
                                 needUpdate = true;
                                 break;
                             }
@@ -490,7 +512,7 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
 
                    if (needUpdate){
                        mChannelList = tempList;
-                       mChannelList.add(0, new ChannelModel("0", "推荐"));
+                       mChannelList.add(0, new ChannelModel(ChannelModel.ID_RECOMMEND, "推荐"));
                        SPUtils.getInstance().put(CHANNEL_CHCHE, JSON.toJSONString(mChannelList));
                    }else{
                        mChannelList = mChannelCacheList;
@@ -508,17 +530,20 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
 
     }
 
+
     void setTabsPage() {
-        mViewPager.removeAllViews();
-//        String[] array = new String[mChannelList.size()];
-//        for (int i = 0 ; i < mChannelList.size(); i++)
-//            array[i] = mChannelList.get(i).getName();
         L.d(TAG, "setTabsPage: ");
+//        mViewPager.removeAllViews();
+
         mAdapter = new HomePagerFragmentAdapter(getChildFragmentManager(), mChannelList);
         mViewPager.setAdapter(mAdapter);
+        //设置预加载数量，系统最小值为1
+        mViewPager.setOffscreenPageLimit(2);
+
         currChannel = mChannelList.get(0);
 
         mTabs.setViewPager(mViewPager);
+
         setTabsValue();
     }
 
@@ -531,12 +556,12 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
 //        mTabs.setShouldExpand(true);
 
         // 设置Tab的分割线的颜色
-//        mTabs.setDividerColor(getResources().getColor(R.color.color_80cbc4));
+        mTabs.setDividerColor(getResources().getColor(R.color.colorTranslucent));
         // 设置分割线的上下的间距,传入的是dp
         mTabs.setDividerPaddingTopBottom(10);
 
         // 设置Tab底部线的高度,传入的是dp
-        mTabs.setUnderlineHeight(1);
+        mTabs.setUnderlineHeight(0);
         //设置Tab底部线的颜色
 //        mTabs.setUnderlineColor(getResources().getColor(R.color.color_1A000000));
 
@@ -570,9 +595,10 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
                 startActivity(new Intent(getActivity(), CategoryExpandActivity.class));
                 break;
             case R.id.button2:  //搜索
-//                startActivity(new Intent(getActivity(), SearchFragment.class));
-                MainFragment mainFragment = (MainFragment) getParentFragment();
-                mainFragment.start(new SearchFragment());
+                startActivity(new Intent(getActivity(), FeedRecyclerActivity.class));
+//                MainFragment mainFragment = (MainFragment) getParentFragment();
+//                mainFragment.start(new SearchFragment());
+//                hidePopup();
                 break;
             case R.id.button4:  //分享
                 if (UserModel.isLogin()){
@@ -610,6 +636,7 @@ public class HomeFragment extends BaseMainFragment implements View.OnClickListen
 
     @Subscribe
     public void onChannelUpdate(UpdateChannelEvent event){
+        Log.d(TAG, "onChannelUpdate: ");
         String channelCacheData = SPUtils.getInstance().getString(CHANNEL_CHCHE);
         if(!TextUtils.isEmpty(channelCacheData)){
             mChannelList = JSON.parseArray(channelCacheData, ChannelModel.class);

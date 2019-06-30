@@ -5,13 +5,17 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.text.SpannableStringBuilder;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.androidquery.callback.AQuery2;
 import com.androidquery.callback.ImageOptions;
 import com.bumptech.glide.Glide;
 import com.bytedance.sdk.openadsdk.TTAdConstant;
@@ -22,6 +26,7 @@ import com.juejinchain.android.R;
 import com.juejinchain.android.model.NewsModel;
 import com.juejinchain.android.ui.fragment.OnItemClickListener;
 import com.juejinchain.android.tools.TToast;
+import com.juejinchain.android.ui.ppw.ADRemovePopup;
 import com.juejinchain.android.util.XSpanUtils;
 
 import java.util.ArrayList;
@@ -49,15 +54,18 @@ public class HomePagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
     private OnItemClickListener mClickListener;
     private Context mContext;
+    ADRemovePopup mRemovePopup;
 
-//    private AQuery2 mAQuery;//AQuery2可以播放gif。有问题，改用glide
+    private AQuery2 mAQuery;//AQuery2可以播放gif。有问题，改用glide
 
     public HomePagerAdapter(Context context, List<Object> data) {
         super();
         mInflater = LayoutInflater.from(context);
         mContext = context;
         mItems = data;
-//        mAQuery = new AQuery2(context);
+
+        mRemovePopup = new ADRemovePopup(context);
+        mAQuery = new AQuery2(context);
         //加圆角 centerCrop() 属性会影响 GlideRoundTransform 对象属性
 //        glideRoundTransform = new GlideRoundTransform(mInflater.getContext(), 5);
     }
@@ -100,7 +108,7 @@ public class HomePagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             case ITEM_VIEW_TYPE_GROUP_PIC_AD:
                 return new GroupAdViewHolder(LayoutInflater.from(mContext).inflate(R.layout.listitem_ad_group_pic, parent, false));
             case ITEM_VIEW_TYPE_VIDEO:
-//                return new VideoAdViewHolder(LayoutInflater.from(mContext).inflate(R.layout.listitem_ad_large_video, parent, false));
+                return new VideoAdViewHolder(LayoutInflater.from(mContext).inflate(R.layout.listitem_ad_large_video, parent, false));
             default:
                 View defaultView = mInflater.inflate(R.layout.item_other, parent, false);
                 return new RecyclerView.ViewHolder(defaultView) {
@@ -121,9 +129,10 @@ public class HomePagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             }
             else {
                 TTFeedAd ad = (TTFeedAd) mItems.get(position);
-                if (ad == null) {
-                    return ITEM_VIEW_TYPE_NORMAL;
-                } else if (ad.getImageMode() == TTAdConstant.IMAGE_MODE_SMALL_IMG) {
+//                if (ad == null) {
+//                    return ITEM_VIEW_TYPE_NORMAL;
+//                } else
+                if (ad.getImageMode() == TTAdConstant.IMAGE_MODE_SMALL_IMG) {
                     return ITEM_VIEW_TYPE_SMALL_PIC_AD;
                 } else if (ad.getImageMode() == TTAdConstant.IMAGE_MODE_LARGE_IMG) {
                     return ITEM_VIEW_TYPE_LARGE_PIC_AD;
@@ -155,7 +164,7 @@ public class HomePagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         TTFeedAd ttFeedAd = (TTFeedAd) mItems.get(position);
         if (holder instanceof SmallAdViewHolder) {
             SmallAdViewHolder smallAdViewHolder = (SmallAdViewHolder) holder;
-            bindData(smallAdViewHolder, ttFeedAd);
+            bindAdData(smallAdViewHolder, ttFeedAd);
             if (ttFeedAd.getImageList() != null && !ttFeedAd.getImageList().isEmpty()) {
                 TTImage image = ttFeedAd.getImageList().get(0);
                 if (image != null && image.isValid()) {
@@ -166,7 +175,7 @@ public class HomePagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
         } else if (holder instanceof LargeAdViewHolder) {
             LargeAdViewHolder largeAdViewHolder = (LargeAdViewHolder) holder;
-            bindData(largeAdViewHolder, ttFeedAd);
+            bindAdData(largeAdViewHolder, ttFeedAd);
             if (ttFeedAd.getImageList() != null && !ttFeedAd.getImageList().isEmpty()) {
                 TTImage image = ttFeedAd.getImageList().get(0);
                 if (image != null && image.isValid()) {
@@ -177,7 +186,7 @@ public class HomePagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
         } else if (holder instanceof GroupAdViewHolder) {
             GroupAdViewHolder groupAdViewHolder = (GroupAdViewHolder) holder;
-            bindData(groupAdViewHolder, ttFeedAd);
+            bindAdData(groupAdViewHolder, ttFeedAd);
             if (ttFeedAd.getImageList() != null && ttFeedAd.getImageList().size() >= 3) {
                 TTImage image1 = ttFeedAd.getImageList().get(0);
                 TTImage image2 = ttFeedAd.getImageList().get(1);
@@ -195,6 +204,45 @@ public class HomePagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                     Glide.with(mContext).load(image3.getImageUrl()).into(groupAdViewHolder.mGroupImage3);
                 }
             }
+        }else if (holder instanceof VideoAdViewHolder) {
+            VideoAdViewHolder videoAdViewHolder = (VideoAdViewHolder) holder;
+            bindAdData(videoAdViewHolder, ttFeedAd);
+            ttFeedAd.setVideoAdListener(new TTFeedAd.VideoAdListener() {
+                @Override
+                public void onVideoLoad(TTFeedAd ad) {
+
+                }
+
+                @Override
+                public void onVideoError(int errorCode, int extraCode) {
+
+                }
+
+                @Override
+                public void onVideoAdStartPlay(TTFeedAd ad) {
+
+                }
+
+                @Override
+                public void onVideoAdPaused(TTFeedAd ad) {
+
+                }
+
+                @Override
+                public void onVideoAdContinuePlay(TTFeedAd ad) {
+
+                }
+            });
+            if (videoAdViewHolder.videoView != null) {
+                View video = ttFeedAd.getAdView();
+                if (video != null) {
+                    if (video.getParent() == null) {
+                        videoAdViewHolder.videoView.removeAllViews();
+                        videoAdViewHolder.videoView.addView(video);
+                    }
+                }
+            }
+
         }
     }
 
@@ -203,7 +251,7 @@ public class HomePagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
      * @param adViewHolder
      * @param ad
      */
-    private void bindData(final AdViewHolder adViewHolder, TTFeedAd ad) {
+    private void bindAdData(final AdViewHolder adViewHolder, TTFeedAd ad) {
         //可以被点击的view, 也可以把convertView放进来意味item可被点击
         List<View> clickViewList = new ArrayList<>();
         clickViewList.add(adViewHolder.itemView);
@@ -217,14 +265,14 @@ public class HomePagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             @Override
             public void onAdClicked(View view, TTNativeAd ad) {
                 if (ad != null) {
-                    TToast.show(mContext, "广告" + ad.getTitle() + "被点击");
+//                    TToast.show(mContext, "广告" + ad.getTitle() + "被点击");
                 }
             }
 
             @Override
             public void onAdCreativeClick(View view, TTNativeAd ad) {
                 if (ad != null) {
-                    TToast.show(mContext, "广告" + ad.getTitle() + "被创意按钮被点击");
+//                    TToast.show(mContext, "广告" + ad.getTitle() + "被创意按钮被点击");
                 }
             }
 
@@ -235,16 +283,38 @@ public class HomePagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 }
             }
         });
+
+        adViewHolder.mDisLikeBtn.setOnClickListener(view -> {
+            mRemovePopup.setBlurBackgroundEnable(false)
+                    .linkTo(view);
+            mRemovePopup.showPopupWindow(view);
+            mRemovePopup.setOnCommentPopupClickListener(new ADRemovePopup.OnCommentPopupClickListener() {
+                @Override
+                public void onClick(View v) {
+//                    Log.d("basePopup", "onClick: 删除广告");
+                    mItems.remove(ad);
+                    notifyDataSetChanged();
+                }
+            });
+        });
+
         adViewHolder.mTitle.setText(ad.getTitle());
-        adViewHolder.mDescription.setText(ad.getDescription());
-        adViewHolder.mSource.setText(ad.getSource() == null ? "广告来源" : ad.getSource());
+        if (adViewHolder.mDescription != null)
+            adViewHolder.mDescription.setText(ad.getDescription());
+
+        if (adViewHolder.mSource != null)
+            adViewHolder.mSource.setText(ad.getSource() == null ? "广告来源" : ad.getSource());
+
         TTImage icon = ad.getIcon();
         if (icon != null && icon.isValid()) {
             ImageOptions options = new ImageOptions();
 //            mAQuery.id(adViewHolder.mIcon).image(icon.getImageUrl(), options);
+            if (adViewHolder.mIcon != null)
             Glide.with(mContext).load(icon.getImageUrl()).into(adViewHolder.mIcon);
         }
         Button adCreativeButton = adViewHolder.mCreativeButton;
+        if (adCreativeButton == null) return;
+
         switch (ad.getInteractionType()) {
             case TTAdConstant.INTERACTION_TYPE_DOWNLOAD:
                 //如果初始化ttAdManager.createAdNative(getApplicationContext())没有传入activity 则需要在此传activity，否则影响使用Dislike逻辑
@@ -252,8 +322,8 @@ public class HomePagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                     ad.setActivityForDownloadApp((Activity) mContext);
                 }
                 adCreativeButton.setVisibility(View.VISIBLE);
-                adViewHolder.mStopButton.setVisibility(View.VISIBLE);
-                adViewHolder.mRemoveButton.setVisibility(View.VISIBLE);
+//                adViewHolder.mStopButton.setVisibility(View.VISIBLE);
+//                adViewHolder.mRemoveButton.setVisibility(View.VISIBLE);
 //                bindDownloadListener(adCreativeButton, adViewHolder, ad);
 //                //绑定下载状态控制器
 //                bindDownLoadStatusController(adViewHolder, ad);
@@ -261,21 +331,21 @@ public class HomePagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             case TTAdConstant.INTERACTION_TYPE_DIAL:
                 adCreativeButton.setVisibility(View.VISIBLE);
                 adCreativeButton.setText("立即拨打");
-                adViewHolder.mStopButton.setVisibility(View.GONE);
-                adViewHolder.mRemoveButton.setVisibility(View.GONE);
+//                adViewHolder.mStopButton.setVisibility(View.GONE);
+//                adViewHolder.mRemoveButton.setVisibility(View.GONE);
                 break;
             case TTAdConstant.INTERACTION_TYPE_LANDING_PAGE:
             case TTAdConstant.INTERACTION_TYPE_BROWSER:
 //                    adCreativeButton.setVisibility(View.GONE);
                 adCreativeButton.setVisibility(View.VISIBLE);
                 adCreativeButton.setText("查看详情");
-                adViewHolder.mStopButton.setVisibility(View.GONE);
-                adViewHolder.mRemoveButton.setVisibility(View.GONE);
+//                adViewHolder.mStopButton.setVisibility(View.GONE);
+//                adViewHolder.mRemoveButton.setVisibility(View.GONE);
                 break;
             default:
                 adCreativeButton.setVisibility(View.GONE);
-                adViewHolder.mStopButton.setVisibility(View.GONE);
-                adViewHolder.mRemoveButton.setVisibility(View.GONE);
+//                adViewHolder.mStopButton.setVisibility(View.GONE);
+//                adViewHolder.mRemoveButton.setVisibility(View.GONE);
                 TToast.show(mContext, "交互类型异常");
         }
     }
@@ -315,10 +385,16 @@ public class HomePagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         }else {
             holder.tvTitle.setText(model.getTitle());
         }
-        holder.tvHot.setText(model.getIs_top());
-        holder.tvSource.setText(model.source);
-        holder.tvReadTimes.setText(model.getRead_num());
-        holder.tvDate.setText(model.getPublish_time());
+
+        if(TextUtils.isEmpty(model.getIs_top())){
+            holder.tvHot.setVisibility(View.GONE);
+        }else {
+            holder.tvHot.setText(model.getIs_top());
+        }
+
+        holder.tvAuther.setText(model.author);
+        holder.tvReadTimes.setText(model.getRead_numStr());
+        holder.tvDate.setText(model.getPublish_timeStr());
     }
 
     SpannableStringBuilder getSearchTitle(String title){
@@ -351,7 +427,7 @@ public class HomePagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         private ImageView img3;
 
         private TextView tvHot;
-        private TextView tvSource;
+        private TextView tvAuther;
         private TextView tvReadTimes;
         private TextView tvDate;
 
@@ -366,7 +442,7 @@ public class HomePagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             img3 = itemView.findViewById(R.id.imageView3);
 
             tvHot = itemView.findViewById(R.id.tv_hot);
-            tvSource = itemView.findViewById(R.id.tv_from);
+            tvAuther = itemView.findViewById(R.id.tv_from);
             tvReadTimes = itemView.findViewById(R.id.tv_readTimes);
             tvDate = itemView.findViewById(R.id.tv_date);
         }
@@ -374,6 +450,27 @@ public class HomePagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
     public void setOnItemClickListener(OnItemClickListener itemClickListener) {
         this.mClickListener = itemClickListener;
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    private static class VideoAdViewHolder extends AdViewHolder {
+        @SuppressWarnings("CanBeFinal")
+        FrameLayout videoView;
+
+        @SuppressWarnings("RedundantCast")
+        public VideoAdViewHolder(View itemView) {
+            super(itemView);
+
+            mTitle = (TextView) itemView.findViewById(R.id.tv_listitem_ad_title);
+            mDescription = (TextView) itemView.findViewById(R.id.tv_listitem_ad_desc);
+            mSource = (TextView) itemView.findViewById(R.id.tv_listitem_ad_source);
+            videoView = (FrameLayout) itemView.findViewById(R.id.iv_listitem_video);
+            mIcon = (ImageView) itemView.findViewById(R.id.iv_listitem_icon);
+            mCreativeButton = (Button) itemView.findViewById(R.id.btn_listitem_creative);
+            mStopButton = (Button) itemView.findViewById(R.id.btn_listitem_stop);
+            mRemoveButton = (Button) itemView.findViewById(R.id.btn_listitem_remove);
+
+        }
     }
 
     private static class LargeAdViewHolder extends AdViewHolder {
@@ -388,7 +485,8 @@ public class HomePagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             mSource = (TextView) itemView.findViewById(R.id.tv_listitem_ad_source);
             mLargeImage = (ImageView) itemView.findViewById(R.id.iv_listitem_image);
             mIcon = (ImageView) itemView.findViewById(R.id.iv_listitem_icon);
-            mCreativeButton = (Button) itemView.findViewById(R.id.btn_listitem_creative);
+//            mCreativeButton = (Button) itemView.findViewById(R.id.btn_listitem_creative);
+            mCreativeButton = (Button) itemView.findViewById(R.id.btn_download);
             mStopButton = (Button) itemView.findViewById(R.id.btn_listitem_stop);
             mRemoveButton = (Button) itemView.findViewById(R.id.btn_listitem_remove);
         }
@@ -435,6 +533,7 @@ public class HomePagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         }
     }
 
+
     private static class AdViewHolder extends RecyclerView.ViewHolder {
         ImageView mIcon;
         Button mCreativeButton;
@@ -443,9 +542,11 @@ public class HomePagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         TextView mSource;
         Button mStopButton;
         Button mRemoveButton;
+        ImageView mDisLikeBtn;
 
         public AdViewHolder(View itemView) {
             super(itemView);
+            mDisLikeBtn = itemView.findViewById(R.id.btn_listitem_dislike);
         }
     }
 

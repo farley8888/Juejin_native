@@ -318,7 +318,7 @@ public class PagerSlidingTabStrip extends HorizontalScrollView {
     private void updateTabStyles() {
         for (int i = 0; i < tabCount; i++) {
             FrameLayout frameLayout = (FrameLayout) tabsContainer.getChildAt(i);
-            frameLayout.setBackgroundResource(tabBackgroundResId);
+//            frameLayout.setBackgroundResource(tabBackgroundResId);
 
             for (int j = 0; j < frameLayout.getChildCount(); j++) {
                 View v = frameLayout.getChildAt(j);
@@ -331,6 +331,7 @@ public class PagerSlidingTabStrip extends HorizontalScrollView {
                         tab.setTextColor(tabTextColor);
                     } else {
                         tab.setTextColor(selectedTabTextColor);
+                        tab.setBackgroundResource(tabBackgroundResId);
                     }
                     ViewHelper.setAlpha(tabViews.get(i).get("normal"), 1);
                     ViewHelper.setAlpha(tabViews.get(i).get("selected"), 0);

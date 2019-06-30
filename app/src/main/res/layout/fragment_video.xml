@@ -8,9 +8,10 @@
 
 
     <com.juejinchain.android.ui.view.PagerSlidingTabStrip
+        android:layout_margin="10dp"
         android:id="@+id/tabs_video"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="20dp"
         android:textColor="@color/video_tabText"
         android:textSize="15sp"
         app:pstsDividerColor="@android:color/transparent"

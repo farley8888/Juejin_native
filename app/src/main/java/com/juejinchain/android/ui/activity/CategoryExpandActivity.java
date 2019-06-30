@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.juejinchain.android.R;
 import com.juejinchain.android.event.UpdateChannelEvent;
@@ -19,6 +20,7 @@ import com.juejinchain.android.network.NetUtil;
 import com.juejinchain.android.ui.view.DragHelper.ChannelAdapter;
 import com.juejinchain.android.ui.view.DragHelper.ItemDragHelperCallback;
 import com.juejinchain.android.util.SPUtils;
+import com.juejinchain.android.util.StringUtils;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -48,7 +50,10 @@ public class CategoryExpandActivity extends AppCompatActivity implements View.On
     private RecyclerView mRecy;
     private ImageView mBackIv;
 
+    //首页频道原列表，用于判断编辑后是否修改
     private List<ChannelModel> originList = new ArrayList<>();
+
+    //我的频道组合
     private List<ChannelModel> showList = new ArrayList<>();
 
     @Override
@@ -85,7 +90,13 @@ public class CategoryExpandActivity extends AppCompatActivity implements View.On
 
     private void setData(List<ChannelModel> otherChannels) {
         String channelCacheData = SPUtils.getInstance().getString(CHANNEL_CHCHE);
-        showList = JSON.parseArray(channelCacheData, ChannelModel.class);
+
+        if (JSON.parse(channelCacheData) instanceof JSONArray){
+            showList = JSON.parseArray(channelCacheData, ChannelModel.class);
+        }else{
+            finish(); //没有缓存的直接退出
+            return;
+        }
 
         if(showList != null && !showList.isEmpty()){
             originList.addAll(showList);
@@ -106,6 +117,7 @@ public class CategoryExpandActivity extends AppCompatActivity implements View.On
         final ItemTouchHelper helper = new ItemTouchHelper(callback);
         helper.attachToRecyclerView(mRecy);
 
+        //推荐的频道是 otherChannels
         final ChannelAdapter adapter = new ChannelAdapter(this, helper, showList, otherChannels);
         manager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
             @Override

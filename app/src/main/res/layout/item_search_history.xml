@@ -23,6 +23,8 @@
         android:drawablePadding="5dp"
         android:gravity="center_vertical"
         android:padding="15dp"
+        android:singleLine="true"
+        android:ellipsize="end"
         android:text="到" />
 
 

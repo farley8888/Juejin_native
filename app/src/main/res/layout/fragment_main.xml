@@ -28,7 +28,7 @@
     <!-- @dimen/bottombar_wechat_height
      android:background=设置透明后无点击波浪效果-->
 
-    <com.juejinchain.android.ui.view.AdsHolderView
+    <com.juejinchain.android.ui.view.AdCarHolderView
         android:id="@+id/adsView"
         style="@style/JJ.WrapContent"
         android:layout_gravity="bottom|right"

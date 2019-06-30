@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,6 +47,7 @@ public class ReplyCommentPopup extends BasePopupWindow {
     int currPage = 1;
     int pageSize = 10;
     int total;
+    private ProgressBar pg;
 
     public ReplyCommentPopup(Context context, boolean delayInit) {
         super(context, delayInit);
@@ -110,6 +112,7 @@ public class ReplyCommentPopup extends BasePopupWindow {
         tv.setText(mModel.fabulous+"");
         tv.setEnabled(!mModel.is_fabulous);
 
+
     }
 
     void loadList(){
@@ -126,18 +129,25 @@ public class ReplyCommentPopup extends BasePopupWindow {
                 Log.d(TAG, "onResponse: "+response);
                 response = response.getJSONObject("data");
                 total = response.getInteger("total");
+                int lastPage = response.getInteger("last_page");
                 List<CommentModel> temp ;
                 if (response.containsKey("top")){
                     temp = JSON.parseArray(response.getString("top"), CommentModel.class);
                 }else {
                     temp = JSON.parseArray(response.getString("data"), CommentModel.class);
                 }
+                mData.clear();
                 mData.addAll(temp);
                 Log.d(TAG, "onResponse: size="+mData.size());
-                mRecyclerVeiw.setAdapter(mAdapter);
-                mAdapter.setDataList(mData);  //无法自动刷新列表？
+                mRecyclerVeiw.setVisibility(View.VISIBLE);
+                pg.setVisibility(View.GONE);
+                if(currPage==1){
+                    mAdapter.setDataList(mData);  //无法自动刷新列表？
+                }else {
+                    mAdapter.addAll(mData);  //无法自动刷新列表？
+                }
 //                mAdapter.notifyDataSetChanged();
-                if (mData.size() < total){
+                if (currPage < lastPage){
                     mAdapter.isLoadMore(true);
                 }else{
                     mAdapter.showLoadComplete();
@@ -149,6 +159,8 @@ public class ReplyCommentPopup extends BasePopupWindow {
 
     void initView(View v){
         mRecyclerVeiw = findViewById(R.id.recycler_view);
+        pg = findViewById(R.id.pg);
+
         mRecyclerVeiw.setLayoutManager(new LinearLayoutManager(getContext()));
         editText = findViewById(R.id.edt_replyComment);
         editText.postDelayed(new Runnable() {

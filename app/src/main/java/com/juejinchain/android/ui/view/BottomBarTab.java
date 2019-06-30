@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
 import android.support.annotation.DrawableRes;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
@@ -17,6 +18,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.juejinchain.android.R;
 
 
@@ -64,8 +66,8 @@ public class BottomBarTab extends FrameLayout {
         int value = TextUtils.isEmpty(title)? 70: 23; //frame为27，project23
         int size = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, value, getResources().getDisplayMetrics());
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(size, size);
-        mIcon.setImageResource(icon);
-
+//        mIcon.setImageResource(icon);
+        Glide.with(context).load(icon).into(mIcon);
         if (!TextUtils.isEmpty(title)){ //图文情况
             mIcon.setColorFilter(ContextCompat.getColor(context, R.color.tab_unselect));
             //中间加了个大图，固高度为63 - 正常的50 bottombar_height
@@ -87,13 +89,13 @@ public class BottomBarTab extends FrameLayout {
 
         addView(lLContainer);
 
-        int min = dip2px(context, 20);
+        int min = dip2px(context, 6);
         int padding = dip2px(context, 5);
         mTvUnreadCount = new TextView(context);
         mTvUnreadCount.setBackgroundResource(R.drawable.bg_msg_bubble);
         mTvUnreadCount.setMinWidth(min);
         mTvUnreadCount.setTextColor(Color.WHITE);
-        mTvUnreadCount.setPadding(padding, 0, padding, 0);
+//        mTvUnreadCount.setPadding(padding, 0, padding, 0);
         mTvUnreadCount.setGravity(Gravity.CENTER);
         LayoutParams tvUnReadParams = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, min);
         tvUnReadParams.gravity = Gravity.CENTER;
@@ -110,7 +112,7 @@ public class BottomBarTab extends FrameLayout {
     private void addUnReadDot(Context context){
         mUnreadDot = new TextView(context);
         mUnreadDot.setBackgroundResource(R.drawable.bg_msg_bubble);
-        int min = dip2px(context, 12); //点大小
+        int min = dip2px(context, 6); //点大小
         int padding = dip2px(context, 5);
         mUnreadDot.setPadding(padding, -5, padding, 0);
         mUnreadDot.setGravity(Gravity.CENTER);
@@ -196,5 +198,49 @@ public class BottomBarTab extends FrameLayout {
 
     private int dip2px(Context context, float dp) {
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, context.getResources().getDisplayMetrics());
+    }
+
+    public void showLoadingByPos(int imageResource,int position){
+
+
+        View childAt = getChildAt(position);
+        removeViewAt(position);
+
+        LinearLayout lLContainer = new LinearLayout(getContext());
+        lLContainer.setOrientation(LinearLayout.VERTICAL);
+        lLContainer.setGravity(Gravity.CENTER);
+        LayoutParams paramsContainer = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        paramsContainer.gravity = Gravity.CENTER;
+        lLContainer.setLayoutParams(paramsContainer);
+
+        ImageView imageView = new ImageView(getContext());
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(70, 70);
+        params.gravity = Gravity.CENTER;
+        params.topMargin = 30;
+        imageView.setLayoutParams(params);
+
+        lLContainer.addView(imageView);
+
+       TextView textView = new TextView(getContext());
+        textView.setText("加载中");
+        LinearLayout.LayoutParams paramsTv = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        paramsTv.topMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2, getResources().getDisplayMetrics());
+        textView.setTextSize(10);
+        textView.setTextColor(ContextCompat.getColor(getContext(), R.color.colorAccent));
+        textView.setLayoutParams(paramsTv);
+
+        lLContainer.addView(textView);
+
+        Glide.with(getContext()).load(imageResource).into(imageView);
+        addView(lLContainer,position);
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                removeViewAt(position);
+                addView(childAt,position);
+            }
+        },1000);
+
     }
 }

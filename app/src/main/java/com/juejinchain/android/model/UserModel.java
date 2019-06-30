@@ -2,6 +2,7 @@ package com.juejinchain.android.model;
 
 import android.util.Log;
 
+import com.juejinchain.android.event.LoginEvent;
 import com.juejinchain.android.event.StopCounterEvent;
 import com.juejinchain.android.util.Constant;
 import com.juejinchain.android.util.SPUtils;
@@ -48,6 +49,8 @@ public class UserModel {
         SPUtils.getInstance().put(Key_PHone, json.getString("mobile"));
         SPUtils.getInstance().put(Key_HasGetReward, json.getInt("achieved_gift_bag") == 1);
         SPUtils.getInstance().put(Key_ISNew, json.getInt("is_new") == 1);
+
+        EventBus.getDefault().post(new LoginEvent());
     }
 
 
@@ -88,6 +91,7 @@ public class UserModel {
     public static void cleanData(){
         EventBus.getDefault().post(new StopCounterEvent());
         SPUtils.getInstance().put(Key_ISLogin, false);
+        SPUtils.getInstance().put(Key_HasGetReward, false);
 
         SPUtils.getInstance().put(Key_UserToken, "");
         SPUtils.getInstance().put(Key_NickName, "");

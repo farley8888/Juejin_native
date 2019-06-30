@@ -19,6 +19,7 @@ import com.juejinchain.android.R;
 import com.juejinchain.android.listener.OnItemClickListener;
 import com.juejinchain.android.network.NetConfig;
 import com.juejinchain.android.network.NetUtil;
+import com.juejinchain.android.util.StringUtils;
 
 import org.w3c.dom.Text;
 
@@ -78,8 +79,8 @@ public class BackExitDialog extends Dialog {
         ((TextView) findViewById(R.id.tv_dotask_rewardCar)).setText(jo.getString("fullname"));
         ImageView image = findViewById(R.id.img_rewardCar);
 
-
-        Glide.with(getContext()).load(jo.getString("thumb"))
+        String imgurl = StringUtils.getImgUrlHeight(jo.getString("thumb"), 2);
+        Glide.with(getContext()).load(imgurl)
                 .placeholder(R.drawable.default_img)
                 .into(image);
     }

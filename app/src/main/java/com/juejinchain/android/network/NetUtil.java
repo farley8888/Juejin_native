@@ -78,7 +78,7 @@ public class NetUtil {
      * @param isProcessError 是否处理异常，false时，非成功响应不通知回调接口
      */
     public static void postRequest(final String api, Map<String, String> param, final OnResponse response, final boolean isProcessError){
-        String url = NetConfig.getUrlByParams(param, api);
+        String url = NetConfig.getUrlByAPI(api);
         OkHttpUtils.postAsyn(url, param, new JSONCallback() {
             @Override
             public void onError(Call call, Exception e) {

@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,17 +17,22 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.alibaba.fastjson.JSONObject;
 import com.bumptech.glide.Glide;
 import com.dmcbig.mediapicker.utils.ScreenUtils;
 import com.juejinchain.android.R;
 import com.juejinchain.android.event.ShareEvent;
 import com.juejinchain.android.event.ShowVueEvent;
 import com.juejinchain.android.model.ShareModel;
+import com.juejinchain.android.network.NetConfig;
+import com.juejinchain.android.network.NetUtil;
 
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 分享对话框
@@ -160,6 +166,15 @@ public class ShareDialog extends Dialog {
 //        L.d("baseDailog", "shareTo: "+entitiy.way);
 //        if (entitiy.way.equals(ShareModel.WAY_SUOFEN))
         dismiss();
+
+        Map<String, String> param = new HashMap<>();
+        param.put("typesign", entitiy.way);
+        NetUtil.getRequest(NetConfig.API_ShareCount, param, new NetUtil.OnResponse() {
+            @Override
+            public void onResponse(JSONObject response) {
+//                Log.d("shareClick", "onResponse: "+response);
+            }
+        });
 
         EventBus.getDefault().post(new ShareEvent(entitiy, mType, mId));
     }

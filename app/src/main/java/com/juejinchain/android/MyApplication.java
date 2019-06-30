@@ -17,6 +17,7 @@ import com.juejinchain.android.listener.PowerListener;
 import com.juejinchain.android.network.SpUtils;
 import com.squareup.leakcanary.LeakCanary;
 import com.squareup.leakcanary.RefWatcher;
+import com.tencent.bugly.crashreport.CrashReport;
 
 import java.lang.reflect.Method;
 
@@ -68,6 +69,8 @@ public class MyApplication extends DCloudApplication {
         super.onCreate();
         c = getApplicationContext();
 
+        CrashReport.initCrashReport(getApplicationContext(), "c127c7993a", false);
+
         /**
          * 开屏广告启动场景
          * 1、每次启动APP都展示，限定时间内最多三次
@@ -80,6 +83,7 @@ public class MyApplication extends DCloudApplication {
         setActivityListener();
         addHomeListener();
 
+        //初始化穿山甲信息流广告
         initWangMeng();
 
         Object obj = this;
@@ -96,7 +100,6 @@ public class MyApplication extends DCloudApplication {
 
     }
 
-    //初始化穿山甲信息流广告
     private void initWangMeng(){
         if (!LeakCanary.isInAnalyzerProcess(this)) {
             sRefWatcher = LeakCanary.install(this);
@@ -110,6 +113,8 @@ public class MyApplication extends DCloudApplication {
         //   TTAdManagerHolder.init(this)
         //}
     }
+
+
 
     protected void attachBaseContext(Context var1) {
         super.attachBaseContext(var1);
